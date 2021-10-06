@@ -42,16 +42,16 @@ configure_file(config.hpp.in config.hpp)
 
 # Add libraries
 
-#set(submods "")
-#list(APPEND submods)
+set(submods "")
+list(APPEND submods position)
 
-#foreach(submod ${submods})
-#    add_subdirectory(${submod})
-#endforeach()
+foreach(submod ${submods})
+    add_subdirectory(${submod})
+endforeach()
 
 
 # Link and include
 target_link_libraries(Swordfish
-    #argparse gui logging pathlib render space3d tests utils
+    position
 )
 target_include_directories(Swordfish PUBLIC "${PROJECT_SOURCE_DIR}")

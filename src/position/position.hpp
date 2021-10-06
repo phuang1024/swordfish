@@ -17,13 +17,28 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#define  VMAJOR  @Swordfish_VERSION_MAJOR@
-#define  VMINOR  @Swordfish_VERSION_MINOR@
-#define  VPATCH  @Swordfish_VERSION_PATCH@
+#include "../config.hpp"
 
-#include <string>
 
-const std::string GIT_HASH = "@GIT_HASH@";
+namespace Position {
 
-typedef  unsigned char       UCH;
-typedef  unsigned long long  ULL;
+
+/**
+ * Represents one position on a chessboard.
+ * Contains bitboards (ULL) for each piece type and color.
+ * Contains turn (bool).
+ * Contains castling rights (char).
+ */
+struct Position {
+    ULL wp, wn, wb, wr, wq, wk, bp, bn, bb, br, bq, bk;
+    bool turn;   // true = white
+    UCH castling;  // not decided yet.
+
+    /**
+     * Write board to stream in a human readable way.
+     */
+    void print(std::ostream& fp);
+};
+
+
+}  // namespace Position

@@ -17,13 +17,14 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#define  VMAJOR  @Swordfish_VERSION_MAJOR@
-#define  VMINOR  @Swordfish_VERSION_MINOR@
-#define  VPATCH  @Swordfish_VERSION_PATCH@
+#include "position.hpp"
 
-#include <string>
 
-const std::string GIT_HASH = "@GIT_HASH@";
+namespace Position {
 
-typedef  unsigned char       UCH;
-typedef  unsigned long long  ULL;
+
+void Position::print(std::ostream& fp) {
+}
+
+
+}  // namespace Position
