@@ -17,9 +17,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <iostream>
+#define  VMAJOR  @Swordfish_VERSION_MAJOR@
+#define  VMINOR  @Swordfish_VERSION_MINOR@
+#define  VPATCH  @Swordfish_VERSION_PATCH@
 
+#include <string>
 
-int main() {
-    std::cout << "hi" << std::endl;
-}
+const std::string GIT_HASH = "@GIT_HASH@";
