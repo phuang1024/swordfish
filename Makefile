@@ -17,10 +17,16 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-.PHONY: all
+.PHONY: release debug
 
-all:
+release:
 	mkdir -p ./build; \
 	cd ./build; \
 	cmake ../src -DCMAKE_BUILD_TYPE=Release; \
+	make -j`nproc`
+
+debug:
+	mkdir -p ./build; \
+	cd ./build; \
+	cmake ../src -DCMAKE_BUILD_TYPE=Debug; \
 	make -j`nproc`
