@@ -23,6 +23,15 @@
 namespace Position {
 
 
+// Constants
+
+constexpr char EMPTY = 0;
+constexpr char WP = 1, WN = 2, WB = 3, WR = 4, WQ = 5, WK = 6;
+constexpr char BP = 9, BN = 10, BB = 11, BR = 12, BQ = 13, BK = 14;
+
+
+// Position and movegen
+
 /**
  * Represents one position on a chessboard.
  * Contains bitboards (ULL) for each piece type and color.
