@@ -24,6 +24,6 @@
 
 
 int main() {
-    Position::Position pos;
+    Position::Position pos(Position::Position::INIT_START);
     pos.print(std::cout);
 }

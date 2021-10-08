@@ -29,6 +29,19 @@ constexpr char EMPTY = 0;
 constexpr char WP = 1, WN = 2, WB = 3, WR = 4, WQ = 5, WK = 6;
 constexpr char BP = 9, BN = 10, BB = 11, BR = 12, BQ = 13, BK = 14;
 
+constexpr ULL START_WP = 65280ULL;
+constexpr ULL START_WN = 66ULL;
+constexpr ULL START_WB = 36ULL;
+constexpr ULL START_WR = 129ULL;
+constexpr ULL START_WQ = 8ULL;
+constexpr ULL START_WK = 16ULL;
+constexpr ULL START_BP = 71776119061217280ULL;
+constexpr ULL START_BN = 4755801206503243776ULL;
+constexpr ULL START_BB = 2594073385365405696ULL;
+constexpr ULL START_BR = 9295429630892703744ULL;
+constexpr ULL START_BQ = 576460752303423488ULL;
+constexpr ULL START_BK = 1152921504606846976ULL;
+
 
 // Position and movegen
 
@@ -55,9 +68,30 @@ char char2piece(char piece);
  * Square values: A1 = 0, A2 = 1, A8 = 7, B1 = 8, H8 = 63
  */
 struct Position {
+    /**
+     * Pass to constructor to initialize as empty.
+     */
+    const static char INIT_EMPTY = 0;
+
+    /**
+     * Pass to constructor to initialize as starting position.
+     */
+    const static char INIT_START = 1;
+
     ULL wp, wn, wb, wr, wq, wk, bp, bn, bb, br, bq, bk;
-    bool turn;     // true = white
     UCH castling;  // not decided yet.
+    bool turn;     // true = white
+
+    /**
+     * No initialization.
+     * Warning: Member variables may be arbitrary.
+     */
+    Position();
+
+    /**
+     * Initialize with init code (e.g. Position::INIT_START)
+     */
+    Position(const char code);
 
     /**
      * Write board to stream in a human readable way.

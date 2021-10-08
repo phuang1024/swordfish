@@ -18,7 +18,7 @@
 //
 
 /**
- * General helper methods.
+ * General helper methods and functions.
  */
 
 #include <iostream>
@@ -69,11 +69,35 @@ char char2piece(char piece) {
 }
 
 
+Position::Position() {
+}
+
+Position::Position(const char code) {
+    if (code == INIT_EMPTY) {
+        wp = wn = wb = wr = wq = wk = bp = bn = bb = br = bq = bk = 0;
+        turn = true;
+    } else if (code == INIT_START) {
+        wp = START_WP;
+        wn = START_WN;
+        wb = START_WB;
+        wr = START_WR;
+        wq = START_WQ;
+        wk = START_WK;
+        bp = START_BP;
+        bn = START_BN;
+        bb = START_BB;
+        br = START_BR;
+        bq = START_BQ;
+        bk = START_BK;
+        turn = true;
+    }
+}
+
 void Position::print(std::ostream& fp) {
     // Design from stockfish.
     const std::string row = " +---+---+---+---+---+---+---+---+";
     const std::string col = " | ";
-    const std::string columns = "  a   b   c   d   e   f   g   h";
+    const std::string columns = "   a   b   c   d   e   f   g   h";
 
     for (int y = 7; y >= 0; y--) {
         std::cout << row << '\n';
