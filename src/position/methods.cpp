@@ -44,6 +44,7 @@ char piece2char(char piece) {
         case BQ: return 'q';
         case BK: return 'k';
     }
+    throw Errors::InvalidArg;
 }
 
 char char2piece(char piece) {
@@ -61,6 +62,7 @@ char char2piece(char piece) {
         case 'q': return BQ;
         case 'k': return BK;
     }
+    throw Errors::InvalidArg;
 }
 
 
@@ -68,6 +70,10 @@ void Position::print(std::ostream& fp) {
     // Design from stockfish.
     const std::string row = "+---+---+---+---+---+---+---+---+";
     const std::string col = " | ";
+}
+
+char Position::piece_at(const char square) {
+
 }
 
 

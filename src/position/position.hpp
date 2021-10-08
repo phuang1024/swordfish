@@ -17,7 +17,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "../config.hpp"
+#include "../utils.hpp"
 
 
 namespace Position {
@@ -35,12 +35,14 @@ constexpr char BP = 9, BN = 10, BB = 11, BR = 12, BQ = 13, BK = 14;
 /**
  * Get character representation of a piece.
  * piece2char(Position::WP) -> 'P'
+ * @throws Errors::InvalidArg
  */
 char piece2char(char piece);
 
 /**
  * Get piece for char representation.
  * char2piece('P') -> Position::WP
+ * @throws Errors::InvalidArg
  */
 char char2piece(char piece);
 
@@ -49,6 +51,8 @@ char char2piece(char piece);
  * Contains bitboards (ULL) for each piece type and color.
  * Contains turn (bool).
  * Contains castling rights (char).
+ *
+ * Square values: A1 = 0, A2 = 1, A8 = 7, B1 = 8, H8 = 63
  */
 struct Position {
     ULL wp, wn, wb, wr, wq, wk, bp, bn, bb, br, bq, bk;
@@ -59,6 +63,12 @@ struct Position {
      * Write board to stream in a human readable way.
      */
     void print(std::ostream& fp);
+
+    /**
+     * Return the piece at the position specified.
+     * e.g. WP, BR, EMPTY
+     */
+    char piece_at(const char square);
 };
 
 

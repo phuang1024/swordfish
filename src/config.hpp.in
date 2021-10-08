@@ -24,6 +24,3 @@
 #include <string>
 
 const std::string GIT_HASH = "@GIT_HASH@";
-
-typedef  unsigned char       UCH;
-typedef  unsigned long long  ULL;

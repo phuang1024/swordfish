@@ -17,11 +17,47 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <iostream>
+/**
+ * Simple utils. All implementations are in this file.
+ * Hopefully the compiler will inline them.
+ */
 
-#include "utils.hpp"
+#pragma once
+
+typedef  unsigned long long  ULL;
+typedef  unsigned char       UCH;
 
 
-int main() {
-    std::cout << "hi" << std::endl;
+enum Errors {
+    InvalidArg
+};
+
+
+/**
+ * Check if a bit is set. Bit 0 is lowest bit.
+ */
+bool bit(const ULL num, const char bit_pos) {
+    return num & (1ULL << bit_pos);
+}
+
+/**
+ * Check if the bit is not set.
+ * Cleans up '!'s in boolean expressions.
+ */
+bool nbit(const ULL num, const char bit_pos) {
+    return !bit(num, bit_pos);
+}
+
+/**
+ * Set the bit to 1.
+ */
+ULL bset(const ULL num, const char bit) {
+    return num | (1ULL << bit);
+}
+
+/**
+ * Set the bit to 0.
+ */
+ULL bunset(const ULL num, const char bit) {
+    return num & ~(1ULL << bit);
 }
