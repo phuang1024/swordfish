@@ -33,6 +33,18 @@ constexpr char BP = 9, BN = 10, BB = 11, BR = 12, BQ = 13, BK = 14;
 // Position and movegen
 
 /**
+ * Get character representation of a piece.
+ * piece2char(Position::WP) -> 'P'
+ */
+char piece2char(char piece);
+
+/**
+ * Get piece for char representation.
+ * char2piece('P') -> Position::WP
+ */
+char char2piece(char piece);
+
+/**
  * Represents one position on a chessboard.
  * Contains bitboards (ULL) for each piece type and color.
  * Contains turn (bool).
@@ -40,7 +52,7 @@ constexpr char BP = 9, BN = 10, BB = 11, BR = 12, BQ = 13, BK = 14;
  */
 struct Position {
     ULL wp, wn, wb, wr, wq, wk, bp, bn, bb, br, bq, bk;
-    bool turn;   // true = white
+    bool turn;     // true = white
     UCH castling;  // not decided yet.
 
     /**
