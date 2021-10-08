@@ -21,6 +21,7 @@
  * General helper methods.
  */
 
+#include <iostream>
 #include <string>
 
 #include "position.hpp"
@@ -43,6 +44,7 @@ char piece2char(char piece) {
         case BR: return 'r';
         case BQ: return 'q';
         case BK: return 'k';
+        case EMPTY: return ' ';
     }
     throw Errors::InvalidArg;
 }
@@ -61,6 +63,7 @@ char char2piece(char piece) {
         case 'r': return BR;
         case 'q': return BQ;
         case 'k': return BK;
+        case ' ': return EMPTY;
     }
     throw Errors::InvalidArg;
 }
@@ -68,12 +71,37 @@ char char2piece(char piece) {
 
 void Position::print(std::ostream& fp) {
     // Design from stockfish.
-    const std::string row = "+---+---+---+---+---+---+---+---+";
+    const std::string row = " +---+---+---+---+---+---+---+---+";
     const std::string col = " | ";
+    const std::string columns = "  a   b   c   d   e   f   g   h";
+
+    for (int y = 7; y >= 0; y--) {
+        std::cout << row << '\n';
+        std::cout << col;
+        for (int x = 0; x < 8; x++) {
+            const char piece = piece_at(y*8 + x);
+            const char symbol = piece2char(piece);
+            std::cout << symbol << col;
+        }
+        std::cout << y+1 << '\n';
+    }
+    std::cout << row << "\n" << columns << std::endl;
 }
 
 char Position::piece_at(const char square) {
-
+    if (bit(wp, square)) return WP;
+    if (bit(wn, square)) return WN;
+    if (bit(wb, square)) return WB;
+    if (bit(wr, square)) return WR;
+    if (bit(wq, square)) return WQ;
+    if (bit(wk, square)) return WK;
+    if (bit(bp, square)) return BP;
+    if (bit(bn, square)) return BN;
+    if (bit(bb, square)) return BB;
+    if (bit(br, square)) return BR;
+    if (bit(bq, square)) return BQ;
+    if (bit(bk, square)) return BK;
+    return EMPTY;
 }
 
 

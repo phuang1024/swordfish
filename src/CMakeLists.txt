@@ -28,7 +28,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Add executable
-set(Swordfish_srcs main.cpp)
+set(Swordfish_srcs main.cpp utils.cpp)
 add_executable(Swordfish ${Swordfish_srcs})
 
 # Configure files

@@ -19,9 +19,11 @@
 
 #include <iostream>
 
+#include <position/position.hpp>
 #include "utils.hpp"
 
 
 int main() {
-    std::cout << "hi" << std::endl;
+    Position::Position pos;
+    pos.print(std::cout);
 }
