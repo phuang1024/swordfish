@@ -17,6 +17,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include <vector>
+
 #include "../utils.hpp"
 
 
@@ -54,7 +56,7 @@ constexpr UCH C_BQ = 8;
 constexpr UCH TURN = 16;  // bitwise "and" on Position.meta
 
 
-// Position
+// Helpers
 
 /**
  * Get character representation of a piece.
@@ -70,6 +72,8 @@ char piece2char(char piece);
  */
 char char2piece(char piece);
 
+
+// Position
 
 /**
  * Represents one position on a chessboard.
@@ -116,15 +120,14 @@ struct Position {
     /**
      * Write board to stream in a human readable way.
      */
-    void print(std::ostream& fp);
+    void print(std::ostream& fp) const;
 
     /**
      * Return the piece at the position specified.
      * e.g. WP, BR, EMPTY
      */
-    char piece_at(const char square);
+    char piece_at(const char square) const;
 };
-
 
 /**
  * Move struct, containing start and end square.
@@ -133,6 +136,14 @@ struct Position {
 struct Move {
     UCH from, to;
 };
+
+
+// Movegen
+
+/**
+ * Generate legal moves and store in @param moves.
+ */
+void legal_moves(std::vector<Move>& moves, const Position& pos);
 
 
 }  // namespace Position

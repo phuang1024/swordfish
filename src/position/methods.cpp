@@ -93,7 +93,7 @@ Position::Position(const char code) {
     }
 }
 
-void Position::print(std::ostream& fp) {
+void Position::print(std::ostream& fp) const {
     // Design from stockfish.
     const std::string row = " +---+---+---+---+---+---+---+---+";
     const std::string col = " | ";
@@ -112,7 +112,7 @@ void Position::print(std::ostream& fp) {
     std::cout << row << "\n" << columns << std::endl;
 }
 
-char Position::piece_at(const char square) {
+char Position::piece_at(const char square) const {
     if (bit(wp, square)) return WP;
     if (bit(wn, square)) return WN;
     if (bit(wb, square)) return WB;
