@@ -17,7 +17,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-set(position_srcs methods.cpp movegen.cpp)
+set(position_srcs functions.cpp movegen.cpp)
 
 add_library(position ${position_srcs})
 target_link_libraries(position)
