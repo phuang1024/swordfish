@@ -30,8 +30,8 @@ namespace Position {
 
 // Piece values
 constexpr char EMPTY = 0;
-constexpr char WP = 1, WN = 2, WB = 3, WR = 4, WQ = 5, WK = 6;
-constexpr char BP = 9, BN = 10, BB = 11, BR = 12, BQ = 13, BK = 14;
+constexpr char WP = 9, WN = 10, WB = 11, WR = 12, WQ = 13, WK = 14;
+constexpr char BP = 1, BN = 2, BB = 3, BR = 4, BQ = 5, BK = 6;
 
 // Starting bitboards
 constexpr ULL START_WP = 65280ULL;
