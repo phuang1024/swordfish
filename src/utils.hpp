@@ -18,7 +18,11 @@
 //
 
 /**
- * Simple utils.
+ * Simple utils. All implementations are in this file.
+ * If it is a function, make it a #define or else there will be
+ * multiple definition error.
+ * BE VERY CAREFUL WITH PARENTHESES! Keep in mind that an argument
+ * may be an expression.
  */
 
 #pragma once
@@ -32,24 +36,7 @@ enum Errors {
     UnitTestFailed,
 };
 
-
-/**
- * Check if a bit is set. Bit 0 is lowest bit.
- */
-bool bit(const ULL num, const char bit_pos);
-
-/**
- * Check if the bit is not set.
- * Cleans up '!'s in boolean expressions.
- */
-bool nbit(const ULL num, const char bit_pos);
-
-/**
- * Set the bit to 1.
- */
-ULL bset(const ULL num, const char bit);
-
-/**
- * Set the bit to 0.
- */
-ULL bunset(const ULL num, const char bit);
+#define  bit(n, pos)     (n & (1ULL << (pos)))
+#define  nbit(n, pos)    (!(n & (1ULL << (pos))))
+#define  bset(n, pos)    (n | (1ULL << (pos)))
+#define  bunset(n, pos)  (n & ~(1ULL << (pos)))

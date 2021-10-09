@@ -33,20 +33,19 @@ ULL attacked(const Position& pos, const bool side) {
     for (int sq = 0; sq < 64; sq++) {
         const int x = sq & 7, y = sq >> 3;
         const char piece = pos.piece_at(sq);
-        std::cout << +piece << std::endl;
 
-        if (piece & 8 != side)  // piece is wrong color
+        if ((bool)(piece & 8) != side)  // piece is wrong color
             continue;
 
         if (piece == EMPTY) {  // check this first so continue earlier.
             continue;
         } else if (piece == WP || piece == BP) {
             if (side && y < 7) {
-                if (x > 0) bset(board, sq+7);
-                if (x < 7) bset(board, sq+9);
+                if (x > 0) board = bset(board, sq+7);
+                if (x < 7) board = bset(board, sq+9);
             } else if (!side && y > 0) {
-                if (x > 0) bset(board, sq-9);
-                if (x < 7) bset(board, sq-7);
+                if (x > 0) board = bset(board, sq-9);
+                if (x < 7) board = bset(board, sq-7);
             }
         }
     }
