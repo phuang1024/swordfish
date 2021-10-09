@@ -33,6 +33,7 @@ ULL attacked(const Position& pos, const bool side) {
     for (int sq = 0; sq < 64; sq++) {
         const int x = sq & 7, y = sq >> 3;
         const char piece = pos.piece_at(sq);
+        std::cout << +piece << std::endl;
 
         if (piece & 8 != side)  // piece is wrong color
             continue;
