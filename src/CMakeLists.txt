@@ -42,7 +42,7 @@ configure_file(config.hpp.in config.hpp)
 
 # Add libraries
 
-set(SUBMODS position uci)
+set(SUBMODS position tests uci)
 set(submods "")
 list(APPEND submods ${SUBMODS})
 

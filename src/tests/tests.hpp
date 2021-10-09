@@ -17,18 +17,26 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <cstring>
-#include <iostream>
-
-#include "position/position.hpp"
-#include "tests/tests.hpp"
+#include <string>
+#include <vector>
 
 
-int main(int argc, char** argv) {
-    if (argc >= 2) {
-        if (strcmp(argv[1], "test") == 0) {
-            if (argc >= 3) Tests::test(argv[2]);
-            else Tests::testall();
-        }
-    }
-}
+namespace Tests {
+
+const std::vector<std::string> tests = {
+    "test_a_test",
+};
+
+
+/**
+ * Run all tests.
+ */
+void testall();
+
+/**
+ * Run test with name.
+ */
+void test(const std::string name);
+
+
+}  // namespace Tests

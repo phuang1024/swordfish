@@ -17,18 +17,29 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <cstring>
 #include <iostream>
 
-#include "position/position.hpp"
-#include "tests/tests.hpp"
+#include "tests.hpp"
+#include "../utils.hpp"
 
 
-int main(int argc, char** argv) {
-    if (argc >= 2) {
-        if (strcmp(argv[1], "test") == 0) {
-            if (argc >= 3) Tests::test(argv[2]);
-            else Tests::testall();
-        }
-    }
+void test_a_test() {
+    std::cout << "asdf" << std::endl;
 }
+
+
+namespace Tests {
+
+
+void testall() {
+    for (const std::string& name: tests)
+        test(name);
+}
+
+void test(const std::string name) {
+    if (name == "test_a_test") test_a_test();
+    else throw Errors::InvalidArg;
+}
+
+
+}  // namespace Tests
