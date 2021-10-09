@@ -93,25 +93,6 @@ Position::Position(const char code) {
     }
 }
 
-void Position::print(std::ostream& fp) const {
-    // Design from stockfish.
-    const std::string row = " +---+---+---+---+---+---+---+---+";
-    const std::string col = " | ";
-    const std::string columns = "   a   b   c   d   e   f   g   h";
-
-    for (int y = 7; y >= 0; y--) {
-        std::cout << row << '\n';
-        std::cout << col;
-        for (int x = 0; x < 8; x++) {
-            const char piece = piece_at(y*8 + x);
-            const char symbol = piece2char(piece);
-            std::cout << symbol << col;
-        }
-        std::cout << y+1 << '\n';
-    }
-    std::cout << row << "\n" << columns << std::endl;
-}
-
 char Position::piece_at(const char square) const {
     if (bit(wp, square)) return WP;
     if (bit(wn, square)) return WN;
@@ -126,6 +107,37 @@ char Position::piece_at(const char square) const {
     if (bit(bq, square)) return BQ;
     if (bit(bk, square)) return BK;
     return EMPTY;
+}
+
+
+void print(std::ostream& fp, const Position& pos) {
+    // Design from stockfish.
+    const std::string row = " +---+---+---+---+---+---+---+---+";
+    const std::string col = " | ";
+    const std::string columns = "   a   b   c   d   e   f   g   h";
+
+    for (int y = 7; y >= 0; y--) {
+        std::cout << row << '\n';
+        std::cout << col;
+        for (int x = 0; x < 8; x++) {
+            const char piece = pos.piece_at(y*8 + x);
+            const char symbol = piece2char(piece);
+            std::cout << symbol << col;
+        }
+        std::cout << y+1 << '\n';
+    }
+    std::cout << row << "\n" << columns << std::endl;
+}
+
+void print(std::ostream& fp, const ULL board) {
+    for (int y = 7; y >= 0; y--) {
+        for (int x = 0; x < 8; x++) {
+            bool set = bit(board, y*8 + x);
+            std::cout << (set ? 'X' : '-') << " ";
+        }
+        std::cout << '\n';
+    }
+    std::cout << std::flush;
 }
 
 

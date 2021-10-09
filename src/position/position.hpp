@@ -17,6 +17,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include <iostream>
 #include <vector>
 
 #include "../utils.hpp"
@@ -118,11 +119,6 @@ struct Position {
     Position(const char code);
 
     /**
-     * Write board to stream in a human readable way.
-     */
-    void print(std::ostream& fp) const;
-
-    /**
      * Return the piece at the position specified.
      * e.g. WP, BR, EMPTY
      */
@@ -136,6 +132,16 @@ struct Position {
 struct Move {
     UCH from, to;
 };
+
+/**
+ * Write board to stream in a human readable way.
+ */
+void print(std::ostream& fp, const Position& pos);
+
+/**
+ * Write bitboard to stream in a human readable way.
+ */
+void print(std::ostream& fp, const ULL board);
 
 
 // Movegen

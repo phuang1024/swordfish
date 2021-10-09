@@ -25,5 +25,6 @@
 
 int main() {
     Position::Position pos(Position::Position::INIT_START);
-    pos.print(std::cout);
+    Position::print(std::cout, pos);
+    Position::print(std::cout, pos.wp);
 }
