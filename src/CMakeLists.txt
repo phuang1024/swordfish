@@ -42,8 +42,9 @@ configure_file(config.hpp.in config.hpp)
 
 # Add libraries
 
+set(SUBMODS position uci)
 set(submods "")
-list(APPEND submods position)
+list(APPEND submods ${SUBMODS})
 
 foreach(submod ${submods})
     add_subdirectory(${submod})
@@ -51,7 +52,5 @@ endforeach()
 
 
 # Link and include
-target_link_libraries(Swordfish
-    position
-)
+target_link_libraries(Swordfish ${SUBMODS})
 target_include_directories(Swordfish PUBLIC "${PROJECT_SOURCE_DIR}")
