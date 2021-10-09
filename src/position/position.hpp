@@ -147,6 +147,12 @@ void print(std::ostream& fp, const ULL board);
 // Movegen
 
 /**
+ * Get bitboard of attacked pieces.
+ * @param side true = white's attacks.
+ */
+ULL attacked(const Position& pos, const bool side);
+
+/**
  * Generate legal moves and store in @param moves.
  */
 void legal_moves(std::vector<Move>& moves, const Position& pos);

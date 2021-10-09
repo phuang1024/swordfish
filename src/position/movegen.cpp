@@ -27,10 +27,6 @@
 namespace Position {
 
 
-/**
- * Get bitboard of attacked pieces.
- * @param side true = white's attacks.
- */
 ULL attacked(const Position& pos, const bool side) {
     ULL board = 0;
 

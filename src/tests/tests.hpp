@@ -24,7 +24,7 @@
 namespace Tests {
 
 const std::vector<std::string> tests = {
-    "test_a_test",
+    "bb_attacks",
 };
 
 

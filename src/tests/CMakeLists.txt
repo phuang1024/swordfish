@@ -20,4 +20,4 @@
 set(tests_srcs tests.cpp)
 
 add_library(tests ${tests_srcs})
-target_link_libraries(tests)
+target_link_libraries(tests position)

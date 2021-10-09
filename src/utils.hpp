@@ -28,7 +28,8 @@ typedef  unsigned char       UCH;
 
 
 enum Errors {
-    InvalidArg
+    InvalidArg,
+    UnitTestFailed,
 };
 
 

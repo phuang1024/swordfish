@@ -19,12 +19,23 @@
 
 #include <iostream>
 
+#include <position.hpp>
+#include <utils.hpp>
 #include "tests.hpp"
-#include "../utils.hpp"
 
 
-void test_a_test() {
-    std::cout << "asdf" << std::endl;
+void bb_attacks() {
+    std::cout << "### Test \"bb_attacks\"" << std::endl;
+
+    Position::Position pos(Position::Position::INIT_START);
+    const ULL attacks = Position::attacked(pos, true);
+
+    std::cout << "Board:\n";
+    Position::print(std::cout, pos);
+    std::cout << "\nWhite attacks:\n";
+    Position::print(std::cout, attacks);
+
+    std::cout << std::endl;
 }
 
 
@@ -37,7 +48,7 @@ void testall() {
 }
 
 void test(const std::string name) {
-    if (name == "test_a_test") test_a_test();
+    if (name == "bb_attacks") bb_attacks();
     else throw Errors::InvalidArg;
 }
 

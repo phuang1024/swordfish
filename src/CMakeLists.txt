@@ -46,8 +46,10 @@ set(SUBMODS position tests uci)
 set(submods "")
 list(APPEND submods ${SUBMODS})
 
+include_directories(BEFORE .)
 foreach(submod ${submods})
     add_subdirectory(${submod})
+    include_directories(BEFORE ${submod})
 endforeach()
 
 
