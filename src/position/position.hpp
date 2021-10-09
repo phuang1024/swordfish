@@ -25,10 +25,12 @@ namespace Position {
 
 // Constants
 
+// Piece values
 constexpr char EMPTY = 0;
 constexpr char WP = 1, WN = 2, WB = 3, WR = 4, WQ = 5, WK = 6;
 constexpr char BP = 9, BN = 10, BB = 11, BR = 12, BQ = 13, BK = 14;
 
+// Starting bitboards
 constexpr ULL START_WP = 65280ULL;
 constexpr ULL START_WN = 66ULL;
 constexpr ULL START_WB = 36ULL;
@@ -42,8 +44,17 @@ constexpr ULL START_BR = 9295429630892703744ULL;
 constexpr ULL START_BQ = 576460752303423488ULL;
 constexpr ULL START_BK = 1152921504606846976ULL;
 
+// Castling constants (use bitwise "and" on Position.meta)
+constexpr UCH C_WK = 1;
+constexpr UCH C_WQ = 2;
+constexpr UCH C_BK = 4;
+constexpr UCH C_BQ = 8;
 
-// Position and movegen
+// Other
+constexpr UCH TURN = 16;  // bitwise "and" on Position.meta
+
+
+// Position
 
 /**
  * Get character representation of a piece.
@@ -58,6 +69,7 @@ char piece2char(char piece);
  * @throws Errors::InvalidArg
  */
 char char2piece(char piece);
+
 
 /**
  * Represents one position on a chessboard.
@@ -78,9 +90,17 @@ struct Position {
      */
     const static char INIT_START = 1;
 
+    /**
+     * Piece bitboards.
+     */
     ULL wp, wn, wb, wr, wq, wk, bp, bn, bb, br, bq, bk;
-    UCH castling;  // not decided yet.
-    bool turn;     // true = white
+
+    /**
+     * Metadata containing:
+     * * castling (4 bits), WK, WQ, BK, BQ
+     * * turn (1 bit), true = white
+     */
+    UCH meta;
 
     /**
      * No initialization.
@@ -103,6 +123,15 @@ struct Position {
      * e.g. WP, BR, EMPTY
      */
     char piece_at(const char square);
+};
+
+
+/**
+ * Move struct, containing start and end square.
+ * Position is responsible for detecting castling and en passant.
+ */
+struct Move {
+    UCH from, to;
 };
 
 

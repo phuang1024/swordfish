@@ -75,7 +75,7 @@ Position::Position() {
 Position::Position(const char code) {
     if (code == INIT_EMPTY) {
         wp = wn = wb = wr = wq = wk = bp = bn = bb = br = bq = bk = 0;
-        turn = true;
+        meta = 0;
     } else if (code == INIT_START) {
         wp = START_WP;
         wn = START_WN;
@@ -89,7 +89,7 @@ Position::Position(const char code) {
         br = START_BR;
         bq = START_BQ;
         bk = START_BK;
-        turn = true;
+        meta = 31;
     }
 }
 
