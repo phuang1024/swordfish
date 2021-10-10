@@ -44,3 +44,4 @@ enum Errors {
 #define  bunset(n, pos)  (n & ~(1ULL << (pos)))
 
 #define  in_board(x, y)  (0 <= (x) && (x) < 8 && 0 <= (y) && (y) < 8)
+#define  square(x, y)    ((x) + ((y) << 3))

@@ -47,15 +47,22 @@ constexpr ULL START_BR = 9295429630892703744ULL;
 constexpr ULL START_BQ = 576460752303423488ULL;
 constexpr ULL START_BK = 1152921504606846976ULL;
 
+// Position metadata
+
 // Castling constants (use bitwise "and" on Position.meta)
 constexpr UCH C_WK = 1;
 constexpr UCH C_WQ = 2;
 constexpr UCH C_BK = 4;
 constexpr UCH C_BQ = 8;
 
-// Other
-constexpr UCH TURN = 16;  // bitwise "and" on Position.meta
+// Bitwise "and" on Position.meta
+constexpr UCH TURN = 16;
 
+// Bitwise "and" on Position.meta and bit shift 5 down (>>) for the square
+constexpr UCH HAS_EP = 128;   // Whether there is ep
+constexpr UCH EN_PASSANT = 96;  // Ep square
+
+// Other
 const char KNIGHT_OFFSETS[8][2] = {
     {-2, -1}, {-2, 1}, {-1, -2}, {-1, 2},
     {2, -1}, {2, 1}, {1, -2}, {1, 2},
@@ -127,7 +134,17 @@ struct Position {
      * Return the piece at the position specified.
      * e.g. WP, BR, EMPTY
      */
-    char piece_at(const char square) const;
+    char piece_at(const char sq) const;
+
+    /**
+     * Overload which takes x and y.
+     */
+    char piece_at(const char x, const char y) const;
+
+    /**
+     * Get the FEN for the current position.
+     */
+    std::string fen() const;
 };
 
 /**

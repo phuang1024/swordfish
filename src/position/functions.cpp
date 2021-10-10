@@ -93,20 +93,71 @@ Position::Position(const char code) {
     }
 }
 
-char Position::piece_at(const char square) const {
-    if (bit(wp, square)) return WP;
-    if (bit(wn, square)) return WN;
-    if (bit(wb, square)) return WB;
-    if (bit(wr, square)) return WR;
-    if (bit(wq, square)) return WQ;
-    if (bit(wk, square)) return WK;
-    if (bit(bp, square)) return BP;
-    if (bit(bn, square)) return BN;
-    if (bit(bb, square)) return BB;
-    if (bit(br, square)) return BR;
-    if (bit(bq, square)) return BQ;
-    if (bit(bk, square)) return BK;
+char Position::piece_at(const char sq) const {
+    if (bit(wp, sq)) return WP;
+    if (bit(wn, sq)) return WN;
+    if (bit(wb, sq)) return WB;
+    if (bit(wr, sq)) return WR;
+    if (bit(wq, sq)) return WQ;
+    if (bit(wk, sq)) return WK;
+    if (bit(bp, sq)) return BP;
+    if (bit(bn, sq)) return BN;
+    if (bit(bb, sq)) return BB;
+    if (bit(br, sq)) return BR;
+    if (bit(bq, sq)) return BQ;
+    if (bit(bk, sq)) return BK;
     return EMPTY;
+}
+
+char Position::piece_at(const char x, const char y) const {
+    return piece_at(square(x, y));
+}
+
+std::string Position::fen() const {
+    std::string str = "";
+
+    for (int y = 7; y >= 0; y--) {
+        int empty = 0;
+        for (int x = 0; x < 8; x++) {
+            const char piece = piece_at(x, y);
+            if (piece == EMPTY) {
+                empty++;
+            } else {
+                if (empty != 0)
+                    str += std::to_string(empty);
+                empty = 0;
+                str += piece2char(piece);
+            }
+        }
+        if (empty != 0)
+            str += std::to_string(empty);
+        if (y != 0)
+            str += "/";
+    }
+    str += " ";
+
+    str += (meta & TURN) ? "w" : "b";
+    str += " ";
+
+    const bool wk = meta & C_WK;
+    const bool wq = meta & C_WQ;
+    const bool bk = meta & C_BK;
+    const bool bq = meta & C_BQ;
+    if (wk || wq || bk || bq) {
+        if (wk) str += "K";
+        if (wq) str += "Q";
+        if (bk) str += "k";
+        if (bq) str += "q";
+    } else {
+        str += "-";
+    }
+    str += " ";
+
+    str += "EP_TODO ";
+
+    str += "0 1";
+
+    return str;
 }
 
 
@@ -126,7 +177,8 @@ void print(std::ostream& fp, const Position& pos) {
         }
         std::cout << y+1 << '\n';
     }
-    std::cout << row << "\n" << columns << std::endl;
+    std::cout << row << '\n' << columns << "\n\n" << std::endl;
+    std::cout << "Fen: " << pos.fen() << "\n\n";
 }
 
 void print(std::ostream& fp, const ULL board) {
