@@ -19,8 +19,10 @@
 
 /**
  * Simple utils. All implementations are in this file.
+ *
  * If it is a function, make it a #define or else there will be
  * multiple definition error.
+ *
  * BE VERY CAREFUL WITH PARENTHESES! Keep in mind that an argument
  * may be an expression.
  */
@@ -40,3 +42,5 @@ enum Errors {
 #define  nbit(n, pos)    (!(n & (1ULL << (pos))))
 #define  bset(n, pos)    (n | (1ULL << (pos)))
 #define  bunset(n, pos)  (n & ~(1ULL << (pos)))
+
+#define  in_board(x, y)  (0 <= (x) && (x) < 8 && 0 <= (y) && (y) < 8)

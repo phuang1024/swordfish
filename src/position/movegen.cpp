@@ -27,6 +27,24 @@
 namespace Position {
 
 
+void attacked_pawn(const bool side, ULL& board, const int x, const int y, const int sq) {
+    if (side && y < 7) {
+        if (x > 0) board = bset(board, sq+7);
+        if (x < 7) board = bset(board, sq+9);
+    } else if (!side && y > 0) {
+        if (x > 0) board = bset(board, sq-9);
+        if (x < 7) board = bset(board, sq-7);
+    }
+}
+
+void attacked_knight(ULL& board, const int x, const int y) {
+    for (int i = 0; i < 8; i++) {
+        const int cx = x + KNIGHT_OFFSETS[i][0], cy = y + KNIGHT_OFFSETS[i][1];
+        if (in_board(cx, cy))
+            board = bset(board, cx + (cy<<3));
+    }
+}
+
 ULL attacked(const Position& pos, const bool side) {
     ULL board = 0;
 
@@ -40,13 +58,9 @@ ULL attacked(const Position& pos, const bool side) {
         if (piece == EMPTY) {  // check this first so continue earlier.
             continue;
         } else if (piece == WP || piece == BP) {
-            if (side && y < 7) {
-                if (x > 0) board = bset(board, sq+7);
-                if (x < 7) board = bset(board, sq+9);
-            } else if (!side && y > 0) {
-                if (x > 0) board = bset(board, sq-9);
-                if (x < 7) board = bset(board, sq-7);
-            }
+            attacked_pawn(side, board, x, y, sq);
+        } else if (piece == WN || piece == BN) {
+            attacked_knight(board, x, y);
         }
     }
 

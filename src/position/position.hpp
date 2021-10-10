@@ -56,6 +56,11 @@ constexpr UCH C_BQ = 8;
 // Other
 constexpr UCH TURN = 16;  // bitwise "and" on Position.meta
 
+const char KNIGHT_OFFSETS[8][2] = {
+    {-2, -1}, {-2, 1}, {-1, -2}, {-1, 2},
+    {2, -1}, {2, 1}, {1, -2}, {1, 2},
+};
+
 
 // Helpers
 
