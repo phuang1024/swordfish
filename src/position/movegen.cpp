@@ -45,7 +45,54 @@ void attacked_knight(ULL& board, const int x, const int y) {
     }
 }
 
+void attacked_sliding(ULL& board, int x, int y, const ULL pieces, const int dx, const int dy) {
+    while (true) {
+        x += dx;
+        y += dy;
+        if (!in_board(x, y))
+            break;
+
+        const char sq = square(x, y);
+        board = bset(board, sq);
+        if (bit(pieces, sq))
+            break;
+    }
+}
+
+void attacked_bishop(ULL& board, const int x, const int y, const ULL pieces) {
+    attacked_sliding(board, x, y, pieces, 1, 1);
+    attacked_sliding(board, x, y, pieces, 1, -1);
+    attacked_sliding(board, x, y, pieces, -1, 1);
+    attacked_sliding(board, x, y, pieces, -1, -1);
+}
+
+void attacked_rook(ULL& board, const int x, const int y, const ULL pieces) {
+    attacked_sliding(board, x, y, pieces, 0, 1);
+    attacked_sliding(board, x, y, pieces, 0, -1);
+    attacked_sliding(board, x, y, pieces, 1, 0);
+    attacked_sliding(board, x, y, pieces, -1, 0);
+}
+
+void attacked_queen(ULL& board, const int x, const int y, const ULL pieces) {
+    attacked_bishop(board, x, y, pieces);
+    attacked_rook(board, x, y, pieces);
+}
+
+void attacked_king(ULL& board, const int x, const int y) {
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            if (dx == 0 && dy == 0)
+                continue;
+            const int nx = x + dx, ny = y + dy;
+            if (in_board(nx, ny))
+                board = bset(board, square(x, y));
+        }
+    }
+}
+
 ULL attacked(const Position& pos, const bool side) {
+    const ULL pieces = all_pieces(pos);
+
     ULL board = 0;
 
     for (int sq = 0; sq < 64; sq++) {
@@ -55,13 +102,20 @@ ULL attacked(const Position& pos, const bool side) {
         if ((bool)(piece & 8) != side)  // piece is wrong color
             continue;
 
-        if (piece == EMPTY) {  // check this first so continue earlier.
+        if (piece == EMPTY)  // check this first so continue earlier.
             continue;
-        } else if (piece == WP || piece == BP) {
+        else if (piece == WP || piece == BP)
             attacked_pawn(side, board, x, y, sq);
-        } else if (piece == WN || piece == BN) {
+        else if (piece == WN || piece == BN)
             attacked_knight(board, x, y);
-        }
+        else if (piece == WB || piece == BB)
+            attacked_bishop(board, x, y, pieces);
+        else if (piece == WR || piece == BR)
+            attacked_rook(board, x, y, pieces);
+        else if (piece == WQ || piece == BQ)
+            attacked_queen(board, x, y, pieces);
+        else if (piece == WK || piece == BK)
+            attacked_king(board, x, y);
     }
 
     return board;

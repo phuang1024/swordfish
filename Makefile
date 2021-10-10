@@ -34,4 +34,3 @@ build:
 	make -j`nproc`
 
 	cp ./build/Swordfish .
-	echo $(BUILD_TYPE)

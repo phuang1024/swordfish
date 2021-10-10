@@ -38,10 +38,37 @@ enum Errors {
     UnitTestFailed,
 };
 
-#define  bit(n, pos)     (n & (1ULL << (pos)))
-#define  nbit(n, pos)    (!(n & (1ULL << (pos))))
-#define  bset(n, pos)    (n | (1ULL << (pos)))
-#define  bunset(n, pos)  (n & ~(1ULL << (pos)))
+/**
+ * Check if a bit is set.
+ */
+#define  bit(n, pos)  ((n) & (1ULL << (pos)))
 
+/**
+ * Check if a bit is not set. Removes ! in bool exprs.
+ */
+#define  nbit(n, pos)  (!((n) & (1ULL << (pos))))
+
+/**
+ * Set the bit. Does not modify in place.
+ */
+#define  bset(n, pos)  ((n) | (1ULL << (pos)))
+
+/**
+ * Unset the bit. Does not modify in place.
+ */
+#define  bunset(n, pos)  ((n) & ~(1ULL << (pos)))
+
+/**
+ * Check if location is in board (0 <= x < 8) and same for y.
+ */
 #define  in_board(x, y)  (0 <= (x) && (x) < 8 && 0 <= (y) && (y) < 8)
-#define  square(x, y)    ((x) + ((y) << 3))
+
+/**
+ * Square value from 0 to 64 given x and y.
+ */
+#define  square(x, y)  ((x) + ((y) << 3))
+
+/**
+ * Bitboard of all pieces (pos.wp | pos.bp | ...)
+ */
+#define  all_pieces(p)  (p.wp|p.wn|p.wb|p.wr|p.wq|p.wk|p.bp|p.bn|p.bb|p.bq|p.bk)
