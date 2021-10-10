@@ -17,32 +17,30 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <string>
-#include <vector>
+#include <iostream>
+
+#include <position.hpp>
+#include <utils.hpp>
+#include "tests.hpp"
 
 
 namespace Tests {
 
-const std::vector<std::string> tests = {
-    "bb_attacks",
-};
 
+void bb_attacks() {
+    std::cout << "### Test \"bb_attacks\"" << std::endl;
 
-/**
- * Test generating attacks.
- */
-void bb_attacks();
+    Position::Position pos(Position::Position::INIT_START);
+    pos.wp = 0;
+    const ULL attacks = Position::attacked(pos, true);
 
+    std::cout << "Board:\n";
+    Position::print(std::cout, pos);
+    std::cout << "\nWhite attacks:\n";
+    Position::print(std::cout, attacks);
 
-/**
- * Run all tests.
- */
-void testall();
-
-/**
- * Run test with name.
- */
-void test(const std::string name);
+    std::cout << std::endl;
+}
 
 
 }  // namespace Tests

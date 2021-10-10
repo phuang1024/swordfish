@@ -24,22 +24,6 @@
 #include "tests.hpp"
 
 
-void bb_attacks() {
-    std::cout << "### Test \"bb_attacks\"" << std::endl;
-
-    Position::Position pos(Position::Position::INIT_START);
-    pos.wp = 0;
-    const ULL attacks = Position::attacked(pos, true);
-
-    std::cout << "Board:\n";
-    Position::print(std::cout, pos);
-    std::cout << "\nWhite attacks:\n";
-    Position::print(std::cout, attacks);
-
-    std::cout << std::endl;
-}
-
-
 namespace Tests {
 
 

@@ -17,7 +17,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-set(tests_srcs tests.cpp)
+set(tests_srcs tests.cpp position.cpp)
 
 add_library(tests ${tests_srcs})
 target_link_libraries(tests position)
