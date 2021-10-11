@@ -82,6 +82,8 @@ Position::Position(const char code) {
     if (code == INIT_EMPTY) {
         wp = wn = wb = wr = wq = wk = bp = bn = bb = br = bq = bk = 0;
         meta = 0;
+        moveclock = 0;
+        fullmoves = 1;
     } else if (code == INIT_START) {
         wp = START_WP;
         wn = START_WN;
@@ -96,6 +98,8 @@ Position::Position(const char code) {
         bq = START_BQ;
         bk = START_BK;
         meta = 31;
+        moveclock = 0;
+        fullmoves = 1;
     }
 }
 
@@ -163,7 +167,9 @@ std::string Position::fen() const {
     else str += "-";
     str += " ";
 
-    str += "0 1";
+    str += std::to_string(moveclock);
+    str += " ";
+    str += std::to_string(fullmoves);
 
     return str;
 }

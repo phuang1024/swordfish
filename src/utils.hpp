@@ -29,8 +29,9 @@
 
 #pragma once
 
-typedef  unsigned long long  ULL;
 typedef  unsigned char       UCH;
+typedef  unsigned short      USH;
+typedef  unsigned long long  ULL;
 
 
 enum Errors {

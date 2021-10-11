@@ -132,6 +132,16 @@ struct Position {
     UCH ep;
 
     /**
+     * Number of plies after the last capture or pawn move.
+     */
+    USH moveclock;
+
+    /**
+     * Number of moves. Starts at 1 and increments after black's move.
+     */
+    USH fullmoves;
+
+    /**
      * No initialization.
      * Warning: Member variables may be arbitrary.
      */
