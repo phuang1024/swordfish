@@ -58,9 +58,9 @@ constexpr UCH C_BQ = 8;
 // Bitwise "and" on Position.meta
 constexpr UCH TURN = 16;
 
-// Bitwise "and" on Position.meta and bit shift 5 down (>>) for the square
-constexpr UCH HAS_EP = 128;   // Whether there is ep
-constexpr UCH EN_PASSANT = 96;  // Ep square
+// Bitwise "and" on Position.ep
+constexpr UCH EP_YES = 64;  // Whether there is ep
+constexpr UCH EP_SQ = 63;   // Ep square
 
 // Other
 const char KNIGHT_OFFSETS[8][2] = {
@@ -76,14 +76,19 @@ const char KNIGHT_OFFSETS[8][2] = {
  * piece2char(Position::WP) -> 'P'
  * @throws Errors::InvalidArg
  */
-char piece2char(char piece);
+char piece2char(const char piece);
 
 /**
  * Get piece for char representation.
  * char2piece('P') -> Position::WP
  * @throws Errors::InvalidArg
  */
-char char2piece(char piece);
+char char2piece(const char piece);
+
+/**
+ * Get algebraic representation (a1, e4, h8) given square number.
+ */
+std::string sq2alg(const char sq);
 
 
 // Position
@@ -114,10 +119,17 @@ struct Position {
 
     /**
      * Metadata containing:
-     * * castling (4 bits), WK, WQ, BK, BQ
-     * * turn (1 bit), true = white
+     * * castling (4 bits): WK, WQ, BK, BQ
+     * * turn (1 bit): true = white
      */
     UCH meta;
+
+    /**
+     * En passant metadata containing:
+     * * EP square (6 bits)
+     * * Is there EP (1 bit)
+     */
+    UCH ep;
 
     /**
      * No initialization.

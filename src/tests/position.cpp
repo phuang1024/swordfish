@@ -28,10 +28,11 @@ namespace Tests {
 
 
 void bb_attacks() {
-    std::cout << "### Test \"bb_attacks\"" << std::endl;
+    std::cout << "### Test \"bb_attacks\"\n\n";
 
     Position::Position pos(Position::Position::INIT_START);
     pos.wp = 0;
+    pos.ep = 64 + 12;
     const ULL attacks = Position::attacked(pos, true);
 
     std::cout << "Board:\n";

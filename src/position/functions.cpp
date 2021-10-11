@@ -30,7 +30,7 @@
 namespace Position {
 
 
-char piece2char(char piece) {
+char piece2char(const char piece) {
     switch (piece) {
         case WP: return 'P';
         case WN: return 'N';
@@ -49,7 +49,7 @@ char piece2char(char piece) {
     throw Errors::InvalidArg;
 }
 
-char char2piece(char piece) {
+char char2piece(const char piece) {
     switch (piece) {
         case 'P': return WP;
         case 'N': return WN;
@@ -66,6 +66,12 @@ char char2piece(char piece) {
         case ' ': return EMPTY;
     }
     throw Errors::InvalidArg;
+}
+
+std::string sq2alg(const char sq) {
+    const int x = sq & 7, y = sq >> 3;
+    const char x_ch = x + 97, y_ch = y + 49;
+    return std::string(1, x_ch) + std::string(1, y_ch);
 }
 
 
@@ -153,7 +159,9 @@ std::string Position::fen() const {
     }
     str += " ";
 
-    str += "EP_TODO ";
+    if (ep & EP_YES) str += sq2alg(ep & EP_SQ);
+    else str += "-";
+    str += " ";
 
     str += "0 1";
 
