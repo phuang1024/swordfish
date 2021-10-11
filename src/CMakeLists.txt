@@ -50,3 +50,10 @@ foreach(submod ${submods})
     target_include_directories(Swordfish PUBLIC "${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/${submod}")
     target_link_libraries(Swordfish PUBLIC ${submod})
 endforeach()
+
+# Installation
+install(TARGETS Swordfish DESTINATION bin)
+
+# Testing
+add_test(NAME unittest COMMAND Swordfish test)
+enable_testing()
