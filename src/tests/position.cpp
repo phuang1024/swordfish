@@ -19,8 +19,8 @@
 
 #include <iostream>
 
-#include <position.hpp>
-#include <utils.hpp>
+#include "position.hpp"
+#include "utils.hpp"
 #include "tests.hpp"
 
 

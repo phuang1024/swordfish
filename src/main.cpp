@@ -20,8 +20,8 @@
 #include <cstring>
 #include <iostream>
 
-#include "position/position.hpp"
-#include "tests/tests.hpp"
+#include <position.hpp>
+#include <tests.hpp>
 
 
 int main(int argc, char** argv) {

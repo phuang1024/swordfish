@@ -20,6 +20,7 @@
 .PHONY: build docs
 
 build:
+	mkdir -p ./build; \
 	cd ./build; \
 	cmake ../src -DCMAKE_BUILD_TYPE=Release -G"Unix Makefiles"; \
 	make -j`nproc`

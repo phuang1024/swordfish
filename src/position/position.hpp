@@ -20,7 +20,7 @@
 #include <iostream>
 #include <vector>
 
-#include "../utils.hpp"
+#include "utils.hpp"
 
 
 namespace Position {

@@ -18,6 +18,4 @@
 #
 
 set(uci_srcs info.cpp)
-
 add_library(uci ${uci_srcs})
-target_link_libraries(uci)

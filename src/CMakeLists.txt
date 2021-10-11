@@ -27,10 +27,6 @@ project(Swordfish VERSION 0.0.1)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Add executable
-set(Swordfish_srcs main.cpp)
-add_executable(Swordfish ${Swordfish_srcs})
-
 # Configure files
 execute_process(
     COMMAND ${GIT_EXECUTABLE} describe --match=asdf --always --abbrev=40 --dirty
@@ -40,19 +36,17 @@ execute_process(
 )
 configure_file(config.hpp.in config.hpp)
 
-# Add libraries
+# Add executable
+set(Swordfish_srcs main.cpp)
+add_executable(Swordfish ${Swordfish_srcs} ${ALL_HEADERS})
 
+# Add libraries
 set(SUBMODS position tests uci)
 set(submods "")
 list(APPEND submods ${SUBMODS})
 
-include_directories(BEFORE .)
 foreach(submod ${submods})
     add_subdirectory(${submod})
-    include_directories(BEFORE ${submod})
+    target_include_directories(Swordfish PUBLIC "${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/${submod}")
+    target_link_libraries(Swordfish PUBLIC ${submod})
 endforeach()
-
-
-# Link and include
-target_link_libraries(Swordfish ${SUBMODS})
-target_include_directories(Swordfish PUBLIC "${PROJECT_SOURCE_DIR}")
