@@ -22,6 +22,7 @@
  */
 
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "position.hpp"
@@ -103,7 +104,28 @@ Position::Position(const char code) {
     }
 }
 
-char Position::piece_at(const char sq) const {
+Position::Position(const std::string fen) {
+    // TODO
+    std::istringstream stream(fen);
+    std::string section;
+    for (int i = 0; i < 6 && std::getline(stream, section, ' '); i++) {
+        if (i == 0) {
+            int x = 0, y = 0;
+            for (char ch: section) {
+                if (ch == '/') {
+                    x = 0;
+                    y++;
+                } else if (49 <= ch && ch <= 57) {
+                    x += ch - 48;
+                } else {
+                    const char piece = char2piece(ch);
+                }
+            }
+        }
+    }
+}
+
+char Position::get_at(const char sq) const {
     if (bit(wp, sq)) return WP;
     if (bit(wn, sq)) return WN;
     if (bit(wb, sq)) return WB;
@@ -119,8 +141,9 @@ char Position::piece_at(const char sq) const {
     return EMPTY;
 }
 
-char Position::piece_at(const char x, const char y) const {
-    return piece_at(square(x, y));
+void set_at(const char sq, const char piece) {
+    // TODO
+    if (piece == EMPTY) {}
 }
 
 std::string Position::fen() const {
@@ -129,7 +152,7 @@ std::string Position::fen() const {
     for (int y = 7; y >= 0; y--) {
         int empty = 0;
         for (int x = 0; x < 8; x++) {
-            const char piece = piece_at(x, y);
+            const char piece = get_at(square(x, y));
             if (piece == EMPTY) {
                 empty++;
             } else {
@@ -185,7 +208,7 @@ void print(std::ostream& fp, const Position& pos) {
         std::cout << row << '\n';
         std::cout << col;
         for (int x = 0; x < 8; x++) {
-            const char piece = pos.piece_at(y*8 + x);
+            const char piece = pos.get_at(y*8 + x);
             const char symbol = piece2char(piece);
             std::cout << symbol << col;
         }

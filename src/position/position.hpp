@@ -153,15 +153,22 @@ struct Position {
     Position(const char code);
 
     /**
+     * Initialize with FEN string.
+     * Make sure each section is separated by exactly 1 space.
+     */
+    Position(const std::string fen);
+
+    /**
      * Return the piece at the position specified.
      * e.g. WP, BR, EMPTY
      */
-    char piece_at(const char sq) const;
+    char get_at(const char sq) const;
 
     /**
-     * Overload which takes x and y.
+     * Set position to piece.
+     * Piece is WP, BR, EMPTY, ...
      */
-    char piece_at(const char x, const char y) const;
+    void set_at(const char sq, const char piece);
 
     /**
      * Get the FEN for the current position.

@@ -97,7 +97,7 @@ ULL attacked(const Position& pos, const bool side) {
 
     for (int sq = 0; sq < 64; sq++) {
         const int x = sq & 7, y = sq >> 3;
-        const char piece = pos.piece_at(sq);
+        const char piece = pos.get_at(sq);
 
         if ((bool)(piece & 8) != side)  // piece is wrong color
             continue;
