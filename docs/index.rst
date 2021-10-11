@@ -7,3 +7,6 @@ A chess playing engine.
    :maxdepth: 2
    :hidden:
    :caption: Contents:
+
+   about.rst
+   build.rst
