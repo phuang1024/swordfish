@@ -17,20 +17,13 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-BUILD_TYPE ?= Release
-
-.PHONY: release debug build
-
-release:
-	make build BUILD_TYPE=Release
-
-debug:
-	make build BUILD_TYPE=Debug
+.PHONY: build docs
 
 build:
-	mkdir -p ./build; \
 	cd ./build; \
-	cmake ../src -DCMAKE_BUILD_TYPE=$(BUILD_TYPE); \
+	cmake ../src -DCMAKE_BUILD_TYPE=Release -G"Unix Makefiles"; \
 	make -j`nproc`
 
-	cp ./build/Swordfish .
+docs:
+	cd ./docs; \
+	make html
