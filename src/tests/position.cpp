@@ -28,7 +28,7 @@ namespace Tests {
 
 
 void test_pos_methods() {
-    std::cerr << "### Test board_methods\n";
+    std::cerr << "### Test pos_methods\n";
 
     std::cerr << "get_at and set_at:";
     Position::Position pos(Position::Position::INIT_EMPTY);
@@ -100,6 +100,28 @@ void test_pos_fen() {
     test_pos_fen_check(pos3, 4096,0,0,0, 0,0,17179869184,0, 0,0,0,0, 25, 0, 4, 2);
     assert(pos3.fen() == "8/8/8/2p5/8/8/4P3/8 w Kq - 4 2");
     std::cerr << ": Passed\n";
+
+    std::cerr << std::endl;
+}
+
+
+void test_pos_movegen() {
+    std::cerr << "### Test pos_movegen\n";
+
+    std::cerr << "Attacked squares:\n";
+
+    const std::string fen1 = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    const Position::Position pos1(fen1);
+    std::cerr << "Fen 1: \"" << fen1 << "\"";
+    assert(Position::attacked(pos1, true) == 16777086);
+    std::cerr << ": Passed\n";
+
+    const std::string fen2 = "8/5b2/2q5/8/4n3/1r6/3p2k1/8 b - - 0 1";
+    const Position::Position pos2(fen2);
+    std::cerr << "Fen 2: \"" << fen2 << "\"";
+    assert(Position::attacked(pos2, false) == 6273228193558146806);
+    std::cerr << ": Passed\n";
+
 
     std::cerr << std::endl;
 }

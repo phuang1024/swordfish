@@ -37,6 +37,7 @@ void test(const std::string name) {
     else if (name == "pos_methods") test_pos_methods();
     else if (name == "pos_helpers") test_pos_helpers();
     else if (name == "pos_fen") test_pos_fen();
+    else if (name == "pos_movegen") test_pos_movegen();
     else {
         std::cerr << "# Unrecognized test: " << name << std::endl;
         throw Errors::InvalidArg;

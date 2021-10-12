@@ -85,7 +85,7 @@ void attacked_king(ULL& board, const int x, const int y) {
                 continue;
             const int nx = x + dx, ny = y + dy;
             if (in_board(nx, ny))
-                board = bset(board, square(x, y));
+                board = bset(board, square(nx, ny));
         }
     }
 }

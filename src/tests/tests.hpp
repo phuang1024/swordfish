@@ -43,6 +43,7 @@ const std::vector<std::string> tests = {
     "pos_methods",
     "pos_helpers",
     "pos_fen",
+    "pos_movegen",
 };
 
 
@@ -71,6 +72,11 @@ void test_pos_helpers();
  * Test generating and parsing FENs.
  */
 void test_pos_fen();
+
+/**
+ * Test move generation.
+ */
+void test_pos_movegen();
 
 
 /**

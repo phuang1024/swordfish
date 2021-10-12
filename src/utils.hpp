@@ -72,7 +72,7 @@ enum Errors {
 /**
  * Bitboard of all pieces (pos.wp | pos.bp | ...)
  */
-#define  all_pieces(p)  (p.wp|p.wn|p.wb|p.wr|p.wq|p.wk|p.bp|p.bn|p.bb|p.bq|p.bk)
+#define  all_pieces(p)  (p.wp|p.wn|p.wb|p.wr|p.wq|p.wk|p.bp|p.bn|p.bb|pos.br|p.bq|p.bk)
 
 /**
  * Throw error if expression is false.
