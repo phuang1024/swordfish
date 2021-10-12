@@ -23,15 +23,32 @@
 
 namespace Tests {
 
+/**
+ * List of the names of all tests.
+ * Pass this as a cli arg to run the test.
+ * e.g. ./Swordfish test my_test_name
+ */
 const std::vector<std::string> tests = {
-    "bb_attacks",
+    "fen",
+
 };
 
 
+// General tests (general.cpp)
+
 /**
- * Test generating attacks.
+ * Test the assert() macro (defined in utils.cpp)
+ * This is the only test NOT added to the tests list because it always fails.
  */
-void bb_attacks();
+void test_assert();
+
+
+// Chess position (position.cpp)
+
+/**
+ * Test generating and parsing FENs.
+ */
+void test_fen();
 
 
 /**

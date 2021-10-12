@@ -17,9 +17,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <iostream>
-
-#include "position.hpp"
 #include "utils.hpp"
 #include "tests.hpp"
 
@@ -27,15 +24,8 @@
 namespace Tests {
 
 
-void testall() {
-    for (const std::string& name: tests)
-        test(name);
-}
-
-void test(const std::string name) {
-    if      (name == "assert") test_assert();
-    else if (name == "fen") test_fen();
-    else throw Errors::InvalidArg;
+void test_assert() {
+    assert(false);
 }
 
 

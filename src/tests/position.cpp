@@ -27,20 +27,29 @@
 namespace Tests {
 
 
-void bb_attacks() {
-    std::cout << "### Test \"bb_attacks\"\n\n";
+void test_fen_check(const Position::Position& pos, ULL wp, ULL wn, ULL wb, ULL wr, ULL wq, ULL wk,
+ULL bp, ULL bn, ULL bb, ULL br, ULL bq, ULL bk, UCH meta, UCH ep, USH moveclock, USH fullmoves) {
+    bool correct = pos.wp == wp && pos.wn == wn && pos.wb == wb && pos.wr == wr && pos.wq == wq &&
+        pos.wk == wk && pos.bp == bp && pos.bn == bn && pos.bb == bb && pos.bq == bq && pos.bk == bk &&
+        pos.meta == meta && pos.ep == ep && pos.moveclock == moveclock && pos.fullmoves == fullmoves;
 
-    Position::Position pos(Position::Position::INIT_START);
-    pos.wp = 0;
-    pos.ep = 64 + 12;
-    const ULL attacks = Position::attacked(pos, true);
+    if (!correct)
+        Position::print(std::cerr, pos);
+    assert(correct);
+}
 
-    std::cout << "Board:\n";
-    Position::print(std::cout, pos);
-    std::cout << "\nWhite attacks:\n";
-    Position::print(std::cout, attacks);
+void test_fen() {
+    std::cerr << "### Test fen\n";
 
-    std::cout << std::endl;
+    std::cerr << "Parsing FENs:\n";
+
+    const std::string fen1 = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    const Position::Position pos1(fen1);
+    std::cerr << "Fen 1: " << fen1;
+    test_fen_check(pos1, 65280ULL, 66ULL, 36ULL, 129ULL, 8ULL, 16ULL, 71776119061217280ULL,
+        4755801206503243776ULL, 2594073385365405696ULL, 9295429630892703744ULL, 576460752303423488ULL,
+        1152921504606846976ULL, 31, 0, 0, 1);
+    std::cerr << " Passed\n";
 }
 
 
