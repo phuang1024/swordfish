@@ -19,11 +19,13 @@
 
 /**
  * Unit testing.
- * When changing the name of a test, there are 5 places to change:
+ * When changing the name of a test or adding a new one, there are 7 places to change:
  * * Name in std::vector<std::string> tests
  * * Declaration name in this file
  * * If statement name and call in tests.cpp
  * * Implementation name in whatever file.
+ * * Implementation std::cerr print in whatever file ("### Test blahblabha")
+ * * src/CMakeLists.txt Near the bottom tests.
  */
 
 #include <string>

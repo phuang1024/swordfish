@@ -55,5 +55,7 @@ endforeach()
 install(TARGETS Swordfish DESTINATION bin)
 
 # Testing
-add_test(NAME unittest COMMAND Swordfish test)
+add_test(NAME pos_methods COMMAND Swordfish test pos_methods)
+add_test(NAME pos_helpers COMMAND Swordfish test pos_helpers)
+add_test(NAME pos_fen     COMMAND Swordfish test pos_fen)
 enable_testing()
