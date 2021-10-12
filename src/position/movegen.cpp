@@ -90,8 +90,10 @@ void attacked_king(ULL& board, const int x, const int y) {
     }
 }
 
-ULL attacked(const Position& pos, const bool side) {
-    const ULL pieces = all_pieces(pos);
+ULL attacked(const Position& pos, const bool side, const bool thru_king) {
+    ULL pieces = all_pieces(pos);
+    if (thru_king)
+        pieces &= ~pos.wk & ~pos.bk;
 
     ULL board = 0;
 

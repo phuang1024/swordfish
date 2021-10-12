@@ -19,3 +19,8 @@
 
 set(uci_srcs info.cpp)
 add_library(uci ${uci_srcs})
+
+target_include_directories(uci PUBLIC "${PROJECT_BINARY_DIR}"
+    "${PROJECT_SOURCE_DIR}/uci"
+    "${PROJECT_SOURCE_DIR}"
+)

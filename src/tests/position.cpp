@@ -116,10 +116,10 @@ void test_pos_movegen() {
     assert(Position::attacked(pos1, true) == 16777086);
     std::cerr << ": Passed\n";
 
-    const std::string fen2 = "8/5b2/2q5/8/4n3/1r6/3p2k1/8 b - - 0 1";
+    const std::string fen2 = "8/5b2/2q5/3k4/4n3/1r6/3p4/8 b - - 0 1";
     const Position::Position pos2(fen2);
-    std::cerr << "Fen 2: \"" << fen2 << "\"";
-    assert(Position::attacked(pos2, false) == 6273228193558146806);
+    std::cerr << "Fen 2: \"" << fen2 << "\" (thru_king = true)";
+    assert(Position::attacked(pos2, false, true) == 6273232660458319382);
     std::cerr << ": Passed\n";
 
 

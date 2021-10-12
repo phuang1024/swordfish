@@ -238,8 +238,9 @@ void print(std::ostream& fp, const ULL board);
 /**
  * Get bitboard of attacked pieces.
  * @param side true = white's attacks.
+ * @param thru_king true = sliding pieces move through king (doesn't ignore king attacks though)
  */
-ULL attacked(const Position& pos, const bool side);
+ULL attacked(const Position& pos, const bool side, const bool thru_king = false);
 
 /**
  * Generate legal moves and store in @param moves.
