@@ -77,4 +77,4 @@ enum Errors {
 /**
  * Throw error if expression is false.
  */
-#define  assert(expr)  {if (!(expr)) {throw Errors::AssertionError;}}
+#define  assert(expr)  {if (!(expr)) throw Errors::AssertionError;}

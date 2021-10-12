@@ -90,6 +90,11 @@ char char2piece(const char piece);
  */
 std::string sq2alg(const char sq);
 
+/**
+ * Get square from algebraic representation (a1, e4, h8).
+ */
+char sq2alg(const std::string alg);
+
 
 // Position
 
@@ -167,6 +172,7 @@ struct Position {
     /**
      * Set position to piece.
      * Piece is WP, BR, EMPTY, ...
+     * @throws Errors::InvalidArg
      */
     void set_at(const char sq, const char piece);
 

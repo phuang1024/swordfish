@@ -75,6 +75,10 @@ std::string sq2alg(const char sq) {
     return std::string(1, x_ch) + std::string(1, y_ch);
 }
 
+char alg2sq(const std::string alg) {
+    return (alg[0]-97) + 8 * (alg[1]-49);
+}
+
 
 Position::Position() {
 }
@@ -105,22 +109,43 @@ Position::Position(const char code) {
 }
 
 Position::Position(const std::string fen) {
-    // TODO
     std::istringstream stream(fen);
     std::string section;
     for (int i = 0; i < 6 && std::getline(stream, section, ' '); i++) {
         if (i == 0) {
-            int x = 0, y = 0;
+            int x = 0, y = 7;
             for (char ch: section) {
                 if (ch == '/') {
                     x = 0;
-                    y++;
+                    y--;
                 } else if (49 <= ch && ch <= 57) {
                     x += ch - 48;
                 } else {
                     const char piece = char2piece(ch);
+                    set_at(square(x, y), piece);
+                    x++;
                 }
             }
+        } else if (i == 1) {
+            meta = (section[0] == 'w') << 4;
+        } else if (i == 2) {
+            if (section[0] == '-') {
+                meta = 0;
+            } else {
+                for (char ch: section) {
+                    if (ch == 'K') meta = bset(meta, 0);
+                    if (ch == 'Q') meta = bset(meta, 1);
+                    if (ch == 'k') meta = bset(meta, 2);
+                    if (ch == 'q') meta = bset(meta, 3);
+                }
+            }
+        } else if (i == 3) {
+            if (section[0] == '-') ep = 0;
+            else ep = 64 + alg2sq(section);
+        } else if (i == 4) {
+            moveclock = std::stoi(section);
+        } else if (i == 5) {
+            fullmoves = std::stoi(section); 
         }
     }
 }
@@ -141,9 +166,34 @@ char Position::get_at(const char sq) const {
     return EMPTY;
 }
 
-void set_at(const char sq, const char piece) {
-    // TODO
-    if (piece == EMPTY) {}
+void Position::set_at(const char sq, const char piece) {
+    if (piece == EMPTY) {
+        wp = bunset(wp, sq);
+        wn = bunset(wn, sq);
+        wb = bunset(wb, sq);
+        wr = bunset(wr, sq);
+        wq = bunset(wq, sq);
+        wk = bunset(wk, sq);
+        bp = bunset(bp, sq);
+        bn = bunset(bn, sq);
+        bb = bunset(bb, sq);
+        br = bunset(br, sq);
+        bq = bunset(bq, sq);
+        bk = bunset(bk, sq);
+    } else {
+        if      (piece == WP) wp = bset(wp, sq);
+        else if (piece == WN) wn = bset(wn, sq);
+        else if (piece == WB) wb = bset(wb, sq);
+        else if (piece == WR) wr = bset(wr, sq);
+        else if (piece == WQ) wq = bset(wq, sq);
+        else if (piece == WK) wk = bset(wk, sq);
+        else if (piece == BP) bp = bset(bp, sq);
+        else if (piece == BN) bn = bset(bn, sq);
+        else if (piece == BB) bb = bset(bb, sq);
+        else if (piece == BR) br = bset(br, sq);
+        else if (piece == BQ) bq = bset(bq, sq);
+        else if (piece == BK) bk = bset(bk, sq);
+    }
 }
 
 std::string Position::fen() const {
