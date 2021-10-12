@@ -109,6 +109,8 @@ Position::Position(const char code) {
 }
 
 Position::Position(const std::string fen) {
+    wp = wn = wb = wr = wq = wk = bp = bn = bb = br = bq = bk = 0;
+
     std::istringstream stream(fen);
     std::string section;
     for (int i = 0; i < 6 && std::getline(stream, section, ' '); i++) {
@@ -119,7 +121,10 @@ Position::Position(const std::string fen) {
                     x = 0;
                     y--;
                 } else if (49 <= ch && ch <= 57) {
-                    x += ch - 48;
+                    for (int j = 0; j < ch - 48; j++) {
+                        set_at(square(x, y), 0);
+                        x++;
+                    }
                 } else {
                     const char piece = char2piece(ch);
                     set_at(square(x, y), piece);
@@ -130,7 +135,8 @@ Position::Position(const std::string fen) {
             meta = (section[0] == 'w') << 4;
         } else if (i == 2) {
             if (section[0] == '-') {
-                meta = 0;
+                for (int j = 0; j < 4; j++)
+                    meta = bunset(meta, j);
             } else {
                 for (char ch: section) {
                     if (ch == 'K') meta = bset(meta, 0);

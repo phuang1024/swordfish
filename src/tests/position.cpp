@@ -61,8 +61,9 @@ void test_pos_helpers() {
 }
 
 
-void test_fen_check(const Position::Position& pos, ULL wp, ULL wn, ULL wb, ULL wr, ULL wq, ULL wk,
+void test_pos_fen_check(const Position::Position& pos, ULL wp, ULL wn, ULL wb, ULL wr, ULL wq, ULL wk,
 ULL bp, ULL bn, ULL bb, ULL br, ULL bq, ULL bk, UCH meta, UCH ep, USH moveclock, USH fullmoves) {
+    // Checks if a result from test_pos_fen is correct
     bool correct = pos.wp == wp && pos.wn == wn && pos.wb == wb && pos.wr == wr && pos.wq == wq &&
         pos.wk == wk && pos.bp == bp && pos.bn == bn && pos.bb == bb && pos.bq == bq && pos.bk == bk &&
         pos.meta == meta && pos.ep == ep && pos.moveclock == moveclock && pos.fullmoves == fullmoves;
@@ -72,18 +73,18 @@ ULL bp, ULL bn, ULL bb, ULL br, ULL bq, ULL bk, UCH meta, UCH ep, USH moveclock,
     assert(correct);
 }
 
-void test_fen() {
+void test_pos_fen() {
     std::cerr << "### Test fen\n";
 
     std::cerr << "Parsing FENs:\n";
 
     const std::string fen1 = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     const Position::Position pos1(fen1);
-    std::cerr << "Fen 1: " << fen1;
-    test_fen_check(pos1, 65280ULL, 66ULL, 36ULL, 129ULL, 8ULL, 16ULL, 71776119061217280ULL,
+    std::cerr << "Fen 1: \"" << fen1 << "\"";
+    test_pos_fen_check(pos1, 65280ULL, 66ULL, 36ULL, 129ULL, 8ULL, 16ULL, 71776119061217280ULL,
         4755801206503243776ULL, 2594073385365405696ULL, 9295429630892703744ULL, 576460752303423488ULL,
         1152921504606846976ULL, 31, 0, 0, 1);
-    std::cerr << " Passed\n";
+    std::cerr << ": Passed\n";
 }
 
 

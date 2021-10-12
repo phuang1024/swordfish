@@ -17,6 +17,15 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+/**
+ * Unit testing.
+ * When changing the name of a test, there are 5 places to change:
+ * * Name in std::vector<std::string> tests
+ * * Declaration name in this file
+ * * If statement name and call in tests.cpp
+ * * Implementation name in whatever file.
+ */
+
 #include <string>
 #include <vector>
 
@@ -31,7 +40,7 @@ namespace Tests {
 const std::vector<std::string> tests = {
     "pos_methods",
     "pos_helpers",
-    "fen",
+    "pos_fen",
 };
 
 
@@ -59,7 +68,7 @@ void test_pos_helpers();
 /**
  * Test generating and parsing FENs.
  */
-void test_fen();
+void test_pos_fen();
 
 
 /**
