@@ -85,6 +85,20 @@ void test_pos_fen() {
         4755801206503243776ULL, 2594073385365405696ULL, 9295429630892703744ULL, 576460752303423488ULL,
         1152921504606846976ULL, 31, 0, 0, 1);
     std::cerr << ": Passed\n";
+
+    const std::string fen2 = "8/8/8/8/8/8/8/8 b - e4 8 20";
+    const Position::Position pos2(fen2);
+    std::cerr << "Fen 2: \"" << fen2 << "\"";
+    test_pos_fen_check(pos2, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0, 64+28, 8, 20);
+    std::cerr << ": Passed\n";
+
+    const std::string fen3 = "8/8/8/2p5/8/8/4P3/8 w Kq - 4 2";
+    const Position::Position pos3(fen3);
+    std::cerr << "Fen 3: \"" << fen3 << "\"";
+    test_pos_fen_check(pos3, 4096,0,0,0, 0,0,17179869184,0, 0,0,0,0, 25, 0, 4, 2);
+    std::cerr << ": Passed\n";
+
+    std::cerr << std::endl;
 }
 
 
