@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "name": "Swordfish",
+            "includePath": [
+                "src/**",
+                "${default}"
+            ],
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerPath": "/home/patrick/builds/llvm-project/build/bin/clang"
+        }
+    ],
+    "version": 4
+}
