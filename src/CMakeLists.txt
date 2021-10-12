@@ -22,6 +22,8 @@ cmake_minimum_required(VERSION 3.10)
 
 find_package(Git)
 
+option(WITH_TESTS "Compile with testing library" OFF)
+
 # Project
 project(Swordfish VERSION 0.0.1)
 set(CMAKE_CXX_STANDARD 17)
@@ -41,7 +43,10 @@ set(Swordfish_srcs main.cpp)
 add_executable(Swordfish ${Swordfish_srcs} ${ALL_HEADERS})
 
 # Add libraries
-set(SUBMODS position tests uci)
+set(SUBMODS position uci)
+if(WITH_TESTING)
+    set(SUBMODS ${SUBMODS} tests)
+endif()
 set(submods "")
 list(APPEND submods ${SUBMODS})
 
@@ -58,4 +63,6 @@ install(TARGETS Swordfish DESTINATION bin)
 add_test(NAME pos_methods COMMAND Swordfish test pos_methods)
 add_test(NAME pos_helpers COMMAND Swordfish test pos_helpers)
 add_test(NAME pos_fen     COMMAND Swordfish test pos_fen)
-enable_testing()
+if(WITH_TESTING)
+    enable_testing()
+endif()

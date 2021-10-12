@@ -22,7 +22,7 @@
 build:
 	mkdir -p ./build; \
 	cd ./build; \
-	cmake ../src -DCMAKE_BUILD_TYPE=Release -G"Unix Makefiles"; \
+	cmake ../src -DCMAKE_BUILD_TYPE=Release -DWITH_TESTING=ON -G"Unix Makefiles"; \
 	make -j`nproc`
 
 docs:

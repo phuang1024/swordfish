@@ -17,10 +17,12 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include <string>
+
 #define  VMAJOR  @Swordfish_VERSION_MAJOR@
 #define  VMINOR  @Swordfish_VERSION_MINOR@
 #define  VPATCH  @Swordfish_VERSION_PATCH@
 
-#include <string>
+#cmakedefine  WITH_TESTING
 
 const std::string GIT_HASH = "@GIT_HASH@";

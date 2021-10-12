@@ -3,6 +3,7 @@
         {
             "name": "Swordfish",
             "includePath": [
+                "build",  // for config.hpp
                 "src/**",
                 "${default}"
             ]

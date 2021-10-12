@@ -19,16 +19,41 @@
 
 #include <cstring>
 #include <iostream>
+#include <stdio.h>
 
-#include <position.hpp>
-#include <tests.hpp>
+#include "config.hpp"
+
+#ifdef WITH_TESTING
+    #include "tests.hpp"
+#endif
+
+
+void print_info() {
+    printf("Swordfish v%d.%d.%d - Free and open source chess engine.\n", VMAJOR, VMINOR, VPATCH);
+    printf("Swordfish is distributed under the GNU GPL v3 license.\n");
+}
+
+
+void loop() {
+    print_info();
+    printf("\n");
+}
 
 
 int main(int argc, char** argv) {
     if (argc >= 2) {
-        if (strcmp(argv[1], "test") == 0) {
-            if (argc >= 3) Tests::test(argv[2]);
-            else Tests::testall();
+        if (strcmp(argv[1], "--version") == 0) {
+            print_info();
+        } else if (strcmp(argv[1], "test") == 0) {
+            #ifdef WITH_TESTING
+                if (argc >= 3) Tests::test(argv[2]);
+                else Tests::testall();
+            #else
+                std::cerr << "Testing is disabled. Run CMake with -DWITH_TESTING=ON" << std::endl;
+                return 1;
+            #endif
         }
+    } else {
+        loop();
     }
 }
