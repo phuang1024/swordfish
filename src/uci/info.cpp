@@ -23,7 +23,13 @@
 namespace Uci {
 
 
-
+void Info::output(std::ostream& fp, const ULL what) {
+    fp << "info ";
+    if (what & I_DEPTH) fp << "depth " << depth << " ";
+    if (what & I_NODES) fp << "nodes " << nodes << " ";
+    if (what & I_NPS)   fp << "nps " << nps << " ";
+    if (what & I_TIME)  fp << "time " << time << " ";
+}
 
 
 }  // namespace Uci
