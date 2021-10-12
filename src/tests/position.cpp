@@ -27,6 +27,40 @@
 namespace Tests {
 
 
+void test_pos_methods() {
+    std::cerr << "### Test board_methods\n";
+
+    std::cerr << "get_at and set_at:";
+    Position::Position pos(Position::Position::INIT_EMPTY);
+    pos.wp = 1;
+    assert(pos.get_at(0) == Position::WP);
+    assert(pos.get_at(1) == Position::EMPTY);
+    pos.set_at(0, Position::EMPTY);
+    pos.set_at(1, Position::BK);
+    pos.set_at(62, Position::WR);
+    assert(pos.get_at(0) == Position::EMPTY);
+    assert(pos.get_at(1) == Position::BK);
+    assert(pos.get_at(62) == Position::WR);
+    std::cerr << " Passed\n";
+
+    std::cerr << std::endl;
+}
+
+
+void test_pos_helpers() {
+    std::cerr << "### Test pos_helpers\n";
+
+    std::cerr << "Conversions:";
+    assert(Position::piece2char(Position::BQ) == 'q');
+    assert(Position::char2piece('R') == Position::WR);
+    assert(Position::sq2alg(45) == "f6");
+    assert(Position::alg2sq("e3") == 20);
+    std::cerr << " Passed\n";
+
+    std::cerr << std::endl;
+}
+
+
 void test_fen_check(const Position::Position& pos, ULL wp, ULL wn, ULL wb, ULL wr, ULL wq, ULL wk,
 ULL bp, ULL bn, ULL bb, ULL br, ULL bq, ULL bk, UCH meta, UCH ep, USH moveclock, USH fullmoves) {
     bool correct = pos.wp == wp && pos.wn == wn && pos.wb == wb && pos.wr == wr && pos.wq == wq &&

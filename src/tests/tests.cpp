@@ -34,8 +34,13 @@ void testall() {
 
 void test(const std::string name) {
     if      (name == "assert") test_assert();
+    else if (name == "pos_methods") test_pos_methods();
+    else if (name == "pos_helpers") test_pos_helpers();
     else if (name == "fen") test_fen();
-    else throw Errors::InvalidArg;
+    else {
+        std::cerr << "# Unrecognized test: " << name << std::endl;
+        throw Errors::InvalidArg;
+    }
 }
 
 

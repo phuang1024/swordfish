@@ -29,8 +29,9 @@ namespace Tests {
  * e.g. ./Swordfish test my_test_name
  */
 const std::vector<std::string> tests = {
+    "pos_methods",
+    "pos_helpers",
     "fen",
-
 };
 
 
@@ -44,6 +45,16 @@ void test_assert();
 
 
 // Chess position (position.cpp)
+
+/**
+ * Test board methods.
+ */
+void test_pos_methods();
+
+/**
+ * Test position helper functions.
+ */
+void test_pos_helpers();
 
 /**
  * Test generating and parsing FENs.

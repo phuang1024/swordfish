@@ -93,7 +93,7 @@ std::string sq2alg(const char sq);
 /**
  * Get square from algebraic representation (a1, e4, h8).
  */
-char sq2alg(const std::string alg);
+char alg2sq(const std::string alg);
 
 
 // Position
