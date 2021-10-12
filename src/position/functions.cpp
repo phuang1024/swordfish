@@ -254,6 +254,22 @@ std::string Position::fen() const {
 }
 
 
+Move::Move() {
+}
+
+Move::Move(const UCH from, const UCH to) {
+    this->from = from;
+    this->to = to;
+    promo = 0;
+}
+
+Move::Move(const UCH from, const UCH to, const UCH promo) {
+    this->from = from;
+    this->to = to;
+    this->promo = PROMO_YES + promo;
+}
+
+
 void print(std::ostream& fp, const Position& pos) {
     // Design from stockfish.
     const std::string row = " +---+---+---+---+---+---+---+---+";

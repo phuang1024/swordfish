@@ -62,6 +62,10 @@ constexpr UCH TURN = 16;
 constexpr UCH EP_YES = 64;  // Whether there is ep
 constexpr UCH EP_SQ = 63;   // Ep square
 
+// Move metadata
+constexpr UCH PROMO_YES = 4;
+constexpr UCH PROMO = 3;
+
 // Other
 const char KNIGHT_OFFSETS[8][2] = {
     {-2, -1}, {-2, 1}, {-1, -2}, {-1, 2},
@@ -187,7 +191,35 @@ struct Position {
  * Position is responsible for detecting castling and en passant.
  */
 struct Move {
+    /**
+     * Squares from 0 to 63
+     */
     UCH from, to;
+
+    /**
+     * Promotion:
+     * * 2 bits: promo piece (N B R Q)
+     * * 1 bit: whether it is a promotion
+     */
+    UCH promo;
+
+    /**
+     * No initialization.
+     * Warning: Member variables may take arbitrary values.
+     */
+    Move();
+
+    /**
+     * Initialize with start and end square.
+     * No promotion.
+     */
+    Move(const UCH from, const UCH to);
+
+    /**
+     * Initialize with start, end, and promo.
+     * Yes promotion. @param promo 0 to 3.
+     */
+    Move(const UCH from, const UCH to, const UCH promo);
 };
 
 /**

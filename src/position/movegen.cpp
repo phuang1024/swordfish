@@ -122,6 +122,9 @@ ULL attacked(const Position& pos, const bool side) {
 }
 
 
+void king_moves(std::vector<Move>& moves, const Position& pos) {
+}
+
 void legal_moves(std::vector<Move>& moves, const Position& pos) {
     moves.clear();
 }
