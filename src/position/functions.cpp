@@ -79,6 +79,26 @@ char alg2sq(const std::string alg) {
     return (alg[0]-97) + 8 * (alg[1]-49);
 }
 
+char promo2char(const char promo) {
+    switch (promo) {
+        case 0: return 'N';
+        case 1: return 'B';
+        case 2: return 'R';
+        case 3: return 'Q';
+    }
+    throw Errors::InvalidArg;
+}
+
+char char2promo(const char ch) {
+    switch (ch) {
+        case 'N': return 0;
+        case 'B': return 1;
+        case 'R': return 2;
+        case 'Q': return 3;
+    }
+    throw Errors::InvalidArg;
+}
+
 
 Position::Position() {
 }
@@ -267,6 +287,13 @@ Move::Move(const UCH from, const UCH to, const UCH promo) {
     this->from = from;
     this->to = to;
     this->promo = PROMO_YES + promo;
+}
+
+std::string Move::uci() const {
+    std::string repr = sq2alg(from) + sq2alg(to);
+    if (PROMO_YES & promo)
+        repr += promo2char(promo & PROMO);
+    return repr;
 }
 
 

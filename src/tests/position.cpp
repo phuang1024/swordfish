@@ -122,6 +122,17 @@ void test_pos_movegen() {
     assert(Position::attacked(pos2, false, true) == 6273232660458319382);
     std::cerr << ": Passed\n";
 
+    std::cerr << "Move generation:\n";
+
+    const std::string fen3 = "3r4/8/8/8/2K5/8/8/8 w - - 0 1";
+    const Position::Position pos3(fen3);
+    std::cerr << "Fen 3: \"" << fen3 << "\"";
+
+    std::vector<Position::Move> moves;
+    Position::legal_moves(moves, pos3);
+    for (const auto& m: moves) {
+        std::cerr << m.uci() << std::endl;
+    }
 
     std::cerr << std::endl;
 }

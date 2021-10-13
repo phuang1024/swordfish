@@ -60,6 +60,12 @@ enum Errors {
 #define  bunset(n, pos)  ((n) & ~(1ULL << (pos)))
 
 /**
+ * Position of highest bit. Position 0 = last.
+ * Make sure there is at least one bit set.
+ */
+#define  bpos(n)  (63 - __builtin_clzll((n)))
+
+/**
  * Check if location is in board (0 <= x < 8) and same for y.
  */
 #define  in_board(x, y)  (0 <= (x) && (x) < 8 && 0 <= (y) && (y) < 8)

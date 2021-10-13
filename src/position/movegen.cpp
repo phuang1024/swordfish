@@ -79,14 +79,10 @@ void attacked_queen(ULL& board, const int x, const int y, const ULL pieces) {
 }
 
 void attacked_king(ULL& board, const int x, const int y) {
-    for (int dx = -1; dx <= 1; dx++) {
-        for (int dy = -1; dy <= 1; dy++) {
-            if (dx == 0 && dy == 0)
-                continue;
-            const int nx = x + dx, ny = y + dy;
-            if (in_board(nx, ny))
-                board = bset(board, square(nx, ny));
-        }
+    for (int i = 0; i < 8; i++) {
+        const int cx = x + KING_OFFSETS[i][0], cy = y + KING_OFFSETS[i][1];
+        if (in_board(cx, cy))
+            board = bset(board, square(cx, cy));
     }
 }
 
@@ -124,11 +120,35 @@ ULL attacked(const Position& pos, const bool side, const bool thru_king) {
 }
 
 
-void king_moves(std::vector<Move>& moves, const Position& pos) {
+void king_moves(std::vector<Move>& moves, const UCH kx, const UCH ky, const ULL attacks) {
+    const int from = square(kx, ky);
+    for (int i = 0; i < 8; i++) {
+        const int cx = kx + KING_OFFSETS[i][0], cy = ky + KING_OFFSETS[i][1];
+        const int sq = square(cx, cy);
+        if (in_board(cx, cy) && nbit(attacks, sq))
+            moves.push_back(Move(from, sq));
+    }
 }
 
 void legal_moves(std::vector<Move>& moves, const Position& pos) {
     moves.clear();
+
+    const bool side = pos.meta & TURN;
+    ULL SP, SN, SB, SR, SQ, SK, OP, ON, OB, OR, OQ, OK;
+    if (side) {
+        SP = pos.wp;  SN = pos.wn;  SB = pos.wb;  SR = pos.wr;  SQ = pos.wq;  SK = pos.wk;
+        OP = pos.bp;  ON = pos.bn;  OB = pos.bb;  OR = pos.br;  OQ = pos.bq;  OK = pos.bk;
+    } else {
+        SP = pos.bp;  SN = pos.bn;  SB = pos.bb;  SR = pos.br;  SQ = pos.bq;  SK = pos.bk;
+        OP = pos.wp;  ON = pos.wn;  OB = pos.wb;  OR = pos.wr;  OQ = pos.wq;  OK = pos.wk;
+    }
+
+    const UCH kpos = bpos(pos.wk);
+    const UCH kx = kpos & 7, ky = kpos >> 3;
+
+    const ULL o_attacks = attacked(pos, !side, true);
+
+    king_moves(moves, kx, ky, o_attacks);
 }
 
 

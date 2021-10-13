@@ -71,6 +71,11 @@ const char KNIGHT_OFFSETS[8][2] = {
     {-2, -1}, {-2, 1}, {-1, -2}, {-1, 2},
     {2, -1}, {2, 1}, {1, -2}, {1, 2},
 };
+const char KING_OFFSETS[8][2] = {
+    {-1, -1}, {-1, 0}, {-1, 1},
+    {0, -1}, {0, 1},
+    {1, -1}, {1, 0}, {1, 1},
+};
 
 
 // Helpers
@@ -98,6 +103,16 @@ std::string sq2alg(const char sq);
  * Get square from algebraic representation (a1, e4, h8).
  */
 char alg2sq(const std::string alg);
+
+/**
+ * Get character repr of promotion for move e.g. Q, R, N, B
+ */
+char promo2char(const char promo);
+
+/**
+ * Get promotion for move e.g. 0, 1, 2, 3 from character repr
+ */
+char char2promo(const char ch);
 
 
 // Position
@@ -198,7 +213,7 @@ struct Move {
 
     /**
      * Promotion:
-     * * 2 bits: promo piece (N B R Q)
+     * * 2 bits: promo piece (N B R Q) in that order.
      * * 1 bit: whether it is a promotion
      */
     UCH promo;
@@ -220,6 +235,12 @@ struct Move {
      * Yes promotion. @param promo 0 to 3.
      */
     Move(const UCH from, const UCH to, const UCH promo);
+
+    /**
+     * Get UCI representation of move.
+     * e.g. e2e4, e7e8Q
+     */
+    std::string uci() const;
 };
 
 /**
