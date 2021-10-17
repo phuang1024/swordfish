@@ -124,7 +124,7 @@ void test_pos_movegen() {
 
     std::cerr << "Move generation:\n";
 
-    const std::string fen3 = "3r4/8/8/8/2K5/8/8/8 w - - 0 1";
+    const std::string fen3 = "2r5/8/8/8/2K5/8/8/8 w - - 0 1";
     const Position::Position pos3(fen3);
     std::cerr << "Fen 3: \"" << fen3 << "\"";
 

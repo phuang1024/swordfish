@@ -40,6 +40,21 @@ enum Errors {
 };
 
 /**
+ * for (int i = 0; i < 256; i++)
+ *     popcnt_of_i = POPCNT_TBL[i];
+ */
+constexpr char POPCNT_TBL[256] = {
+    0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+    1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+    1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+    1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+    3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8,
+};
+
+/**
  * Check if a bit is set.
  */
 #define  bit(n, pos)  ((n) & (1ULL << (pos)))
@@ -60,10 +75,17 @@ enum Errors {
 #define  bunset(n, pos)  ((n) & ~(1ULL << (pos)))
 
 /**
- * Position of highest bit. Position 0 = last.
+ * Position of highest bit.
  * Make sure there is at least one bit set.
  */
 #define  bpos(n)  (63 - __builtin_clzll((n)))
+
+/**
+ * Popcnt of ULL
+ */
+#define  popcnt(n)  (POPCNT_TBL[(n)&255] + POPCNT_TBL[((n)>>8)&255] + POPCNT_TBL[((n)>>16)&255] + \
+    POPCNT_TBL[((n)>>24)&255] + POPCNT_TBL[((n)>>32)&255] + POPCNT_TBL[((n)>>40)&255] + \
+    POPCNT_TBL[((n)>>48)&255] + POPCNT_TBL[((n)>>56)&255])
 
 /**
  * Check if location is in board (0 <= x < 8) and same for y.

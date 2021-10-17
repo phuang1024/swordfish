@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 #include "config.hpp"
+#include "utils.hpp"
 
 #ifdef WITH_TESTING
     #include "tests.hpp"

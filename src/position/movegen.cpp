@@ -120,6 +120,16 @@ ULL attacked(const Position& pos, const bool side, const bool thru_king) {
 }
 
 
+ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx, const UCH ky) {
+    ULL board = 0;
+    const ULL pieces = all_pieces(pos);
+
+    // Check pawns
+    if (side && ky < 7) {
+    }
+}
+
+
 void king_moves(std::vector<Move>& moves, const UCH kx, const UCH ky, const ULL attacks) {
     const int from = square(kx, ky);
     for (int i = 0; i < 8; i++) {

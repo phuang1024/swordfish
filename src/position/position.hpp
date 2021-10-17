@@ -264,6 +264,11 @@ void print(std::ostream& fp, const ULL board);
 ULL attacked(const Position& pos, const bool side, const bool thru_king = false);
 
 /**
+ * Generate a bitboard of opponent pieces checking the king (respect to @param side)
+ */
+ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx, const UCH ky);
+
+/**
  * Generate legal moves and store in @param moves.
  */
 void legal_moves(std::vector<Move>& moves, const Position& pos);
