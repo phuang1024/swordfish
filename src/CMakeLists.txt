@@ -45,7 +45,7 @@ set(Swordfish_srcs main.cpp)
 add_executable(swordfish ${Swordfish_srcs} ${ALL_HEADERS})
 
 # Add libraries
-set(SUBMODS position uci)
+set(SUBMODS position uci utils)
 #if(WITH_TESTING)
 #    set(SUBMODS ${SUBMODS} tests)
 #endif()
@@ -54,7 +54,6 @@ list(APPEND submods ${SUBMODS})
 
 foreach(submod ${submods})
     add_subdirectory(${submod})
-    target_include_directories(swordfish PUBLIC "${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/${submod}")
     target_link_libraries(swordfish PUBLIC ${submod})
 endforeach()
 

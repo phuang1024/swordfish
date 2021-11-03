@@ -20,7 +20,8 @@
 set(position_srcs functions.cpp movegen.cpp)
 add_library(position ${position_srcs})
 
-target_include_directories(position PUBLIC "${PROJECT_BINARY_DIR}"
-    "${PROJECT_SOURCE_DIR}/position"
-    "${PROJECT_SOURCE_DIR}"
+target_include_directories(position INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_link_libraries(position PUBLIC
+    utils
 )
