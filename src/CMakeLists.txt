@@ -22,6 +22,8 @@ cmake_minimum_required(VERSION 3.10)
 
 find_package(Git)
 
+add_compile_options(-Wall)
+
 option(WITH_TESTS "Compile with testing library" OFF)
 
 # Project
