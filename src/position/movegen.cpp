@@ -120,12 +120,24 @@ ULL attacked(const Position& pos, const bool side, const bool thru_king) {
 }
 
 
-ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx, const UCH ky) {
-    ULL board = 0;
+ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx, const UCH ky,
+             const RespectivePieces& rpieces) {
+    ULL board = 0;  // pieces that are checking the king
     const ULL pieces = all_pieces(pos);
 
     // Check pawns
-    if (side && ky < 7) {
+    int pawn_offset = (side ? 1 : -1);   // y offset to find attacking pawns
+    if ((side && ky < 7) || (!side && ky > 0)) {
+        if (kx > 0) {
+            UCH pos = square(kx-1, ky+pawn_offset);
+            if (bit(rpieces.OP, pos))
+                board = bset(board, pos);
+        }
+        if (kx < 7) {
+            UCH pos = square(kx+1, ky+pawn_offset);
+            if (bit(rpieces.OP, pos))
+                board = bset(board, pos);
+        }
     }
 }
 
@@ -144,14 +156,17 @@ void legal_moves(std::vector<Move>& moves, const Position& pos) {
     moves.clear();
 
     const bool side = pos.meta & TURN;
+
+    // SP = same side pawns. ON = other side knights.
     ULL SP, SN, SB, SR, SQ, SK, OP, ON, OB, OR, OQ, OK;
-    if (side) {
+    if (side) {  // yes this is bad style
         SP = pos.wp;  SN = pos.wn;  SB = pos.wb;  SR = pos.wr;  SQ = pos.wq;  SK = pos.wk;
         OP = pos.bp;  ON = pos.bn;  OB = pos.bb;  OR = pos.br;  OQ = pos.bq;  OK = pos.bk;
     } else {
         SP = pos.bp;  SN = pos.bn;  SB = pos.bb;  SR = pos.br;  SQ = pos.bq;  SK = pos.bk;
         OP = pos.wp;  ON = pos.wn;  OB = pos.wb;  OR = pos.wr;  OQ = pos.wq;  OK = pos.wk;
     }
+    const RespectivePieces rpieces(SP, SN, SB, SR, SQ, SK, OP, ON, OB, OR, OQ, OK);
 
     const UCH kpos = bpos(pos.wk);
     const UCH kx = kpos & 7, ky = kpos >> 3;

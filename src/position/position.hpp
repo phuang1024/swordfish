@@ -202,6 +202,32 @@ struct Position {
 };
 
 /**
+ * Contain same side bitboards and other side bitboards.
+ */
+struct RespectivePieces {
+    /**
+     * Bitboards for same side pieces.
+     */
+    ULL SP, SN, SB, SR, SQ, SK;
+
+    /**
+     * Bitboards for other side pieces.
+     */
+    ULL OP, ON, OB, OR, OQ, OK;
+
+    /**
+     * Set all bitboards to 0.
+     */
+    RespectivePieces();
+
+    /**
+     * Set bitboards to passed in bitboards.
+     */
+    RespectivePieces(ULL SP, ULL SN, ULL SB, ULL SR, ULL SQ, ULL SK,
+                     ULL OP, ULL ON, ULL OB, ULL OR, ULL OQ, ULL OK);
+};
+
+/**
  * Move struct, containing start and end square.
  * Position is responsible for detecting castling and en passant.
  */
@@ -232,7 +258,8 @@ struct Move {
 
     /**
      * Initialize with start, end, and promo.
-     * Yes promotion. @param promo 0 to 3.
+     * Yes promotion.
+     * @param promo 0 to 3.
      */
     Move(const UCH from, const UCH to, const UCH promo);
 
@@ -264,12 +291,14 @@ void print(std::ostream& fp, const ULL board);
 ULL attacked(const Position& pos, const bool side, const bool thru_king = false);
 
 /**
- * Generate a bitboard of opponent pieces checking the king (respect to @param side)
+ * Generate a bitboard of opponent pieces checking the king (respect to side).
+ * @param side true = pieces checking white's king.
  */
-ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx, const UCH ky);
+ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx, const UCH ky,
+             const RespectivePieces& rpieces);
 
 /**
- * Generate legal moves and store in @param moves.
+ * Generate legal moves and store in moves.
  */
 void legal_moves(std::vector<Move>& moves, const Position& pos);
 

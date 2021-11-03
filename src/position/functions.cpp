@@ -18,7 +18,8 @@
 //
 
 /**
- * General helper methods and functions.
+ * Helper functions.
+ * Also implementations of methods.
  */
 
 #include <iostream>
@@ -271,6 +272,28 @@ std::string Position::fen() const {
     str += std::to_string(fullmoves);
 
     return str;
+}
+
+
+RespectivePieces::RespectivePieces() {
+    SP = SN = SB = SR = SQ = SK = 0;
+    OP = ON = OB = OR = OQ = OK = 0;
+}
+
+RespectivePieces::RespectivePieces(ULL SP, ULL SN, ULL SB, ULL SR, ULL SQ, ULL SK,
+                                   ULL OP, ULL ON, ULL OB, ULL OR, ULL OQ, ULL OK) {
+    this->SP = SP;
+    this->SN = SN;
+    this->SB = SB;
+    this->SR = SR;
+    this->SQ = SQ;
+    this->SK = SK;
+    this->OP = OP;
+    this->ON = ON;
+    this->OB = OB;
+    this->OR = OR;
+    this->OQ = OQ;
+    this->OK = OK;
 }
 
 
