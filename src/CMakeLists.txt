@@ -42,30 +42,30 @@ configure_file(config.hpp.in config.hpp)
 
 # Add executable
 set(Swordfish_srcs main.cpp)
-add_executable(Swordfish ${Swordfish_srcs} ${ALL_HEADERS})
+add_executable(swordfish ${Swordfish_srcs} ${ALL_HEADERS})
 
 # Add libraries
 set(SUBMODS position uci)
-if(WITH_TESTING)
-    set(SUBMODS ${SUBMODS} tests)
-endif()
+#if(WITH_TESTING)
+#    set(SUBMODS ${SUBMODS} tests)
+#endif()
 set(submods "")
 list(APPEND submods ${SUBMODS})
 
 foreach(submod ${submods})
     add_subdirectory(${submod})
-    target_include_directories(Swordfish PUBLIC "${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/${submod}")
-    target_link_libraries(Swordfish PUBLIC ${submod})
+    target_include_directories(swordfish PUBLIC "${PROJECT_BINARY_DIR}" "${PROJECT_SOURCE_DIR}/${submod}")
+    target_link_libraries(swordfish PUBLIC ${submod})
 endforeach()
 
 # Installation
-install(TARGETS Swordfish DESTINATION bin)
+install(TARGETS swordfish DESTINATION bin)
 
 # Testing
-add_test(NAME pos_methods COMMAND Swordfish test pos_methods)
-add_test(NAME pos_helpers COMMAND Swordfish test pos_helpers)
-add_test(NAME pos_fen     COMMAND Swordfish test pos_fen)
-add_test(NAME pos_movegen COMMAND Swordfish test pos_movegen)
+add_test(NAME pos_methods COMMAND swordfish test pos_methods)
+add_test(NAME pos_helpers COMMAND swordfish test pos_helpers)
+add_test(NAME pos_fen     COMMAND swordfish test pos_fen)
+add_test(NAME pos_movegen COMMAND swordfish test pos_movegen)
 if(WITH_TESTING)
     enable_testing()
 endif()
