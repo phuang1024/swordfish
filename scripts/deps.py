@@ -17,19 +17,4 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-PY = /usr/bin/env python3
-
-.PHONY: build deps docs
-
-build: deps
-	mkdir -p ./build; \
-	cd ./build; \
-	cmake ../src -DCMAKE_BUILD_TYPE=Release -DWITH_TESTING=ON -G"Unix Makefiles"; \
-	make -j`nproc`
-
-deps:
-	$(PY) ./scripts/deps.py
-
-docs:
-	cd ./docs; \
-	make html
+raise ValueError
