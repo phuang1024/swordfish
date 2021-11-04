@@ -35,14 +35,20 @@ void print_info() {
     printf("Swordfish is distributed under the GNU GPL v3 license.\n");
 }
 
+void test_stuff() {
+    Position::Position pos("8/b2r4/8/8/2K5/8/8/8 w - - 0 1");
+    //pos.meta &= ~Position::TURN;
+    std::vector<Position::Move> moves;
+    Position::legal_moves(moves, pos);
+
+    Position::print(std::cout, pos);
+    std::cout << moves.size() << " moves\n";
+    for (int i = 0; i < moves.size(); i++)
+        std::cout << moves[i].uci() << std::endl;
+}
 
 void loop() {
-    Position::Position pos("3B4/5R2/3k4/5Q2/1Q6/6B1/3R4/8 w - - 0 1");
-    pos.meta &= ~Position::TURN;
-    Position::print(std::cout, pos);
-    std::vector<Position::Move> asdf;
-    Position::legal_moves(asdf, pos);
-
+    test_stuff();
     printf("\n");
 }
 

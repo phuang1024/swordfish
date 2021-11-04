@@ -224,10 +224,16 @@ void legal_moves(std::vector<Move>& moves, const Position& pos) {
     const UCH kx = kpos & 7, ky = kpos >> 3;
 
     const ULL o_attacks = attacked(pos, !side, true);
+    const ULL checks = checkers(pos, side, kpos, kx, ky, rpieces);
+    const int num_checks = popcnt(checks);
 
-    ULL a = checkers(pos, side, kpos, kx, ky, rpieces);
-    print(std::cout, a);
-    //king_moves(moves, kx, ky, o_attacks);
+    king_moves(moves, kx, ky, o_attacks);
+
+    switch (num_checks) {
+        case 0: break; // no check moves
+        case 1: break; // one check moves
+        default: break; // two check moves
+    }
 }
 
 
