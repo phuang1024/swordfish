@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 #include "config.hpp"
+#include "position.hpp"
 #include "utils.hpp"
 
 #ifdef WITH_TESTING
@@ -36,19 +37,23 @@ void print_info() {
 
 
 void loop() {
-    print_info();
+    Position::Position pos("8/8/8/2k5/3PN3/8/8/8 w - - 0 1");
+    pos.meta &= ~Position::TURN;
+    Position::print(std::cout, pos);
+    std::vector<Position::Move> asdf;
+    Position::legal_moves(asdf, pos);
+
     printf("\n");
 }
 
 
 int main(int argc, char** argv) {
+    print_info();
+
     if (argc >= 2) {
         if (strcmp(argv[1], "--version") == 0) {
-            print_info();
         } else if (strcmp(argv[1], "test") == 0) {
             #ifdef WITH_TESTING
-                if (argc >= 3) Tests::test(argv[2]);
-                else Tests::testall();
             #else
                 std::cerr << "Testing is disabled. Run CMake with -DWITH_TESTING=ON" << std::endl;
                 return 1;

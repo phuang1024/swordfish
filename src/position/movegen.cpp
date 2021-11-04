@@ -149,6 +149,8 @@ ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx,
                 board = bset(board, pos);
         }
     }
+
+    return board;
 }
 
 
@@ -178,12 +180,14 @@ void legal_moves(std::vector<Move>& moves, const Position& pos) {
     }
     const RespectivePieces rpieces(SP, SN, SB, SR, SQ, SK, OP, ON, OB, OR, OQ, OK);
 
-    const UCH kpos = bpos(pos.wk);
+    const UCH kpos = bpos(side ? pos.wk : pos.bk);
     const UCH kx = kpos & 7, ky = kpos >> 3;
 
     const ULL o_attacks = attacked(pos, !side, true);
 
-    king_moves(moves, kx, ky, o_attacks);
+    ULL a = checkers(pos, side, kpos, kx, ky, rpieces);
+    print(std::cout, a);
+    //king_moves(moves, kx, ky, o_attacks);
 }
 
 
