@@ -18,8 +18,12 @@
 //
 
 /**
- * Implementation of search info.
+ * Helper functions.
  */
+
+#include <iterator>
+#include <sstream>
+#include <string>
 
 #include "uci.hpp"
 
@@ -27,12 +31,15 @@
 namespace Uci {
 
 
-void Info::output(std::ostream& fp, const ULL what) {
-    fp << "info ";
-    if (what & I_DEPTH) fp << "depth " << depth << " ";
-    if (what & I_NODES) fp << "nodes " << nodes << " ";
-    if (what & I_NPS)   fp << "nps " << nps << " ";
-    if (what & I_TIME)  fp << "time " << time << " ";
+void get_cmds(std::vector<std::string>& cmds) {
+    std::string input;
+    std::getline(std::cin, input);
+
+    std::istringstream iss(input);
+    std::string word;
+    while (std::getline(iss, word, ' ')) {
+        cmds.push_back(word);
+    }
 }
 
 

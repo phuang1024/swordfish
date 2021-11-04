@@ -18,6 +18,7 @@
 //
 
 #include <iostream>
+#include <vector>
 
 #include "utils.hpp"
 
@@ -34,7 +35,16 @@ constexpr ULL I_TIME  = 1ULL << 3;
 constexpr ULL I_NONE  = 0ULL;
 constexpr ULL I_ALL   = (1ULL << 32) - 1;
 
+/**
+ * Read space separated tokens from std::cin.
+ * Store in cmds argument.
+ */
+void get_cmds(std::vector<std::string>& cmds);
 
+
+/**
+ * UCI search information.
+ */
 struct Info {
     int depth;
     int nodes;

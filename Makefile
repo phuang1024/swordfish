@@ -21,7 +21,7 @@ PY = /usr/bin/env python3
 
 .PHONY: build deps docs
 
-build: deps
+build:
 	mkdir -p ./build; \
 	cd ./build; \
 	cmake ../src -DCMAKE_BUILD_TYPE=Release -DWITH_TESTING=ON -G"Unix Makefiles"; \
