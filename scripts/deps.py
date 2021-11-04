@@ -17,4 +17,35 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-raise ValueError
+import os
+import subprocess
+import shutil
+from typing import Dict
+
+GIT = shutil.which("git")
+assert GIT is not None
+
+DEPS = [
+    {
+        "url": "https://github.com/catchorg/Catch2.git",
+        "commit": "c4e3767e265808590986d5db6ca1b5532a7f3d13",
+    }
+]
+
+PARENT = os.path.dirname(os.path.realpath(__file__))
+LIBS_PATH = os.path.join(os.path.dirname(PARENT), "3rdparty")
+
+
+def setup_lib(lib: Dict[str, str]):
+    basename = os.path.basename(lib["url"]).replace(".git", "")
+    subprocess.Popen([GIT, "clone", lib["url"]], cwd=LIBS_PATH).wait()
+    subprocess.Popen([GIT, "checkout", lib["commit"]], cwd=os.path.join(LIBS_PATH, basename)).wait()
+
+
+def main():
+    os.makedirs(LIBS_PATH, exist_ok=True)
+    for dep in DEPS:
+        setup_lib(dep)
+
+
+main()
