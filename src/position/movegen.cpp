@@ -125,7 +125,7 @@ ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx,
     ULL board = 0;  // pieces that are checking the king
     const ULL pieces = all_pieces(pos);
 
-    // Check pawns
+    // Pawns
     int pawn_offset = (side ? 1 : -1);   // y offset to find attacking pawns
     if ((side && ky < 7) || (!side && ky > 0)) {
         if (kx > 0) {
@@ -136,6 +136,16 @@ ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx,
         if (kx < 7) {
             UCH pos = square(kx+1, ky+pawn_offset);
             if (bit(rpieces.OP, pos))
+                board = bset(board, pos);
+        }
+    }
+
+    // Knights
+    for (int i = 0; i < 8; i++) {
+        const int cx = kx + KNIGHT_OFFSETS[i][0], cy = ky + KNIGHT_OFFSETS[i][1];
+        if (in_board(cx, cy)) {
+            const UCH pos = square(cx, cy);
+            if (bit(rpieces.ON, pos))
                 board = bset(board, pos);
         }
     }
