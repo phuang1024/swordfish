@@ -60,17 +60,17 @@ void attacked_sliding(ULL& board, int x, int y, const ULL pieces, const int dx, 
 }
 
 void attacked_bishop(ULL& board, const int x, const int y, const ULL pieces) {
-    attacked_sliding(board, x, y, pieces, 1, 1);
-    attacked_sliding(board, x, y, pieces, 1, -1);
-    attacked_sliding(board, x, y, pieces, -1, 1);
-    attacked_sliding(board, x, y, pieces, -1, -1);
+    for (int i = 0; i < 4; i++) {
+        const int dx = BISHOP_OFFSETS[i][0], dy = BISHOP_OFFSETS[i][1];
+        attacked_sliding(board, x, y, pieces, dx, dy);
+    }
 }
 
 void attacked_rook(ULL& board, const int x, const int y, const ULL pieces) {
-    attacked_sliding(board, x, y, pieces, 0, 1);
-    attacked_sliding(board, x, y, pieces, 0, -1);
-    attacked_sliding(board, x, y, pieces, 1, 0);
-    attacked_sliding(board, x, y, pieces, -1, 0);
+    for (int i = 0; i < 4; i++) {
+        const int dx = ROOK_OFFSETS[i][0], dy = ROOK_OFFSETS[i][1];
+        attacked_sliding(board, x, y, pieces, dx, dy);
+    }
 }
 
 void attacked_queen(ULL& board, const int x, const int y, const ULL pieces) {
@@ -147,6 +147,46 @@ ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx,
             const UCH pos = square(cx, cy);
             if (bit(rpieces.ON, pos))
                 board = bset(board, pos);
+        }
+    }
+
+    // Bishops and Queens
+    for (int i = 0; i < 4; i++) {
+        const int dx = BISHOP_OFFSETS[i][0], dy = BISHOP_OFFSETS[i][1];
+        int x = kx, y = ky;
+        while (true) {
+            x += dx;
+            y += dy;
+            if (!in_board(x, y))
+                break;
+
+            const UCH pos = square(x, y);
+            if (bit(rpieces.OB, pos) || bit(rpieces.OQ, pos)) {
+                board = bset(board, pos);
+                break;
+            }
+            if (bit(pieces, pos))
+                break;
+        }
+    }
+
+    // Rooks and Queens
+    for (int i = 0; i < 4; i++) {
+        const int dx = ROOK_OFFSETS[i][0], dy = ROOK_OFFSETS[i][1];
+        int x = kx, y = ky;
+        while (true) {
+            x += dx;
+            y += dy;
+            if (!in_board(x, y))
+                break;
+
+            const UCH pos = square(x, y);
+            if (bit(rpieces.OR, pos) || bit(rpieces.OQ, pos)) {
+                board = bset(board, pos);
+                break;
+            }
+            if (bit(pieces, pos))
+                break;
         }
     }
 

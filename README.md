@@ -11,6 +11,15 @@ Swordfish is in development and does not work yet.
 Progress to a working version (best if done in order):
 
 - [ ] Move generation
+    - [ ] Attacks and checks
+    - [ ] King moves
+    - [ ] Single check moves
+    - [ ] Pinned pieces
+    - [ ] Other rules
 - [ ] UCI protocol
 - [ ] Evaluation
+    - [ ] Material
+    - [ ] Piece development
 - [ ] Search
+    - [ ] Alpha beta
+    - [ ] Hash table

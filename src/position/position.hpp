@@ -76,6 +76,14 @@ const char KING_OFFSETS[8][2] = {
     {0, -1}, {0, 1},
     {1, -1}, {1, 0}, {1, 1},
 };
+const char BISHOP_OFFSETS[4][2] = {
+    {-1, -1}, {-1, 1},
+    {1, -1}, {1, 1},
+};
+const char ROOK_OFFSETS[4][2] = {
+    {-1, 0}, {0, -1},
+    {0, 1}, {1, 0},
+};
 
 
 // Helpers

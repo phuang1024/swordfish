@@ -37,7 +37,7 @@ void print_info() {
 
 
 void loop() {
-    Position::Position pos("8/8/8/2k5/3PN3/8/8/8 w - - 0 1");
+    Position::Position pos("3B4/5R2/3k4/5Q2/1Q6/6B1/3R4/8 w - - 0 1");
     pos.meta &= ~Position::TURN;
     Position::print(std::cout, pos);
     std::vector<Position::Move> asdf;
