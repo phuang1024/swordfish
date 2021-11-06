@@ -36,14 +36,14 @@ void print_info() {
 }
 
 void test_stuff() {
-    Position::Position pos("8/b2r4/8/8/2K5/8/8/8 w - - 0 1");
+    Position::Position pos("2r5/8/6N1/8/2K5/8/8/8 w - - 0 1");
     //pos.meta &= ~Position::TURN;
     std::vector<Position::Move> moves;
     Position::legal_moves(moves, pos);
 
     Position::print(std::cout, pos);
     std::cout << moves.size() << " moves\n";
-    for (int i = 0; i < moves.size(); i++)
+    for (int i = 0; i < (int)moves.size(); i++)
         std::cout << moves[i].uci() << std::endl;
 }
 
