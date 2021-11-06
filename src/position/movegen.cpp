@@ -121,9 +121,8 @@ ULL attacked(const Position& pos, const bool side, const bool thru_king) {
 
 
 ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx, const UCH ky,
-             const RespectivePieces& rpieces) {
+             const RespectivePieces& rpieces, const ULL pieces) {
     ULL board = 0;  // pieces that are checking the king
-    const ULL pieces = all_pieces(pos);
 
     // Pawns
     int pawn_offset = (side ? 1 : -1);   // y offset to find attacking pawns
@@ -204,6 +203,28 @@ void king_moves(std::vector<Move>& moves, const UCH kx, const UCH ky, const ULL 
     }
 }
 
+void no_check_moves(std::vector<Move>& moves, const Position& pos, bool side, const ULL same_pieces) {
+    const int pawn_offset = (side ? 1 : -1);
+    const int pawn_promo = (side ? 6 : 1);
+    const int pawn_two_moves = (side ? 1 : 6);
+
+    for (int sq = 0; sq < 64; sq++) {
+        const UCH piece = pos.get_at(sq);
+        if (piece == EMPTY)
+            continue;
+        const int x = sq & 7, y = sq >> 3;
+
+        if (piece == WN || piece == BN) {
+            for (int i = 0; i < 8; i++) {
+                const int cx = x + KNIGHT_OFFSETS[i][0], cy = y + KNIGHT_OFFSETS[i][1];
+                const int curr_sq = square(cx, cy);
+                if (in_board(cx, cy) && nbit(same_pieces, curr_sq))
+                    moves.push_back(Move(sq, curr_sq));
+            }
+        }
+    }
+}
+
 void legal_moves(std::vector<Move>& moves, const Position& pos) {
     moves.clear();
 
@@ -219,18 +240,21 @@ void legal_moves(std::vector<Move>& moves, const Position& pos) {
         OP = pos.wp;  ON = pos.wn;  OB = pos.wb;  OR = pos.wr;  OQ = pos.wq;  OK = pos.wk;
     }
     const RespectivePieces rpieces(SP, SN, SB, SR, SQ, SK, OP, ON, OB, OR, OQ, OK);
+    const ULL pieces = all_pieces(pos);
+    const ULL same_pieces = SP | SN | SB | SR | SQ | SK;
+    const ULL other_pieces = OP | ON | OB | OR | OQ | OK;
 
     const UCH kpos = bpos(side ? pos.wk : pos.bk);
     const UCH kx = kpos & 7, ky = kpos >> 3;
 
     const ULL o_attacks = attacked(pos, !side, true);
-    const ULL checks = checkers(pos, side, kpos, kx, ky, rpieces);
+    const ULL checks = checkers(pos, side, kpos, kx, ky, rpieces, pieces);
     const int num_checks = popcnt(checks);
 
     king_moves(moves, kx, ky, o_attacks);
 
     switch (num_checks) {
-        case 0: break; // no check moves
+        case 0: no_check_moves(moves, pos, side, same_pieces); break; // no check moves
         case 1: break; // one check moves
         default: break; // two check moves
     }
