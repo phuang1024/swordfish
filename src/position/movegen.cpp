@@ -26,6 +26,27 @@
 
 namespace Position {
 
+ULL bb_ray(const char sq1, const char sq2) {
+    const int x1 = sq1 & 7, y1 = sq1 >> 3;
+    const int x2 = sq2 & 7, y2 = sq2 >> 3;
+    const int abs_dx = x2 - x1, abs_dy = y2 - y1;
+
+    const int dx = (abs_dx == 0) ? 0 : (abs_dx > 0 ? 1 : -1);
+    const int dy = (abs_dy == 0) ? 0 : (abs_dy > 0 ? 1 : -1);
+
+    ULL board = 0;
+    int x = x1, y = y1;
+    while (true) {
+        board = bset(board, square(x, y));
+        if (!(x != x2 || y != y2))
+            break;
+        x += dx;
+        y += dy;
+    }
+
+    return board;
+}
+
 
 void attacked_pawn(const bool side, ULL& board, const int x, const int y, const int sq) {
     if (side && y < 7) {
@@ -203,7 +224,7 @@ void king_moves(std::vector<Move>& moves, const UCH kx, const UCH ky, const ULL 
     }
 }
 
-void no_check_moves(std::vector<Move>& moves, const Position& pos, bool side, const ULL same_pieces) {
+void non_king_moves(std::vector<Move>& moves, const Position& pos, bool side, const ULL same_pieces) {
     const int pawn_offset = (side ? 1 : -1);
     const int pawn_promo = (side ? 6 : 1);
     const int pawn_two_moves = (side ? 1 : 6);
@@ -253,10 +274,13 @@ void legal_moves(std::vector<Move>& moves, const Position& pos) {
 
     king_moves(moves, kx, ky, o_attacks);
 
+    if (num_checks < 2) {
+        const ULL capture_mask = ((num_checks == 0) ? ALL : checks);
+        const ULL push_mask = ((num_checks == 0) ? ALL : bb_ray(kpos, bpos(checks)));
+        non_king_moves(moves, pos, side, same_pieces);
+    }
+
     switch (num_checks) {
-        case 0: no_check_moves(moves, pos, side, same_pieces); break; // no check moves
-        case 1: break; // one check moves
-        default: break; // two check moves
     }
 }
 

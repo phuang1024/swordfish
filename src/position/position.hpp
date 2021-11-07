@@ -34,6 +34,7 @@ constexpr char WP = 9, WN = 10, WB = 11, WR = 12, WQ = 13, WK = 14;
 constexpr char BP = 1, BN = 2, BB = 3, BR = 4, BQ = 5, BK = 6;
 
 // Starting bitboards
+constexpr ULL ALL = 18446744073709551615ULL;
 constexpr ULL START_WP = 65280ULL;
 constexpr ULL START_WN = 66ULL;
 constexpr ULL START_WB = 36ULL;
@@ -290,6 +291,14 @@ void print(std::ostream& fp, const ULL board);
 
 
 // Movegen
+
+/**
+ * Bitboard of squares in a line from sq1 to sq2, inclusive.
+ * Assumes they are either "rook like" or "bishop like".
+ * i.e. on the same rank or file or diagonal.
+ * It will run forever otherwise.
+ */
+ULL bb_ray(const char sq1, const char sq2);
 
 /**
  * Get bitboard of attacked pieces.

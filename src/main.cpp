@@ -36,6 +36,10 @@ void print_info() {
 }
 
 void test_stuff() {
+    ULL ray = Position::bb_ray(0, 27);
+    Position::print(std::cout, ray);
+    return;
+
     Position::Position pos("2r5/8/6N1/8/2K5/8/8/8 w - - 0 1");
     //pos.meta &= ~Position::TURN;
     std::vector<Position::Move> moves;
