@@ -224,7 +224,8 @@ void king_moves(std::vector<Move>& moves, const UCH kx, const UCH ky, const ULL 
     }
 }
 
-void non_king_moves(std::vector<Move>& moves, const Position& pos, bool side, const ULL same_pieces) {
+void non_king_moves(std::vector<Move>& moves, const Position& pos, bool side, const ULL same_pieces,
+                    const ULL other_pieces, const ULL capture_mask, const ULL push_mask) {
     const int pawn_offset = (side ? 1 : -1);
     const int pawn_promo = (side ? 6 : 1);
     const int pawn_two_moves = (side ? 1 : 6);
@@ -275,12 +276,20 @@ void legal_moves(std::vector<Move>& moves, const Position& pos) {
     king_moves(moves, kx, ky, o_attacks);
 
     if (num_checks < 2) {
-        const ULL capture_mask = ((num_checks == 0) ? ALL : checks);
-        const ULL push_mask = ((num_checks == 0) ? ALL : bb_ray(kpos, bpos(checks)));
-        non_king_moves(moves, pos, side, same_pieces);
-    }
+        const char check_pos = (num_checks == 1 ? bpos(checks) : -1);
+        ULL capture_mask = ALL, push_mask = ALL;
 
-    switch (num_checks) {
+        if (num_checks == 1) {
+            capture_mask = checks;
+            if (bit(OB|OR|OQ, check_pos)) {
+                push_mask = bb_ray(kpos, check_pos);
+                push_mask = bunset(bunset(push_mask, kpos), check_pos);
+            } else {
+                push_mask = 0;
+            }
+        }
+
+        non_king_moves(moves, pos, side, same_pieces, other_pieces, capture_mask, push_mask);
     }
 }
 
