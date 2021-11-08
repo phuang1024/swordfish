@@ -53,3 +53,16 @@ TEST_CASE("Position: Helper methods", "[pos_helpers]") {
     REQUIRE(Position::char2promo('R') == 2);
     REQUIRE(Position::char2promo('Q') == 3);
 }
+
+
+TEST_CASE("Position: Move generation", "[pos_movegen]") {
+    REQUIRE(Position::bb_ray(9, 36) == 68853957120ULL);
+    REQUIRE(Position::bb_ray(13, 37) == 137977929728ULL);
+
+    Position::Position pos1("8/3r4/4B3/1P6/2K2R2/7P/4Nk2/8 w - - 0 1");
+    Position::Position pos2("8/8/8/p7/2q1K3/6p1/2R5/8 b - - 0 1");
+    REQUIRE(Position::attacked(pos1, true, false) == 6928828910485250116ULL);
+    REQUIRE(Position::attacked(pos1, true, true) == 6928828910502027620ULL);
+    REQUIRE(Position::attacked(pos2, false, false) == 4910072644068357408ULL);
+    REQUIRE(Position::attacked(pos2, false, true) == 4910072647826453792ULL);
+}
