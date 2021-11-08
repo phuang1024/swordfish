@@ -77,7 +77,7 @@ constexpr char POPCNT_TBL[256] = {
  * Position of highest bit.
  * Make sure there is at least one bit set.
  */
-#define  bpos(n)  (63 - __builtin_clzll((n)))
+#define  bpos(n)  (63 - __builtin_clzll((ULL)(n)))
 
 /**
  * Popcnt of ULL

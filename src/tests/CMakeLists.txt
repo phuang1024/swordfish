@@ -17,7 +17,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-set(tests_srcs position.cpp)
+set(tests_srcs position.cpp utils.cpp)
 add_executable(tests ${tests_srcs})
 
 target_link_libraries(tests PUBLIC
