@@ -26,5 +26,5 @@ target_link_libraries(tests PUBLIC
 )
 
 # Setup Catch2
-add_subdirectory(../../3rdparty/Catch2 build)
+add_subdirectory(../../3rdparty/Catch2 ../catch2)
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)

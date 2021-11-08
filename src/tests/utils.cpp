@@ -36,8 +36,8 @@ TEST_CASE("Utils: Bit processing", "[utils_bitproc]") {
     REQUIRE(bpos(128) == 7);
     REQUIRE(bpos(4096) == 12);
 
-    REQUIRE(popcnt(0) == 0);
-    REQUIRE(popcnt(3279492) == 7);
+    REQUIRE(popcnt(0ULL) == 0);
+    REQUIRE(popcnt(3279492ULL) == 7);
 
     REQUIRE(in_board(7, 3));
     REQUIRE(!in_board(4, 8));
