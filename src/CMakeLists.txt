@@ -52,6 +52,7 @@ endif()
 set(submods "")
 list(APPEND submods ${SUBMODS})
 
+target_include_directories(swordfish PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 foreach(submod ${submods})
     add_subdirectory(${submod})
     target_link_libraries(swordfish PUBLIC ${submod})

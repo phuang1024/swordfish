@@ -54,12 +54,6 @@ int main(int argc, char** argv) {
 
     if (argc >= 2) {
         if (strcmp(argv[1], "--version") == 0) {
-        } else if (strcmp(argv[1], "test") == 0) {
-            #ifdef WITH_TESTING
-            #else
-                std::cerr << "Testing is disabled. Run CMake with -DWITH_TESTING=ON" << std::endl;
-                return 1;
-            #endif
         }
     } else {
         loop();
