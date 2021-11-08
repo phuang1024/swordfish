@@ -39,4 +39,5 @@ deps:
 
 docs:
 	cd ./docs; \
-	make html
+	mkdir -p _static _templates; \
+	make html SPHINXOPTS="-W --keep-going"

@@ -28,7 +28,7 @@ assert GIT is not None
 DEPS = [
     {
         "url": "https://github.com/catchorg/Catch2.git",
-        "commit": "devel",
+        "commit": "912df7df354fd6c814b5d7c45ac44f494a5fb5fe",
     }
 ]
 
