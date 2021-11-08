@@ -13,7 +13,7 @@ Progress to a working version (best if done in order):
 - [ ] Move generation
     - [x] Attacks and checks
     - [x] King moves
-    - [ ] Single check moves
+    - [ ] Non king moves
     - [ ] Pinned pieces
     - [ ] Other rules
 - [ ] UCI protocol

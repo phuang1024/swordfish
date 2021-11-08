@@ -17,10 +17,15 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <string>
+#include <catch2/catch_test_macros.hpp>
 
-#define  VMAJOR  @Swordfish_VERSION_MAJOR@
-#define  VMINOR  @Swordfish_VERSION_MINOR@
-#define  VPATCH  @Swordfish_VERSION_PATCH@
 
-const std::string GIT_HASH = "@GIT_HASH@";
+int add_one(int x) {
+    return x + 1;
+}
+
+
+TEST_CASE("Add one to a number", "[add_one]") {
+    REQUIRE(add_one(1) == 2);
+    REQUIRE(add_one(2) == 3);
+}

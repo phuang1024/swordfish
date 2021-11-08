@@ -46,9 +46,9 @@ add_executable(swordfish ${Swordfish_srcs} ${ALL_HEADERS})
 
 # Add libraries
 set(SUBMODS position uci utils)
-#if(WITH_TESTING)
-#    set(SUBMODS ${SUBMODS} tests)
-#endif()
+if(WITH_TESTING)
+    add_subdirectory(tests)
+endif()
 set(submods "")
 list(APPEND submods ${SUBMODS})
 
@@ -59,12 +59,3 @@ endforeach()
 
 # Installation
 install(TARGETS swordfish DESTINATION bin)
-
-# Testing
-add_test(NAME pos_methods COMMAND swordfish test pos_methods)
-add_test(NAME pos_helpers COMMAND swordfish test pos_helpers)
-add_test(NAME pos_fen     COMMAND swordfish test pos_fen)
-add_test(NAME pos_movegen COMMAND swordfish test pos_movegen)
-if(WITH_TESTING)
-    enable_testing()
-endif()

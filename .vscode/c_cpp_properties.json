@@ -5,6 +5,7 @@
             "includePath": [
                 "build",  // for config.hpp
                 "src/**",
+                "3rdparty/Catch2/src",
                 "${default}"
             ]
         }

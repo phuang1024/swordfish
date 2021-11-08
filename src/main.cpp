@@ -25,10 +25,6 @@
 #include "position.hpp"
 #include "utils.hpp"
 
-#ifdef WITH_TESTING
-    #include "tests.hpp"
-#endif
-
 
 void print_info() {
     printf("Swordfish v%d.%d.%d - Free and open source chess engine.\n", VMAJOR, VMINOR, VPATCH);
