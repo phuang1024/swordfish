@@ -18,13 +18,20 @@
 #
 
 PY = /usr/bin/env python3
+CMAKE_FLAGS = -G"Unix Makefiles"
 
-.PHONY: build deps docs
+.PHONY: release debug deps docs
 
-build:
+release:
 	mkdir -p ./build; \
 	cd ./build; \
-	cmake ../src -DCMAKE_BUILD_TYPE=Release -DWITH_TESTING=ON -G"Unix Makefiles"; \
+	cmake ../src -DCMAKE_BUILD_TYPE=Release $(CMAKE_FLAGS); \
+	make -j`nproc`
+
+debug: deps
+	mkdir -p ./build; \
+	cd ./build; \
+	cmake ../src -DCMAKE_BUILD_TYPE=Debug -DWITH_TESTING=ON $(CMAKE_FLAGS); \
 	make -j`nproc`
 
 deps:
