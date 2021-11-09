@@ -17,7 +17,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-set(uci_srcs info.cpp)
+set(uci_srcs functions.cpp info.cpp)
 add_library(uci ${uci_srcs})
 
 target_include_directories(uci INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -95,15 +95,13 @@ ULL attacked(const Position& pos, ULL spieces, ULL opieces, bool side, bool thru
 
     ULL board = 0;
     for (int sq = 0; sq < 64; sq++) {
-        const int x = sq & 7, y = sq >> 3;
         const char piece = pos.get_at(sq);
-
+        if (piece == EMPTY)
+            continue;
         if ((bool)(piece & 8) != side)  // piece is wrong color
             continue;
 
-        if (piece == EMPTY) {  // check this first so continue earlier.
-            continue;
-        }
+        const int x = sq & 7, y = sq >> 3;
 
         if (piece == WP || piece == BP) {
             if (side && y < 7) {
@@ -242,16 +240,11 @@ void non_king_moves(std::vector<Move>& moves, const Position& pos, bool side, co
         const UCH piece = pos.get_at(sq);
         if (piece == EMPTY)
             continue;
+        if ((bool)(piece & 8) != side)  // piece is wrong color
+            continue;
+
         const int x = sq & 7, y = sq >> 3;
 
-        if (piece == WN || piece == BN) {
-            for (int i = 0; i < 8; i++) {
-                const int cx = x + KNIGHT_OFFSETS[i][0], cy = y + KNIGHT_OFFSETS[i][1];
-                const int curr_sq = square(cx, cy);
-                if (in_board(cx, cy) && nbit(spieces, curr_sq))
-                    moves.push_back(Move(sq, curr_sq));
-            }
-        }
     }
 }
 

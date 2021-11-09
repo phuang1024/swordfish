@@ -23,12 +23,13 @@
 
 #include "config.hpp"
 #include "position.hpp"
+#include "uci.hpp"
 #include "utils.hpp"
 
 
 void print_info() {
-    printf("Swordfish v%d.%d.%d - Free and open source chess engine.\n", VMAJOR, VMINOR, VPATCH);
-    printf("Swordfish is distributed under the GNU GPL v3 license.\n");
+    printf("Swordfish v%d.%d.%d: A free and open source chess engine.\n", VMAJOR, VMINOR, VPATCH);
+    printf("Swordfish is licensed under the GNU GPL v3 license.\n");
 }
 
 void test_stuff() {
@@ -44,18 +45,31 @@ void test_stuff() {
 }
 
 void loop() {
-    test_stuff();
-    printf("\n");
+    bool run = true;
+
+    while (run) {
+        std::vector<std::string> cmds;
+        if (!Uci::get_cmds(cmds))
+            break;
+        int num = cmds.size();
+
+        if (num >= 1) {
+            if (cmds[0] == "quit") {
+                run = false;
+            } else if (cmds[0] == "isready") {
+                std::cout << "readyok" << std::endl;
+            } else if (cmds[0] == "uci") {
+                // print uci options
+                std::cout << "uciok" << std::endl;
+            }
+        }
+    }
+
+    // Deallocation
 }
 
 
 int main(int argc, char** argv) {
     print_info();
-
-    if (argc >= 2) {
-        if (strcmp(argv[1], "--version") == 0) {
-        }
-    } else {
-        loop();
-    }
+    loop();
 }

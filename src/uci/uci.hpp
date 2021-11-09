@@ -39,7 +39,7 @@ constexpr ULL I_ALL   = (1ULL << 32) - 1;
  * Read space separated tokens from std::cin.
  * Store in cmds argument.
  */
-void get_cmds(std::vector<std::string>& cmds);
+bool get_cmds(std::vector<std::string>& cmds);
 
 
 /**

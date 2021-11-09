@@ -31,15 +31,19 @@
 namespace Uci {
 
 
-void get_cmds(std::vector<std::string>& cmds) {
+bool get_cmds(std::vector<std::string>& cmds) {
+    cmds.clear();
     std::string input;
-    std::getline(std::cin, input);
+    if (!std::getline(std::cin, input))
+        return false;
 
     std::istringstream iss(input);
     std::string word;
     while (std::getline(iss, word, ' ')) {
         cmds.push_back(word);
     }
+
+    return true;
 }
 
 
