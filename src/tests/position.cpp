@@ -67,4 +67,11 @@ TEST_CASE("Position: Move generation", "[pos_movegen]") {
     REQUIRE(Position::attacked(pos1, resp1.SAME, resp1.OTHER, true, true) == 6928828910502027620ULL);
     REQUIRE(Position::attacked(pos2, resp2.SAME, resp2.OTHER, false, false) == 4910072644068357408ULL);
     REQUIRE(Position::attacked(pos2, resp2.SAME, resp2.OTHER, false, true) == 4910072647826453792ULL);
+
+    Position::Position pos3("8/8/2B5/3kP1R1/1BP5/4N3/8/3Q4 b - - 0 1");
+    Position::Position pos4("8/3p4/rNK1n3/8/2r1b3/8/2q5/8 w - - 0 1");
+    Position::RespectivePieces resp3(pos3);
+    Position::RespectivePieces resp4(pos4);
+    REQUIRE(Position::checkers(pos3, false, 3, 4, resp3) == 4398114668552ULL);
+    REQUIRE(Position::checkers(pos4, true, 2, 5, resp4) == 2251800149229568ULL);
 }

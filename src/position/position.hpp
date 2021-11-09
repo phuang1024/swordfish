@@ -328,8 +328,7 @@ ULL attacked(const Position& pos, ULL spieces, ULL opieces, bool side, bool thru
  * Generate a bitboard of opponent pieces checking the king (respect to side).
  * @param side true = pieces checking white's king.
  */
-ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx, const UCH ky,
-             const RespectivePieces& rpieces);
+ULL checkers(const Position& pos, bool side, UCH kx, UCH ky, const RespectivePieces& rpieces);
 
 /**
  * Generate legal moves and store in moves.

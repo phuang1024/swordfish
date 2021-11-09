@@ -57,9 +57,10 @@ ULL bb_ray(const char sq1, const char sq2) {
  * @param inc_start whether to include starting square.
  * @param inc_end_sp whether to include ending square when hitting a same side piece.
  * @param inc_end_op whether to include ending square when hitting a other side piece.
+ * @param inc_mid whether to include middle pieces.
  */
 void bb_sliding(ULL& board, int x, int y, int dx, int dy, ULL sp, ULL op, bool inc_start,
-                bool inc_end_sp, bool inc_end_op) {
+                bool inc_end_sp, bool inc_end_op, bool inc_mid) {
     if (inc_start)
         board = bset(board, square(x, y));
 
@@ -80,7 +81,9 @@ void bb_sliding(ULL& board, int x, int y, int dx, int dy, ULL sp, ULL op, bool i
                 board = bset(board, sq);
             break;
         }
-        board = bset(board, sq);
+
+        if (inc_mid)
+            board = bset(board, sq);
     }
 }
 
@@ -123,14 +126,14 @@ ULL attacked(const Position& pos, ULL spieces, ULL opieces, bool side, bool thru
         if (piece == WB || piece == BB || piece == WQ || piece == BQ) {
             for (int i = 0; i < 4; i++) {
                 const int dx = BISHOP_OFFSETS[i][0], dy = BISHOP_OFFSETS[i][1];
-                bb_sliding(board, x, y, dx, dy, spieces, opieces, false, true, true);
+                bb_sliding(board, x, y, dx, dy, spieces, opieces, false, true, true, true);
             }
         }
 
         if (piece == WR || piece == BR || piece == WQ || piece == BQ) {
             for (int i = 0; i < 4; i++) {
                 const int dx = ROOK_OFFSETS[i][0], dy = ROOK_OFFSETS[i][1];
-                bb_sliding(board, x, y, dx, dy, spieces, opieces, false, true, true);
+                bb_sliding(board, x, y, dx, dy, spieces, opieces, false, true, true, true);
             }
         }
 
@@ -147,8 +150,7 @@ ULL attacked(const Position& pos, ULL spieces, ULL opieces, bool side, bool thru
 }
 
 
-ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx, const UCH ky,
-             const RespectivePieces& rpieces, const ULL pieces) {
+ULL checkers(const Position& pos, bool side, UCH kx, UCH ky, const RespectivePieces& rpieces) {
     ULL board = 0;  // pieces that are checking the king
 
     // Pawns
@@ -191,7 +193,7 @@ ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx,
                 board = bset(board, pos);
                 break;
             }
-            if (bit(pieces, pos))
+            if (bit(rpieces.ALL, pos))
                 break;
         }
     }
@@ -211,7 +213,7 @@ ULL checkers(const Position& pos, const bool side, const UCH kpos, const UCH kx,
                 board = bset(board, pos);
                 break;
             }
-            if (bit(pieces, pos))
+            if (bit(rpieces.ALL, pos))
                 break;
         }
     }
@@ -263,7 +265,7 @@ void legal_moves(std::vector<Move>& moves, const Position& pos) {
     const UCH kx = kpos & 7, ky = kpos >> 3;
 
     const ULL o_attacks = attacked(pos, rpieces.SAME, rpieces.OTHER, !side, true);
-    const ULL checks = checkers(pos, side, kpos, kx, ky, rpieces, rpieces.ALL);
+    const ULL checks = checkers(pos, side, kx, ky, rpieces);
     const int num_checks = popcnt(checks);
 
     king_moves(moves, kx, ky, o_attacks);
