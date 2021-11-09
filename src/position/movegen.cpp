@@ -26,6 +26,7 @@
 
 namespace Position {
 
+
 ULL bb_ray(const char sq1, const char sq2) {
     const int x1 = sq1 & 7, y1 = sq1 >> 3;
     const int x2 = sq2 & 7, y2 = sq2 >> 3;
@@ -48,24 +49,6 @@ ULL bb_ray(const char sq1, const char sq2) {
 }
 
 
-void attacked_pawn(const bool side, ULL& board, const int x, const int y, const int sq) {
-    if (side && y < 7) {
-        if (x > 0) board = bset(board, sq+7);
-        if (x < 7) board = bset(board, sq+9);
-    } else if (!side && y > 0) {
-        if (x > 0) board = bset(board, sq-9);
-        if (x < 7) board = bset(board, sq-7);
-    }
-}
-
-void attacked_knight(ULL& board, const int x, const int y) {
-    for (int i = 0; i < 8; i++) {
-        const int cx = x + KNIGHT_OFFSETS[i][0], cy = y + KNIGHT_OFFSETS[i][1];
-        if (in_board(cx, cy))
-            board = bset(board, cx + (cy<<3));
-    }
-}
-
 void attacked_sliding(ULL& board, int x, int y, const ULL pieces, const int dx, const int dy) {
     while (true) {
         x += dx;
@@ -77,33 +60,6 @@ void attacked_sliding(ULL& board, int x, int y, const ULL pieces, const int dx, 
         board = bset(board, sq);
         if (bit(pieces, sq))
             break;
-    }
-}
-
-void attacked_bishop(ULL& board, const int x, const int y, const ULL pieces) {
-    for (int i = 0; i < 4; i++) {
-        const int dx = BISHOP_OFFSETS[i][0], dy = BISHOP_OFFSETS[i][1];
-        attacked_sliding(board, x, y, pieces, dx, dy);
-    }
-}
-
-void attacked_rook(ULL& board, const int x, const int y, const ULL pieces) {
-    for (int i = 0; i < 4; i++) {
-        const int dx = ROOK_OFFSETS[i][0], dy = ROOK_OFFSETS[i][1];
-        attacked_sliding(board, x, y, pieces, dx, dy);
-    }
-}
-
-void attacked_queen(ULL& board, const int x, const int y, const ULL pieces) {
-    attacked_bishop(board, x, y, pieces);
-    attacked_rook(board, x, y, pieces);
-}
-
-void attacked_king(ULL& board, const int x, const int y) {
-    for (int i = 0; i < 8; i++) {
-        const int cx = x + KING_OFFSETS[i][0], cy = y + KING_OFFSETS[i][1];
-        if (in_board(cx, cy))
-            board = bset(board, square(cx, cy));
     }
 }
 
@@ -121,20 +77,49 @@ ULL attacked(const Position& pos, const bool side, const bool thru_king) {
         if ((bool)(piece & 8) != side)  // piece is wrong color
             continue;
 
-        if (piece == EMPTY)  // check this first so continue earlier.
+        if (piece == EMPTY) {  // check this first so continue earlier.
             continue;
-        else if (piece == WP || piece == BP)
-            attacked_pawn(side, board, x, y, sq);
-        else if (piece == WN || piece == BN)
-            attacked_knight(board, x, y);
-        else if (piece == WB || piece == BB)
-            attacked_bishop(board, x, y, pieces);
-        else if (piece == WR || piece == BR)
-            attacked_rook(board, x, y, pieces);
-        else if (piece == WQ || piece == BQ)
-            attacked_queen(board, x, y, pieces);
-        else if (piece == WK || piece == BK)
-            attacked_king(board, x, y);
+        }
+
+        if (piece == WP || piece == BP) {
+            if (side && y < 7) {
+                if (x > 0) board = bset(board, sq+7);
+                if (x < 7) board = bset(board, sq+9);
+            } else if (!side && y > 0) {
+                if (x > 0) board = bset(board, sq-9);
+                if (x < 7) board = bset(board, sq-7);
+            }
+        }
+
+        if (piece == WN || piece == BN) {
+            for (int i = 0; i < 8; i++) {
+                const int cx = x + KNIGHT_OFFSETS[i][0], cy = y + KNIGHT_OFFSETS[i][1];
+                if (in_board(cx, cy))
+                    board = bset(board, square(cx, cy));
+            }
+        }
+
+        if (piece == WB || piece == BB || piece == WQ || piece == BQ) {
+            for (int i = 0; i < 4; i++) {
+                const int dx = BISHOP_OFFSETS[i][0], dy = BISHOP_OFFSETS[i][1];
+                attacked_sliding(board, x, y, pieces, dx, dy);
+            }
+        }
+
+        if (piece == WR || piece == BR || piece == WQ || piece == BQ) {
+            for (int i = 0; i < 4; i++) {
+                const int dx = ROOK_OFFSETS[i][0], dy = ROOK_OFFSETS[i][1];
+                attacked_sliding(board, x, y, pieces, dx, dy);
+            }
+        }
+
+        if (piece == WK || piece == BK) {
+            for (int i = 0; i < 8; i++) {
+                const int cx = x + KING_OFFSETS[i][0], cy = y + KING_OFFSETS[i][1];
+                if (in_board(cx, cy))
+                    board = bset(board, square(cx, cy));
+            }
+        }
     }
 
     return board;
