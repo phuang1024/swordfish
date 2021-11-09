@@ -280,8 +280,25 @@ RespectivePieces::RespectivePieces() {
     OP = ON = OB = OR = OQ = OK = 0;
 }
 
+RespectivePieces::RespectivePieces(const Position& pos) {
+    ULL SP, SN, SB, SR, SQ, SK, OP, ON, OB, OR, OQ, OK;
+    if (pos.meta & TURN) {  // yes this is bad style
+        SP = pos.wp;  SN = pos.wn;  SB = pos.wb;  SR = pos.wr;  SQ = pos.wq;  SK = pos.wk;
+        OP = pos.bp;  ON = pos.bn;  OB = pos.bb;  OR = pos.br;  OQ = pos.bq;  OK = pos.bk;
+    } else {
+        SP = pos.bp;  SN = pos.bn;  SB = pos.bb;  SR = pos.br;  SQ = pos.bq;  SK = pos.bk;
+        OP = pos.wp;  ON = pos.wn;  OB = pos.wb;  OR = pos.wr;  OQ = pos.wq;  OK = pos.wk;
+    }
+    init(SP, SN, SB, SR, SQ, SK, OP, ON, OB, OR, OQ, OK);
+}
+
 RespectivePieces::RespectivePieces(ULL SP, ULL SN, ULL SB, ULL SR, ULL SQ, ULL SK,
                                    ULL OP, ULL ON, ULL OB, ULL OR, ULL OQ, ULL OK) {
+    init(SP, SN, SB, SR, SQ, SK, OP, ON, OB, OR, OQ, OK);
+}
+
+void RespectivePieces::init(ULL SP, ULL SN, ULL SB, ULL SR, ULL SQ, ULL SK,
+                            ULL OP, ULL ON, ULL OB, ULL OR, ULL OQ, ULL OK) {
     this->SP = SP;
     this->SN = SN;
     this->SB = SB;
@@ -294,6 +311,9 @@ RespectivePieces::RespectivePieces(ULL SP, ULL SN, ULL SB, ULL SR, ULL SQ, ULL S
     this->OR = OR;
     this->OQ = OQ;
     this->OK = OK;
+    SAME = SP | SN | SB | SR | SQ | SK;
+    OTHER = OP | ON | OB | OR | OQ | OK;
+    ALL = SAME | OTHER;
 }
 
 

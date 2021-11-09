@@ -49,7 +49,20 @@ ULL bb_ray(const char sq1, const char sq2) {
 }
 
 
-void attacked_sliding(ULL& board, int x, int y, const ULL pieces, const int dx, const int dy) {
+/**
+ * Generate squares of sliding piece and store in board.
+ * Starts at (x, y). Moves with offset (dx, dy).
+ * @param sp bitboard of same side pieces.
+ * @param op bitboard of other side pieces.
+ * @param inc_start whether to include starting square.
+ * @param inc_end_sp whether to include ending square when hitting a same side piece.
+ * @param inc_end_op whether to include ending square when hitting a other side piece.
+ */
+void bb_sliding(ULL& board, int x, int y, int dx, int dy, ULL sp, ULL op, bool inc_start,
+                bool inc_end_sp, bool inc_end_op) {
+    if (inc_start)
+        board = bset(board, square(x, y));
+
     while (true) {
         x += dx;
         y += dy;
@@ -57,19 +70,27 @@ void attacked_sliding(ULL& board, int x, int y, const ULL pieces, const int dx, 
             break;
 
         const char sq = square(x, y);
-        board = bset(board, sq);
-        if (bit(pieces, sq))
+        if (bit(sp, sq)) {
+            if (inc_end_sp)
+                board = bset(board, sq);
             break;
+        }
+        if (bit(op, sq)) {
+            if (inc_end_op)
+                board = bset(board, sq);
+            break;
+        }
+        board = bset(board, sq);
     }
 }
 
-ULL attacked(const Position& pos, const bool side, const bool thru_king) {
-    ULL pieces = all_pieces(pos);
-    if (thru_king)
-        pieces &= ~pos.wk & ~pos.bk;
+ULL attacked(const Position& pos, ULL spieces, ULL opieces, bool side, bool thru_king) {
+    if (thru_king) {
+        spieces &= ~pos.wk & ~pos.bk;
+        opieces &= ~pos.wk & ~pos.bk;
+    }
 
     ULL board = 0;
-
     for (int sq = 0; sq < 64; sq++) {
         const int x = sq & 7, y = sq >> 3;
         const char piece = pos.get_at(sq);
@@ -102,14 +123,14 @@ ULL attacked(const Position& pos, const bool side, const bool thru_king) {
         if (piece == WB || piece == BB || piece == WQ || piece == BQ) {
             for (int i = 0; i < 4; i++) {
                 const int dx = BISHOP_OFFSETS[i][0], dy = BISHOP_OFFSETS[i][1];
-                attacked_sliding(board, x, y, pieces, dx, dy);
+                bb_sliding(board, x, y, dx, dy, spieces, opieces, false, true, true);
             }
         }
 
         if (piece == WR || piece == BR || piece == WQ || piece == BQ) {
             for (int i = 0; i < 4; i++) {
                 const int dx = ROOK_OFFSETS[i][0], dy = ROOK_OFFSETS[i][1];
-                attacked_sliding(board, x, y, pieces, dx, dy);
+                bb_sliding(board, x, y, dx, dy, spieces, opieces, false, true, true);
             }
         }
 
@@ -209,8 +230,8 @@ void king_moves(std::vector<Move>& moves, const UCH kx, const UCH ky, const ULL 
     }
 }
 
-void non_king_moves(std::vector<Move>& moves, const Position& pos, bool side, const ULL same_pieces,
-                    const ULL other_pieces, const ULL capture_mask, const ULL push_mask) {
+void non_king_moves(std::vector<Move>& moves, const Position& pos, bool side, const ULL spieces,
+                    const ULL opieces, const ULL capture_mask, const ULL push_mask) {
     const int pawn_offset = (side ? 1 : -1);
     const int pawn_promo = (side ? 6 : 1);
     const int pawn_two_moves = (side ? 1 : 6);
@@ -225,7 +246,7 @@ void non_king_moves(std::vector<Move>& moves, const Position& pos, bool side, co
             for (int i = 0; i < 8; i++) {
                 const int cx = x + KNIGHT_OFFSETS[i][0], cy = y + KNIGHT_OFFSETS[i][1];
                 const int curr_sq = square(cx, cy);
-                if (in_board(cx, cy) && nbit(same_pieces, curr_sq))
+                if (in_board(cx, cy) && nbit(spieces, curr_sq))
                     moves.push_back(Move(sq, curr_sq));
             }
         }
@@ -236,26 +257,13 @@ void legal_moves(std::vector<Move>& moves, const Position& pos) {
     moves.clear();
 
     const bool side = pos.meta & TURN;
-
-    // SP = same side pawns. ON = other side knights.
-    ULL SP, SN, SB, SR, SQ, SK, OP, ON, OB, OR, OQ, OK;
-    if (side) {  // yes this is bad style
-        SP = pos.wp;  SN = pos.wn;  SB = pos.wb;  SR = pos.wr;  SQ = pos.wq;  SK = pos.wk;
-        OP = pos.bp;  ON = pos.bn;  OB = pos.bb;  OR = pos.br;  OQ = pos.bq;  OK = pos.bk;
-    } else {
-        SP = pos.bp;  SN = pos.bn;  SB = pos.bb;  SR = pos.br;  SQ = pos.bq;  SK = pos.bk;
-        OP = pos.wp;  ON = pos.wn;  OB = pos.wb;  OR = pos.wr;  OQ = pos.wq;  OK = pos.wk;
-    }
-    const RespectivePieces rpieces(SP, SN, SB, SR, SQ, SK, OP, ON, OB, OR, OQ, OK);
-    const ULL pieces = all_pieces(pos);
-    const ULL same_pieces = SP | SN | SB | SR | SQ | SK;
-    const ULL other_pieces = OP | ON | OB | OR | OQ | OK;
+    const RespectivePieces rpieces(pos);
 
     const UCH kpos = bpos(side ? pos.wk : pos.bk);
     const UCH kx = kpos & 7, ky = kpos >> 3;
 
-    const ULL o_attacks = attacked(pos, !side, true);
-    const ULL checks = checkers(pos, side, kpos, kx, ky, rpieces, pieces);
+    const ULL o_attacks = attacked(pos, rpieces.SAME, rpieces.OTHER, !side, true);
+    const ULL checks = checkers(pos, side, kpos, kx, ky, rpieces, rpieces.ALL);
     const int num_checks = popcnt(checks);
 
     king_moves(moves, kx, ky, o_attacks);
@@ -266,7 +274,7 @@ void legal_moves(std::vector<Move>& moves, const Position& pos) {
 
         if (num_checks == 1) {
             capture_mask = checks;
-            if (bit(OB|OR|OQ, check_pos)) {
+            if (bit(rpieces.OB|rpieces.OR|rpieces.OQ, check_pos)) {
                 push_mask = bb_ray(kpos, check_pos);
                 push_mask = bunset(bunset(push_mask, kpos), check_pos);
             } else {
@@ -274,7 +282,7 @@ void legal_moves(std::vector<Move>& moves, const Position& pos) {
             }
         }
 
-        non_king_moves(moves, pos, side, same_pieces, other_pieces, capture_mask, push_mask);
+        non_king_moves(moves, pos, side, rpieces.SAME, rpieces.OTHER, capture_mask, push_mask);
     }
 }
 

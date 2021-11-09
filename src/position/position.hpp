@@ -212,6 +212,7 @@ struct Position {
 
 /**
  * Contain same side bitboards and other side bitboards.
+ * DO NOT EDIT any member variables, as they are not synced.
  */
 struct RespectivePieces {
     /**
@@ -225,15 +226,31 @@ struct RespectivePieces {
     ULL OP, ON, OB, OR, OQ, OK;
 
     /**
+     * Other bitboards
+     */
+    ULL SAME, OTHER, ALL;
+
+    /**
      * Set all bitboards to 0.
      */
     RespectivePieces();
+
+    /**
+     * Initialize from a Position.
+     */
+    RespectivePieces(const Position& pos);
 
     /**
      * Set bitboards to passed in bitboards.
      */
     RespectivePieces(ULL SP, ULL SN, ULL SB, ULL SR, ULL SQ, ULL SK,
                      ULL OP, ULL ON, ULL OB, ULL OR, ULL OQ, ULL OK);
+
+    /**
+     * Set bitboards to passed in bitboards.
+     */
+    void init(ULL SP, ULL SN, ULL SB, ULL SR, ULL SQ, ULL SK,
+              ULL OP, ULL ON, ULL OB, ULL OR, ULL OQ, ULL OK);
 };
 
 /**
@@ -305,7 +322,7 @@ ULL bb_ray(const char sq1, const char sq2);
  * @param side true = white's attacks.
  * @param thru_king true = sliding pieces move through king (doesn't ignore king attacks though)
  */
-ULL attacked(const Position& pos, const bool side, const bool thru_king = false);
+ULL attacked(const Position& pos, ULL spieces, ULL opieces, bool side, bool thru_king);
 
 /**
  * Generate a bitboard of opponent pieces checking the king (respect to side).
