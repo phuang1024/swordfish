@@ -45,7 +45,7 @@ set(Swordfish_srcs main.cpp)
 add_executable(swordfish ${Swordfish_srcs} ${ALL_HEADERS})
 
 # Add libraries
-set(SUBMODS position uci utils)
+set(SUBMODS eval position search uci utils)
 if(WITH_TESTING)
     add_subdirectory(tests)
 endif()

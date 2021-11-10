@@ -17,14 +17,13 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-
 #include "eval.hpp"
 
 
 namespace Eval {
 
 
-void material(const Position::Position& position) {
+void eval(const Position::Position& position) {
 }
 
     

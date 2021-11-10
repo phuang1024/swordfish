@@ -17,7 +17,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-set(eval_srcs material.cpp)
+set(eval_srcs eval.cpp material.cpp)
 add_library(eval ${eval_srcs})
 
 target_include_directories(eval INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

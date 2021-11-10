@@ -23,7 +23,9 @@
 namespace Eval {
 
 
-void eval(Position::Position& pos);
+void eval(const Position::Position& pos);
+
+void material(const Position::Position& pos);
 
 
 }  // namespace Eval

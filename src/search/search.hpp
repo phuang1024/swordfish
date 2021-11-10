@@ -18,14 +18,10 @@
 //
 
 
-#include "eval.hpp"
+namespace Search {
 
 
-namespace Eval {
 
 
-void material(const Position::Position& position) {
-}
 
-    
-}  // namespace Eval
+}  // namespace Search

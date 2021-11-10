@@ -17,15 +17,13 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-
-#include "eval.hpp"
-
-
-namespace Eval {
+#include "search.hpp"
 
 
-void material(const Position::Position& position) {
-}
+namespace Search {
+
+
+
 
     
-}  // namespace Eval
+}  // namespace Search

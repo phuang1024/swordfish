@@ -17,7 +17,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-set(search_srcs)
+set(search_srcs search.cpp)
 add_library(search ${search_srcs})
 
 target_include_directories(search INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
