@@ -208,6 +208,11 @@ struct Position {
      * Get the FEN for the current position.
      */
     std::string fen() const;
+
+    /**
+     * Make a move on the board.
+     */
+    void push(const Move& move);
 };
 
 /**
