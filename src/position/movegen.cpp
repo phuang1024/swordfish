@@ -220,6 +220,9 @@ ULL checkers(const Position& pos, bool side, UCH kx, UCH ky, const RespectivePie
 }
 
 
+/**
+ * Possible king moves. Takes into account check.
+ */
 void king_moves(std::vector<Move>& moves, const UCH kx, const UCH ky, const ULL attacks) {
     const int from = square(kx, ky);
     for (int i = 0; i < 8; i++) {
@@ -230,6 +233,11 @@ void king_moves(std::vector<Move>& moves, const UCH kx, const UCH ky, const ULL 
     }
 }
 
+/**
+ * Moves that are not king.
+ * Takes into account pins, checks, and en passant, ...
+ * But NOT castling.
+ */
 void non_king_moves(std::vector<Move>& moves, const Position& pos, bool side, const ULL spieces,
                     const ULL opieces, const ULL capture_mask, const ULL push_mask) {
     const int pawn_offset = (side ? 1 : -1);
