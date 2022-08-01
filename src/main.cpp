@@ -1,8 +1,10 @@
 #include <iostream>
 
 #include "config.hpp"
+#include "position.hpp"
 
 
 int main() {
-    std::cout << VERSION_MAJOR << '.' << VERSION_MINOR << '.' << VERSION_PATCH << std::endl;
+    Position pos;
+    std::cout << pos << std::endl;
 }
