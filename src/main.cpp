@@ -1,6 +1,8 @@
-#include <stdio.h>
+#include <iostream>
+
+#include "config.hpp"
 
 
 int main() {
-    printf("asdf\n");
+    std::cout << VERSION_MAJOR << '.' << VERSION_MINOR << '.' << VERSION_PATCH << std::endl;
 }

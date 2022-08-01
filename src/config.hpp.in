@@ -1,0 +1,3 @@
+#define  VERSION_MAJOR  @swordfish_VERSION_MAJOR@
+#define  VERSION_MINOR  @swordfish_VERSION_MINOR@
+#define  VERSION_PATCH  @swordfish_VERSION_PATCH@
