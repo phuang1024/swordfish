@@ -120,8 +120,13 @@ public:
         this->to = to;
     }
 
-    inline std::string uci() {
+    inline std::string uci() const {
         return Ascii::square_str(from) + Ascii::square_str(to);
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Move& move) {
+        os << move.uci();
+        return os;
     }
 };
 
@@ -194,7 +199,8 @@ public:
         if (Bit::get(br, pos)) return br;
         if (Bit::get(bq, pos)) return bq;
         if (Bit::get(bk, pos)) return bk;
-        throw "sfutils:Position:piece_bb: no piece at position";
+        std::cerr << "sfutils:Position:piece_bb: no piece at position " << pos << std::endl;
+        throw 0;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Position& pos);
