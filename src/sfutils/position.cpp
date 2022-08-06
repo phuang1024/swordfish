@@ -25,8 +25,8 @@ std::ostream& operator<<(std::ostream& os, const Position& pos) {
         print_row(os);
         for (int x = 0; x < 8; x++) {
             print_sep(os);
-            // TODO print piece char
-            os << ' ';
+            char ch = piece_char(pos.piece_at(square(x, y)));
+            os << ch;
         }
         print_sep(os);
         os << y+1 << '\n';

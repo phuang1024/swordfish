@@ -8,7 +8,7 @@ using ull = unsigned long long;
 constexpr bool WHITE = true,
                BLACK = false;
 
-// Piece types and empty
+// Piece codes.
 constexpr int EMPTY = 0,
               WP = 1,
               WN = 2,
@@ -22,6 +22,36 @@ constexpr int EMPTY = 0,
               BR = 10,
               BQ = 11,
               BK = 12;
+
+
+/**
+ * Bit manipulation functions.
+ */
+namespace Bit {
+    inline ull mask(int i) {
+        return 1ULL << i;
+    }
+
+    inline bool get(ull b, int i) {
+        return b & mask(i);
+    }
+
+    inline ull set(ull b, int i) {
+        return b | mask(i);
+    }
+
+    inline ull unset(ull b, int i) {
+        return b & ~mask(i);
+    }
+}
+
+
+/**
+ * Convert X, Y to square code.
+ */
+inline int square(int x, int y) {
+    return x + 8 * y;
+}
 
 
 /**
@@ -48,6 +78,7 @@ inline char piece_char(int piece) {
 
 /**
  * Chess position using bitboards.
+ * Square numbers: 0 = A1, 1 = A2, ..., 63 = H8.
  */
 class Position {
 public:
@@ -63,8 +94,20 @@ public:
     /**
      * Get piece code at position.
      */
-    int piece_at(int pos) const {
-        //TODO
+    inline int piece_at(int pos) const {
+        if (Bit::get(wp, pos)) return WP;
+        if (Bit::get(wn, pos)) return WN;
+        if (Bit::get(wb, pos)) return WB;
+        if (Bit::get(wr, pos)) return WR;
+        if (Bit::get(wq, pos)) return WQ;
+        if (Bit::get(wk, pos)) return WK;
+        if (Bit::get(bp, pos)) return BP;
+        if (Bit::get(bn, pos)) return BN;
+        if (Bit::get(bb, pos)) return BB;
+        if (Bit::get(br, pos)) return BR;
+        if (Bit::get(bq, pos)) return BQ;
+        if (Bit::get(bk, pos)) return BK;
+        return EMPTY;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Position& pos);
