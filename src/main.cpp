@@ -1,7 +1,6 @@
 #include <iostream>
 
-#include "config.hpp"
-#include "position.hpp"
+#include "sfutils.hpp"
 
 
 int main() {
