@@ -1,4 +1,4 @@
-.PHONY: build debug release
+.PHONY: build clean debug release
 
 BUILD_TYPE ?= Release
 BUILD_SYSTEM ?= Unix Makefiles
@@ -14,3 +14,6 @@ build:
 	cd ./build; \
 	cmake -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -G="$(BUILD_SYSTEM)" ../src; \
 	cmake --build .
+
+clean:
+	rm -rf ./build
