@@ -145,6 +145,17 @@ public:
 
 
 /**
+ * Instead of white and black sides, stores bitboards of "my" and "their".
+ * e.g. mk = my king, tp = their pawns.
+ */
+class RelativeBB {
+public:
+    ull mp, mn, mb, mr, mq, mk;
+    ull tp, tn, tb, tr, tq, tk;
+};
+
+
+/**
  * Chess position using bitboards.
  * Square numbers: 0 = A1, 1 = A2, ..., 63 = H8.
  */
@@ -214,5 +225,41 @@ public:
         if (Bit::get(bk, pos)) return bk;
         std::cerr << "sfutils:Position:piece_bb: no piece at position " << pos << std::endl;
         throw 0;
+    }
+
+    /**
+     * Get relative BB.
+     * @param my_side  WHITE or BLACK
+     */
+    inline RelativeBB relative_bb(bool my_side) const {
+        RelativeBB relbb;
+        if (my_side) {
+            relbb.mp = wp;
+            relbb.mn = wn;
+            relbb.mb = wb;
+            relbb.mr = wr;
+            relbb.mq = wq;
+            relbb.mk = wk;
+            relbb.tp = bp;
+            relbb.tn = bn;
+            relbb.tb = bb;
+            relbb.tr = br;
+            relbb.tq = bq;
+            relbb.tk = bk;
+        } else {
+            relbb.mp = bp;
+            relbb.mn = bn;
+            relbb.mb = bb;
+            relbb.mr = br;
+            relbb.mq = bq;
+            relbb.mk = bk;
+            relbb.tp = wp;
+            relbb.tn = wn;
+            relbb.tb = wb;
+            relbb.tr = wr;
+            relbb.tq = wq;
+            relbb.tk = wk;
+        }
+        return relbb;
     }
 };
