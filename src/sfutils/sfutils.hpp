@@ -5,6 +5,9 @@
 
 using ull = unsigned long long;
 
+class Position;
+class Move;
+
 
 constexpr bool WHITE = true,
                BLACK = false;
@@ -97,6 +100,21 @@ namespace Ascii {
         char rank = '1' + (square / 8);
         return std::string(1, file) + std::string(1, rank);
     }
+
+    /**
+     * Print bitboard.
+     */
+    void print(std::ostream& os, ull bb);
+
+    /**
+     * Print board.
+     */
+    void print(std::ostream& os, const Position& pos);
+
+    /**
+     * Print move.
+     */
+    void print(std::ostream& os, const Move& move);
 }
 
 
@@ -122,11 +140,6 @@ public:
 
     inline std::string uci() const {
         return Ascii::square_str(from) + Ascii::square_str(to);
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const Move& move) {
-        os << move.uci();
-        return os;
     }
 };
 
@@ -202,6 +215,4 @@ public:
         std::cerr << "sfutils:Position:piece_bb: no piece at position " << pos << std::endl;
         throw 0;
     }
-
-    friend std::ostream& operator<<(std::ostream& os, const Position& pos);
 };

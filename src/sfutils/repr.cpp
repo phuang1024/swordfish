@@ -1,6 +1,23 @@
+// Implementation of printing out things.
+
+
 #include <iostream>
 
 #include "sfutils.hpp"
+
+
+namespace Ascii {
+
+
+void print(std::ostream& os, ull bb) {
+    for (int y = 7; y >= 0; y--) {
+        for (int x = 0; x < 8; x++) {
+            os << (Bit::get(bb, square(x, y)) ? 'X' : '-');
+            os << ' ';
+        }
+        os << std::endl;
+    }
+}
 
 
 /**
@@ -20,7 +37,7 @@ static inline void print_sep(std::ostream& os) {
     os << " | ";
 }
 
-std::ostream& operator<<(std::ostream& os, const Position& pos) {
+void print(std::ostream& os, const Position& pos) {
     for (int y = 7; y >= 0; y--) {
         print_row(os);
         for (int x = 0; x < 8; x++) {
@@ -35,5 +52,13 @@ std::ostream& operator<<(std::ostream& os, const Position& pos) {
     for (char i = 'a'; i <= 'h'; i++) {
         os << "   " << i;
     }
-    return os;
+    os << std::endl;
 }
+
+
+void print(std::ostream& os, const Move& move) {
+    os << move.uci();
+}
+
+
+}  // namespace Ascii
