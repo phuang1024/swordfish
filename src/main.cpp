@@ -8,7 +8,7 @@ int main() {
     Position pos;
     pos.setup_std();
 
+    const ull attacks = Movegen::attacked_sqs(pos, WHITE, true);
     Ascii::print(std::cout, pos);
-
-    Movegen::attacked_sqs(pos, WHITE, true);
+    Ascii::print(std::cout, attacks);
 }

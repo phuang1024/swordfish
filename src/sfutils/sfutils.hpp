@@ -125,6 +125,15 @@ inline int square(int x, int y) {
     return x + 8 * y;
 }
 
+inline int in_board(int sq) {
+    return 0 <= sq && sq < 64;
+}
+
+inline int in_board(int x, int y) {
+    return (0 <= x && x < 8)
+        && (0 <= y && y < 8);
+}
+
 
 /**
  * Move from one square to next.
