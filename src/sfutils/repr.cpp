@@ -42,7 +42,7 @@ void print(std::ostream& os, const Position& pos) {
         print_row(os);
         for (int x = 0; x < 8; x++) {
             print_sep(os);
-            char ch = Ascii::piece_char(pos.piece_at(square(x, y)));
+            char ch = Ascii::piece2char(pos.piece_at(square(x, y)));
             os << ch;
         }
         print_sep(os);

@@ -1,7 +1,79 @@
 #include "sfutils.hpp"
 
 
-void Position::setup_fen(const std::string& fen) {
+void Position::setup_fen(std::string fen) {
+    std::string::iterator it = fen.begin();
+    char ch;
+
+    // Pieces
+    int y = 7;
+    int x = 0;
+    while ((ch = *it++) != ' ') {
+        if (ch == '/') {
+            y--;
+            x = 0;
+            continue;
+        }
+        if (ch >= '1' && ch <= '8') {
+            x += ch - '0';
+            continue;
+        }
+
+        int sq = square(x, y);
+        int piece = Ascii::char2piece(ch);
+        if (piece == EMPTY) {
+            std::cerr << "sfutils:Position:setup_fen: Invalid piece FEN: " << fen << std::endl;
+            throw 0;
+        }
+        set_at(sq, piece);
+        x++;
+    }
+
+    // Turn
+    while ((ch = *it++) != ' ') {
+        if (ch == 'w') {
+            turn = WHITE;
+        } else if (ch == 'b') {
+            turn = BLACK;
+        } else {
+            std::cerr << "sfutils:Position:setup_fen: Invalid turn FEN: " << fen << std::endl;
+            throw 0;
+        }
+    }
+
+    // Castling rights
+    castling = 0;
+    while ((ch = *it++) != ' ') {
+        if (ch == '-') continue;
+        else if (ch == 'K') castling = Bit::set(castling, CASTLE_K);
+        else if (ch == 'Q') castling = Bit::set(castling, CASTLE_Q);
+        else if (ch == 'k') castling = Bit::set(castling, CASTLE_k);
+        else if (ch == 'q') castling = Bit::set(castling, CASTLE_q);
+        else {
+            std::cerr << "sfutils:Position:setup_fen: Invalid castling FEN: " << fen << std::endl;
+            throw 0;
+        }
+    }
+
+    // EP TODO
+    ep = -1;
+    while ((ch = *it++) != ' ') {
+        /*
+        if (ch == '-') {
+            ep = -1;
+        } else {
+            ep = Ascii::str2square(ch);
+        }
+        */
+    }
+
+    // 50 move rule
+    while ((ch = *it++) != ' ') {
+        moves50 = ch - '0';
+    }
+
+    // Fullmove number
+    move = *it - '0';
 }
 
 
@@ -17,11 +89,11 @@ std::string Position::get_fen() const {
                 empty_count++;
             } else {
                 if (empty_count > 0) {
-                    fen += empty_count;
+                    fen += '0' + empty_count;
                 }
                 empty_count = 0;
 
-                const char ch = Ascii::piece_char(piece);
+                const char ch = Ascii::piece2char(piece);
                 fen += ch;
             }
         }
@@ -51,12 +123,14 @@ std::string Position::get_fen() const {
     if (ep == -1) {
         fen += '-';
     } else {
-        fen += Ascii::square_str(ep);
+        fen += Ascii::square2str(ep);
     }
     fen += ' ';
 
-    // Moves TODO
-    fen += "0 1";
+    // Moves
+    fen += '0' + moves50;
+    fen += ' ';
+    fen += '0' + move;
 
     return fen;
 }

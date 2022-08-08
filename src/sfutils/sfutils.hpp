@@ -81,7 +81,7 @@ namespace Ascii {
     /**
      * Convert piece code (e.g. WP) into char representation (e.g. 'P')
      */
-    inline char piece_char(int piece) {
+    inline char piece2char(int piece) {
         switch (piece) {
             case WP: return 'P';
             case WN: return 'N';
@@ -100,12 +100,40 @@ namespace Ascii {
     }
 
     /**
-     * Convert square code to string representation (e.g. "a1")
+     * Convert char (e.g. 'P') to piece (e.g. WP)
      */
-    inline std::string square_str(int square) {
+    inline int char2piece(char ch) {
+        switch (ch) {
+            case 'P': return WP;
+            case 'N': return WN;
+            case 'B': return WB;
+            case 'R': return WR;
+            case 'Q': return WQ;
+            case 'K': return WK;
+            case 'p': return BP;
+            case 'n': return BN;
+            case 'b': return BB;
+            case 'r': return BR;
+            case 'q': return BQ;
+            case 'k': return BK;
+            default: return EMPTY;
+        }
+    }
+
+    /**
+     * Convert square code (e.g. 0) to string representation (e.g. "a1")
+     */
+    inline std::string square2str(int square) {
         char file = 'a' + (square % 8);
         char rank = '1' + (square / 8);
         return std::string(1, file) + std::string(1, rank);
+    }
+
+    /**
+     * Convert square str (e.g. "a1") to square code (e.g. 0)
+     */
+    inline int str2square(std::string str) {
+        return (str[1] - '1') * 8 + (str[0] - 'a');
     }
 
     /**
@@ -155,7 +183,7 @@ public:
     }
 
     inline std::string uci() const {
-        return Ascii::square_str(from) + Ascii::square_str(to);
+        return Ascii::square2str(from) + Ascii::square2str(to);
     }
 };
 
@@ -181,15 +209,14 @@ public:
     bool turn;
     uch castling;
     char ep;
+    uch moves50;  // Fifty move rule.
+    uch move;  // TODO this and above may have too small capacity.
 
     /**
-     * All bitboards zero.
+     * NO initialization (may contain arbitrary values).
+     * Use setup_std() to setup standard chess board.
      */
     Position() {
-        wp = wn = wb = wr = wq = wk = bp = bn = bb = br = bq = bk = 0;
-        turn = WHITE;
-        castling = 0;
-        ep = -1;
     }
 
     /**
@@ -216,7 +243,7 @@ public:
     /**
      * Load position from FEN.
      */
-    void setup_fen(const std::string& fen);
+    void setup_fen(std::string fen);
 
     /**
      * Get piece code at position.
@@ -253,7 +280,7 @@ public:
         if (Bit::get(br, pos)) return br;
         if (Bit::get(bq, pos)) return bq;
         if (Bit::get(bk, pos)) return bk;
-        std::cerr << "sfutils:Position:piece_bb: no piece at position " << pos << std::endl;
+        std::cerr << "sfutils:Position:piece_bb: no piece at position: " << pos << std::endl;
         throw 0;
     }
 
@@ -297,4 +324,36 @@ public:
      * Get FEN string for this position.
      */
     std::string get_fen() const;
+
+    void set_at(int sq, int piece) {
+        if (piece == WP) wp = Bit::set(wp, sq);
+        else if (piece == WN) wn = Bit::set(wn, sq);
+        else if (piece == WB) wb = Bit::set(wb, sq);
+        else if (piece == WR) wr = Bit::set(wr, sq);
+        else if (piece == WQ) wq = Bit::set(wq, sq);
+        else if (piece == WK) wk = Bit::set(wk, sq);
+        else if (piece == BP) bp = Bit::set(bp, sq);
+        else if (piece == BN) bn = Bit::set(bn, sq);
+        else if (piece == BB) bb = Bit::set(bb, sq);
+        else if (piece == BR) br = Bit::set(br, sq);
+        else if (piece == BQ) bq = Bit::set(bq, sq);
+        else if (piece == BK) bk = Bit::set(bk, sq);
+        else if (piece == EMPTY) {
+            wp = Bit::unset(wp, sq);
+            wn = Bit::unset(wn, sq);
+            wb = Bit::unset(wb, sq);
+            wr = Bit::unset(wr, sq);
+            wq = Bit::unset(wq, sq);
+            wk = Bit::unset(wk, sq);
+            bp = Bit::unset(bp, sq);
+            bn = Bit::unset(bn, sq);
+            bb = Bit::unset(bb, sq);
+            br = Bit::unset(br, sq);
+            bq = Bit::unset(bq, sq);
+            bk = Bit::unset(bk, sq);
+        } else {
+            std::cerr << "sfutils:Position:set_at: Invalid piece: " << piece << std::endl;
+            throw 0;
+        }
+    }
 };
