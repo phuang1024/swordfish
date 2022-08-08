@@ -45,27 +45,34 @@ void Position::setup_fen(std::string fen) {
     castling = 0;
     while ((ch = *it++) != ' ') {
         if (ch == '-') continue;
-        else if (ch == 'K') castling = Bit::set(castling, CASTLE_K);
-        else if (ch == 'Q') castling = Bit::set(castling, CASTLE_Q);
-        else if (ch == 'k') castling = Bit::set(castling, CASTLE_k);
-        else if (ch == 'q') castling = Bit::set(castling, CASTLE_q);
+        else if (ch == 'K') castling = Bit::set(castling, 0);
+        else if (ch == 'Q') castling = Bit::set(castling, 1);
+        else if (ch == 'k') castling = Bit::set(castling, 2);
+        else if (ch == 'q') castling = Bit::set(castling, 3);
         else {
             std::cerr << "sfutils:Position:setup_fen: Invalid castling FEN: " << fen << std::endl;
             throw 0;
         }
     }
 
-    // EP TODO
-    ep = -1;
+    // EP
+    x = -1, y = -1;
     while ((ch = *it++) != ' ') {
-        /*
-        if (ch == '-') {
-            ep = -1;
-        } else {
-            ep = Ascii::str2square(ch);
+        if (ch == '-')
+            continue;
+        else if ('a' <= ch && ch <= 'h')
+            y = ch - 'a';
+        else if ('1' <= ch && ch <= '8')
+            x = ch - '1';
+        else {
+            std::cerr << "sfutils:Position:setup_fen: Invalid EP FEN: " << fen << std::endl;
+            throw 0;
         }
-        */
     }
+    if (x != -1 && y != -1)
+        ep = square(x, y);
+    else
+        ep = -1;
 
     // 50 move rule
     while ((ch = *it++) != ' ') {
