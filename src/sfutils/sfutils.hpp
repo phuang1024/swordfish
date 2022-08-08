@@ -171,12 +171,14 @@ public:
 class Position {
 public:
     ull wp, wn, wb, wr, wq, wk, bp, bn, bb, br, bq, bk;
+    bool turn;
 
     /**
      * All bitboards zero.
      */
     Position() {
         wp = wn = wb = wr = wq = wk = bp = bn = bb = br = bq = bk = 0;
+        turn = WHITE;
     }
 
     /**
@@ -195,7 +197,13 @@ public:
         br = START_BR;
         bq = START_BQ;
         bk = START_BK;
+        turn = WHITE;
     }
+
+    /**
+     * Load position from FEN.
+     */
+    void setup_fen(const std::string& fen);
 
     /**
      * Get piece code at position.
@@ -271,4 +279,9 @@ public:
         }
         return relbb;
     }
+
+    /**
+     * Get FEN string for this position.
+     */
+    std::string get_fen() const;
 };

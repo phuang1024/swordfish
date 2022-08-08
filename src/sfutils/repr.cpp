@@ -53,6 +53,9 @@ void print(std::ostream& os, const Position& pos) {
         os << "   " << i;
     }
     os << std::endl;
+    os << std::endl;
+
+    os << "Fen: " << pos.get_fen() << std::endl;
 }
 
 
