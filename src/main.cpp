@@ -6,7 +6,7 @@
 
 int main() {
     Position pos;
-    pos.setup_std();
+    pos.setup_fen("8/2k5/8/3N4/8/2R5/8/K7 w - - 0 1");
 
     ull attacks;
     ull checkers;
