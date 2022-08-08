@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 
+using uch = unsigned char;
 using ull = unsigned long long;
 
 class Position;
@@ -28,6 +29,12 @@ constexpr int
     BQ = 11,
     BK = 12;
 
+// Castling
+constexpr int
+    CASTLE_K = 1,
+    CASTLE_Q = 2,
+    CASTLE_k = 4,
+    CASTLE_q = 8;
 
 // Starting bitboards.
 constexpr ull
@@ -172,6 +179,8 @@ class Position {
 public:
     ull wp, wn, wb, wr, wq, wk, bp, bn, bb, br, bq, bk;
     bool turn;
+    uch castling;
+    char ep;
 
     /**
      * All bitboards zero.
@@ -179,6 +188,8 @@ public:
     Position() {
         wp = wn = wb = wr = wq = wk = bp = bn = bb = br = bq = bk = 0;
         turn = WHITE;
+        castling = 0;
+        ep = -1;
     }
 
     /**
@@ -198,6 +209,8 @@ public:
         bq = START_BQ;
         bk = START_BK;
         turn = WHITE;
+        castling = 15;
+        ep = -1;
     }
 
     /**

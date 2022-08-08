@@ -39,12 +39,20 @@ std::string Position::get_fen() const {
     fen += (turn ? 'w' : 'b');
     fen += ' ';
 
-    // Castling TODO
-    fen += '-';
+    // Castling
+    if (Bit::get(castling, 0)) fen += 'K';
+    if (Bit::get(castling, 1)) fen += 'Q';
+    if (Bit::get(castling, 2)) fen += 'k';
+    if (Bit::get(castling, 3)) fen += 'q';
+    if (castling == 0) fen += '-';
     fen += ' ';
 
-    // EP TODO
-    fen += '-';
+    // EP
+    if (ep == -1) {
+        fen += '-';
+    } else {
+        fen += Ascii::square_str(ep);
+    }
     fen += ' ';
 
     // Moves TODO
