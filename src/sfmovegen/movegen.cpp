@@ -35,8 +35,28 @@ static inline ull attacks_offsets(int x, int y, const int offsets[8][2]) {
     return attacks;
 }
 
+/**
+ * Rook, bishop, or queen.
+ */
+static inline ull attacks_sliding(int x, int y, const int offsets[4][2], ull all_pieces) {
+    const int start = square(x, y);
+    all_pieces = Bit::unset(all_pieces, start);
+
+    ull attacks = 0;
+    for (int i = 0; i < 4; i++) {
+        attacks |= bb_sequence(start, offsets[i][0], offsets[i][1], all_pieces, true);
+    }
+
+    if (attacks != 0)
+        std::cerr << attacks << std::endl;
+    return attacks;
+}
+
 void board_info(const Position& pos, ull& r_attacked, ull& r_checkers) {
     RelativeBB relbb = pos.relative_bb(pos.turn);
+    const ull m_pieces = relbb.mp | relbb.mn | relbb.mb | relbb.mr | relbb.mq | relbb.mk;
+    const ull t_pieces = relbb.tp | relbb.tn | relbb.tb | relbb.tr | relbb.tq | relbb.tk;
+    const ull a_pieces = m_pieces | t_pieces;
     const ull tk = relbb.tk;
     relbb.tk = 0;
 
@@ -50,6 +70,10 @@ void board_info(const Position& pos, ull& r_attacked, ull& r_checkers) {
             attacks = attacks_offsets(x, y, KNIGHT_OFFSETS);
         } else if (Bit::get(relbb.mk, i)) {
             attacks = attacks_offsets(x, y, KING_OFFSETS);
+        } else if (Bit::get(relbb.mb, i) || Bit::get(relbb.mq, i)) {
+            attacks = attacks_sliding(x, y, BISHOP_OFFSETS, a_pieces);
+        } else if (Bit::get(relbb.mr, i) || Bit::get(relbb.mq, i)) {
+            attacks = attacks_sliding(x, y, ROOK_OFFSETS, a_pieces);
         }
 
         r_attacked |= attacks;

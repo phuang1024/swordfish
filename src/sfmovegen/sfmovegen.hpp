@@ -11,6 +11,8 @@ namespace Movegen {
         {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
     const int KNIGHT_OFFSETS[8][2] = {{-1, 2}, {1, 2}, {-1, -2}, {1, -2},
         {-2, 1}, {-2, -1}, {2, 1}, {2, -1}};
+    const int BISHOP_OFFSETS[4][2] = {{-1, -1}, {1, 1}, {1, -1}, {-1, 1}};
+    const int ROOK_OFFSETS[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
 
     /**
      * Set a sequence of squares.
@@ -19,16 +21,20 @@ namespace Movegen {
      * Also stops if corresponding bit is set in stop_bb.
      */
     inline ull bb_sequence(int start, int dx, int dy, ull stop_bb, bool include_stop) {
-        const int delta = dx + 8*dy;
 
         ull bb = 0;
-        int sq = start;
-        while (in_board(sq)) {
+        int x = start % 8, y = start / 8;
+        while (in_board(x, y)) {
+            const int sq = square(x, y);
+
             bool stop_here = Bit::get(stop_bb, sq);
             if (!include_stop && stop_here)
                 break;
+
             bb = Bit::set(bb, sq);
-            sq += delta;
+            x += dx;
+            y += dy;
+
             if (stop_here)
                 break;
         }
