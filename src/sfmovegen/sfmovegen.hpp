@@ -50,8 +50,10 @@ namespace Movegen {
     /**
      * Get some info stored in return args.
      * @param r_attacked  Attacked squares ignoring enemy king.
+     * @param r_pinned  Enemy pieces pinned to enemy king.
      */
-    void board_info(bool turn, const RelativeBB& relbb, ull& r_attacked, ull& r_checkers);
+    void board_info(bool turn, const RelativeBB& relbb, ull& r_attacked, ull& r_checkers,
+            ull& r_pinned);
 
     /**
      * Get all legal moves.

@@ -50,13 +50,17 @@ static inline ull attacks_sliding(int x, int y, const int offsets[4][2], ull all
     return attacks;
 }
 
-void board_info(bool turn, const RelativeBB& relbb, ull& r_attacked, ull& r_checkers) {
+void board_info(bool turn, const RelativeBB& relbb, ull& r_attacked, ull& r_checkers, ull& r_pinned) {
+    r_attacked = r_checkers = r_pinned = 0;
+
     const ull m_pieces = *relbb.mp | *relbb.mn | *relbb.mb | *relbb.mr | *relbb.mq | *relbb.mk;
     const ull t_pieces_nok = *relbb.tp | *relbb.tn | *relbb.tb | *relbb.tr | *relbb.tq;
     const ull t_pieces = t_pieces_nok | *relbb.tk;
     const ull a_pieces_nok = m_pieces | t_pieces_nok;
     const ull a_pieces = m_pieces | t_pieces;
+    const int tkpos = Bit::first(*relbb.tk);
 
+    ull sliding_attacks = 0;  // Used to compute pins.
     for (int i = 0; i < 64; i++) {
         const int x = i % 8, y = i / 8;
         ull attacks = 0;
@@ -70,15 +74,26 @@ void board_info(bool turn, const RelativeBB& relbb, ull& r_attacked, ull& r_chec
         }
         if (Bit::get(*relbb.mb, i) || Bit::get(*relbb.mq, i)) {
             attacks |= attacks_sliding(x, y, BISHOP_OFFSETS, a_pieces_nok);
+            sliding_attacks |= attacks;
         }
         if (Bit::get(*relbb.mr, i) || Bit::get(*relbb.mq, i)) {
             attacks |= attacks_sliding(x, y, ROOK_OFFSETS, a_pieces_nok);
+            sliding_attacks |= attacks;
         }
 
         r_attacked |= attacks;
         if (attacks & *relbb.tk)
             r_checkers = Bit::set(r_checkers, i);
     }
+
+    // Compute sliding attacks from enemy king.
+    ull king_sliding = 0;
+    for (int i = 0; i < 4; i++) {
+        king_sliding |= bb_sequence(tkpos, KING_OFFSETS[i][0], KING_OFFSETS[i][1], a_pieces_nok,
+            false, true);
+    }
+
+    r_pinned = sliding_attacks & king_sliding & t_pieces_nok;
 }
 
 
@@ -96,14 +111,15 @@ static inline void get_king_moves(int kx, int ky, ull danger, std::vector<Move>&
 
 void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
     RelativeBB relbb = pos.relative_bb(pos.turn);
-    ull attacked, checkers;
-    board_info(!pos.turn, relbb.swap_sides(), attacked, checkers);
+    ull attacked, checkers, pinned;
+    board_info(!pos.turn, relbb.swap_sides(), attacked, checkers, pinned);
     const int num_checkers = Bit::popcnt(checkers);
     const int kpos = Bit::first(*relbb.mk);
     const int kx = kpos % 8, ky = kpos / 8;
 
-    Ascii::print(std::cerr, attacked); std::cerr << std::endl;
-    Ascii::print(std::cerr, checkers); std::cerr << std::endl;
+    std::cerr << "attacked\n"; Ascii::print(std::cerr, attacked); std::cerr << std::endl;
+    std::cerr << "checkers\n"; Ascii::print(std::cerr, checkers); std::cerr << std::endl;
+    std::cerr << "pinned\n"; Ascii::print(std::cerr, pinned); std::cerr << std::endl;
 
     get_king_moves(kx, ky, attacked, r_moves);
 
