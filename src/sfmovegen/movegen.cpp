@@ -65,15 +65,17 @@ void board_info(const Position& pos, ull& r_attacked, ull& r_checkers) {
         ull attacks = 0;
 
         if (Bit::get(relbb.mp, i)) {
-            attacks = attacks_pawn(x, y, pos.turn);
+            attacks |= attacks_pawn(x, y, pos.turn);
         } else if (Bit::get(relbb.mn, i)) {
-            attacks = attacks_offsets(x, y, KNIGHT_OFFSETS);
+            attacks |= attacks_offsets(x, y, KNIGHT_OFFSETS);
         } else if (Bit::get(relbb.mk, i)) {
-            attacks = attacks_offsets(x, y, KING_OFFSETS);
-        } else if (Bit::get(relbb.mb, i) || Bit::get(relbb.mq, i)) {
-            attacks = attacks_sliding(x, y, BISHOP_OFFSETS, a_pieces);
-        } else if (Bit::get(relbb.mr, i) || Bit::get(relbb.mq, i)) {
-            attacks = attacks_sliding(x, y, ROOK_OFFSETS, a_pieces);
+            attacks |= attacks_offsets(x, y, KING_OFFSETS);
+        }
+        if (Bit::get(relbb.mb, i) || Bit::get(relbb.mq, i)) {
+            attacks |= attacks_sliding(x, y, BISHOP_OFFSETS, a_pieces);
+        }
+        if (Bit::get(relbb.mr, i) || Bit::get(relbb.mq, i)) {
+            attacks |= attacks_sliding(x, y, ROOK_OFFSETS, a_pieces);
         }
 
         r_attacked |= attacks;
