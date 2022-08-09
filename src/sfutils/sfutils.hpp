@@ -71,6 +71,26 @@ namespace Bit {
     inline ull unset(ull b, int i) {
         return b & ~mask(i);
     }
+
+    inline int popcnt(ull b) {
+        // TODO use a lookup table per 8 bits
+        int pop = 0;
+        for (int i = 0; i < 64; i++)
+            pop += get(b, i);
+        return pop;
+    }
+
+    /**
+     * Position of first bit set.
+     * -1 if no bit set.
+     */
+    inline int first(ull b) {
+        // TODO use a lookup table per 8 bits.
+        for (int i = 0; i < 64; i++)
+            if (get(b, i))
+                return i;
+        return -1;
+    }
 }
 
 
@@ -194,8 +214,15 @@ public:
  */
 class RelativeBB {
 public:
-    ull mp, mn, mb, mr, mq, mk;
-    ull tp, tn, tb, tr, tq, tk;
+    ull *mp, *mn, *mb, *mr, *mq, *mk;
+    ull *tp, *tn, *tb, *tr, *tq, *tk;
+
+    RelativeBB swap_sides() {
+        RelativeBB rbb;
+        rbb.mp = tp; rbb.mn = tn; rbb.mb = tb; rbb.mr = tr; rbb.mq = tq; rbb.mk = tk;
+        rbb.tp = mp; rbb.tn = mn; rbb.tb = mb; rbb.tr = mr; rbb.tq = mq; rbb.tk = mk;
+        return rbb;
+    }
 };
 
 
@@ -286,38 +313,20 @@ public:
 
     /**
      * Get relative BB.
-     * @param my_side  WHITE or BLACK
+     * @param my_side  WHITE or BLACK. Specifies which side is considered "mine".
      */
-    inline RelativeBB relative_bb(bool my_side) const {
-        RelativeBB relbb;
+    inline RelativeBB relative_bb(bool my_side) {
         if (my_side) {
-            relbb.mp = wp;
-            relbb.mn = wn;
-            relbb.mb = wb;
-            relbb.mr = wr;
-            relbb.mq = wq;
-            relbb.mk = wk;
-            relbb.tp = bp;
-            relbb.tn = bn;
-            relbb.tb = bb;
-            relbb.tr = br;
-            relbb.tq = bq;
-            relbb.tk = bk;
+            return (RelativeBB) {
+                .mp = &wp, .mn = &wn, .mb = &wb, .mr = &wr, .mq = &wq, .mk = &wk,
+                .tp = &bp, .tn = &bn, .tb = &bb, .tr = &br, .tq = &bq, .tk = &bk
+            };
         } else {
-            relbb.mp = bp;
-            relbb.mn = bn;
-            relbb.mb = bb;
-            relbb.mr = br;
-            relbb.mq = bq;
-            relbb.mk = bk;
-            relbb.tp = wp;
-            relbb.tn = wn;
-            relbb.tb = wb;
-            relbb.tr = wr;
-            relbb.tq = wq;
-            relbb.tk = wk;
+            return (RelativeBB) {
+                .mp = &bp, .mn = &bn, .mb = &bb, .mr = &br, .mq = &bq, .mk = &bk,
+                .tp = &wp, .tn = &wn, .tb = &wb, .tr = &wr, .tq = &wq, .tk = &wk
+            };
         }
-        return relbb;
     }
 
     /**

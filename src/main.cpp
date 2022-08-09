@@ -1,23 +1,22 @@
 #include <iostream>
+#include <vector>
 
 #include "sfmovegen.hpp"
 #include "sfutils.hpp"
 
 
 int main() {
-    //Ascii::print(std::cout, Movegen::bb_sequence(0, 1, 1, Bit::mask(27), true));
-    //Ascii::print(std::cout, Movegen::bb_sequence(0, 1, 1, Bit::mask(27), false));
-
     Position pos;
-    pos.setup_fen("8/8/8/8/2Q5/8/8/8 w - - 0 1");
+    pos.setup_fen("3r4/8/8/3K4/8/2r5/8/8 w - - 0 1");
 
-    ull attacks;
-    ull checkers;
-    Movegen::board_info(pos, attacks, checkers);
+    std::vector<Move> moves;
+    Movegen::get_legal_moves(pos, moves);
 
-    Ascii::print(std::cout, pos);
-    std::cout << std::endl;
-    Ascii::print(std::cout, attacks);
-    std::cout << std::endl;
-    Ascii::print(std::cout, checkers);
+    Ascii::print(std::cerr, pos);
+    std::cerr << std::endl;
+    std::cerr << moves.size() << " moves:\n";
+    for (auto move: moves) {
+        Ascii::print(std::cerr, move);
+        std::cerr << std::endl;
+    }
 }

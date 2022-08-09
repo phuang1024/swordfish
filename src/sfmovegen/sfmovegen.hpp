@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "sfutils.hpp"
 
 
@@ -26,10 +28,8 @@ namespace Movegen {
         int x = start % 8, y = start / 8;
         bool is_start = true;
         while (in_board(x, y)) {
-
             const int sq = square(x, y);
-
-            bool stop_here = Bit::get(stop_bb, sq);
+            const bool stop_here = Bit::get(stop_bb, sq);
             if (!include_stop && stop_here)
                 break;
 
@@ -50,7 +50,12 @@ namespace Movegen {
     /**
      * Get some info stored in return args.
      * @param r_attacked  Attacked squares ignoring enemy king.
-     * @param r_checkers  Checkers.
      */
-    void board_info(const Position& pos, ull& r_attacked, ull& r_checkers);
+    void board_info(bool turn, const RelativeBB& relbb, ull& r_attacked, ull& r_checkers);
+
+    /**
+     * Get all legal moves.
+     * Appends moves to r_moves
+     */
+    void get_legal_moves(Position& pos, std::vector<Move>& r_moves);
 }
