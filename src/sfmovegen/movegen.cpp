@@ -44,7 +44,7 @@ static inline ull attacks_sliding(int x, int y, const int offsets[4][2], ull all
 
     ull attacks = 0;
     for (int i = 0; i < 4; i++) {
-        attacks |= bb_sequence(start, offsets[i][0], offsets[i][1], all_pieces, true);
+        attacks |= bb_sequence(start, offsets[i][0], offsets[i][1], all_pieces, false, true);
     }
 
     if (attacks != 0)
