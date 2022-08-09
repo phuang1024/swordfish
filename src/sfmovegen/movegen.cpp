@@ -53,11 +53,8 @@ static inline ull attacks_sliding(int x, int y, const int offsets[4][2], ull all
 void board_info(bool turn, const RelativeBB& relbb, ull& r_attacked, ull& r_checkers, ull& r_pinned) {
     r_attacked = r_checkers = r_pinned = 0;
 
-    const ull m_pieces = *relbb.mp | *relbb.mn | *relbb.mb | *relbb.mr | *relbb.mq | *relbb.mk;
-    const ull t_pieces_nok = *relbb.tp | *relbb.tn | *relbb.tb | *relbb.tr | *relbb.tq;
-    const ull t_pieces = t_pieces_nok | *relbb.tk;
-    const ull a_pieces_nok = m_pieces | t_pieces_nok;
-    const ull a_pieces = m_pieces | t_pieces;
+    const ull t_pieces_nok = relbb.t_pieces & ~*relbb.tk;
+    const ull a_pieces_nok = relbb.m_pieces | t_pieces_nok;
     const int tkpos = Bit::first(*relbb.tk);
 
     ull sliding_attacks = 0;  // Used to compute pins.
@@ -97,14 +94,37 @@ void board_info(bool turn, const RelativeBB& relbb, ull& r_attacked, ull& r_chec
 }
 
 
-static inline void get_king_moves(int kx, int ky, ull danger, std::vector<Move>& r_moves) {
+/**
+ * Doesn't add if to & m_pieces
+ */
+static inline void add_move(std::vector<Move>& moves, int from, int to, ull m_pieces) {
+    if (Bit::get(m_pieces, to))
+        return;
+    moves.push_back(Move(from, to));
+}
+
+static inline void get_king_moves(const RelativeBB& relbb, int kx, int ky, ull danger,
+        std::vector<Move>& r_moves) {
     const int start = square(kx, ky);
     for (int i = 0; i < 8; i++) {
         const int x = kx + KING_OFFSETS[i][0], y = ky + KING_OFFSETS[i][1];
         if (in_board(x, y)) {
             const int sq = square(x, y);
             if (!Bit::get(danger, sq))
-                r_moves.push_back(Move(start, sq));
+                add_move(r_moves, start, sq, relbb.m_pieces);
+        }
+    }
+}
+
+static inline void get_knight_moves(const RelativeBB& relbb, int x, int y, ull mask,
+        std::vector<Move>& r_moves) {
+    const int start = square(x, y);
+    for (int i = 0; i < 8; i++) {
+        const int nx = x + KNIGHT_OFFSETS[i][0], ny = y + KNIGHT_OFFSETS[i][1];
+        if (in_board(nx, ny)) {
+            const int sq = square(nx, ny);
+            if (Bit::get(mask, sq))
+                add_move(r_moves, start, sq, relbb.m_pieces);
         }
     }
 }
@@ -121,7 +141,7 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
     std::cerr << "checkers\n"; Ascii::print(std::cerr, checkers); std::cerr << std::endl;
     std::cerr << "pinned\n"; Ascii::print(std::cerr, pinned); std::cerr << std::endl;
 
-    get_king_moves(kx, ky, attacked, r_moves);
+    get_king_moves(relbb, kx, ky, attacked, r_moves);
 
     if (num_checkers >= 2) {
         // Only king moves.
@@ -130,6 +150,7 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
 
     ull capture_mask = 0xffffffffffffffff;
     ull push_mask = 0xffffffffffffffff;
+    ull all_mask = 0xffffffffffffffff;
 
     if (num_checkers == 1) {
         // Calculate push and capture mask.
@@ -139,9 +160,14 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
                   dy = (checker_y == ky ? 0 : (checker_y > ky ? 1 : -1));
         push_mask = bb_sequence(kpos, dx, dy, checkers, false, false);
         capture_mask = checkers;
+        all_mask = push_mask | capture_mask;
     }
 
-    // TODO generate other piece moves.
+    for (int sq = 0; sq < 64; sq++) {
+        const int x = sq % 8, y = sq / 8;
+        if (Bit::get(*relbb.mn, sq))
+            get_knight_moves(relbb, x, y, all_mask, r_moves);
+    }
 }
 
 

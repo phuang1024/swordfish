@@ -216,11 +216,22 @@ class RelativeBB {
 public:
     ull *mp, *mn, *mb, *mr, *mq, *mk;
     ull *tp, *tn, *tb, *tr, *tq, *tk;
+    ull m_pieces, t_pieces, a_pieces;  // WARNING: Call init() before using.
+
+    /**
+     * Sets up m_pieces, t_pieces and a_pieces.
+     */
+    void init() {
+        m_pieces = *mp | *mn | *mb | *mr | *mq | *mk;
+        t_pieces = *tp | *tn | *tb | *tr | *tq | *tk;
+        a_pieces = m_pieces | t_pieces;
+    }
 
     RelativeBB swap_sides() {
         RelativeBB rbb;
         rbb.mp = tp; rbb.mn = tn; rbb.mb = tb; rbb.mr = tr; rbb.mq = tq; rbb.mk = tk;
         rbb.tp = mp; rbb.tn = mn; rbb.tb = mb; rbb.tr = mr; rbb.tq = mq; rbb.tk = mk;
+        rbb.init();
         return rbb;
     }
 };
@@ -316,17 +327,20 @@ public:
      * @param my_side  WHITE or BLACK. Specifies which side is considered "mine".
      */
     inline RelativeBB relative_bb(bool my_side) {
+        RelativeBB rbb;
         if (my_side) {
-            return (RelativeBB) {
+            rbb = (RelativeBB) {
                 .mp = &wp, .mn = &wn, .mb = &wb, .mr = &wr, .mq = &wq, .mk = &wk,
                 .tp = &bp, .tn = &bn, .tb = &bb, .tr = &br, .tq = &bq, .tk = &bk
             };
         } else {
-            return (RelativeBB) {
+            rbb = (RelativeBB) {
                 .mp = &bp, .mn = &bn, .mb = &bb, .mr = &br, .mq = &bq, .mk = &bk,
                 .tp = &wp, .tn = &wn, .tb = &wb, .tr = &wr, .tq = &wq, .tk = &wk
             };
         }
+        rbb.init();
+        return rbb;
     }
 
     /**
