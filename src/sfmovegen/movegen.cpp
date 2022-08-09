@@ -165,7 +165,8 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
 
     for (int sq = 0; sq < 64; sq++) {
         const int x = sq % 8, y = sq / 8;
-        if (Bit::get(*relbb.mn, sq))
+        const bool this_pinned = Bit::get(pinned, sq);
+        if (!this_pinned && Bit::get(*relbb.mn, sq))
             get_knight_moves(relbb, x, y, all_mask, r_moves);
     }
 }
