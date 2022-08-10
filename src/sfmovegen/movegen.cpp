@@ -116,6 +116,34 @@ static inline void get_king_moves(const RelativeBB& relbb, int kx, int ky, ull d
     }
 }
 
+static inline void get_pawn_moves(const RelativeBB& relbb, int x, int y, bool turn, ull mask,
+        std::vector<Move>& r_moves) {
+    const int pawn_dir = turn ? 1 : -1;
+    const int allow_double = (turn && y == 1) || (!turn && y == 6);
+    const int start = square(x, y);
+
+    ull dests = 0;
+
+    // Push moves
+    dests |= Bit::mask(square(x, y + pawn_dir));
+    if (allow_double)
+        dests |= Bit::mask(square(x, y + 2*pawn_dir));
+    dests &= ~relbb.a_pieces;
+
+    // Capture moves
+    int sq;
+    if (x > 0 && Bit::get(relbb.t_pieces, sq = square(x-1, y+pawn_dir)))
+        dests |= Bit::mask(sq);
+    if (x < 7 && Bit::get(relbb.t_pieces, sq = square(x+1, y+pawn_dir)))
+        dests |= Bit::mask(sq);
+
+    // Add to vector
+    dests &= mask;
+    for (int sq = 0; sq < 64; sq++)
+        if (Bit::get(dests, sq))
+            add_move(r_moves, start, sq, relbb.m_pieces);
+}
+
 static inline void get_knight_moves(const RelativeBB& relbb, int x, int y, ull mask,
         std::vector<Move>& r_moves) {
     const int start = square(x, y);
@@ -135,17 +163,15 @@ static inline void get_sliding_moves(const RelativeBB& relbb, int x, int y, cons
     // End sequence at all pieces except this.
     const ull stop_at = relbb.a_pieces & ~Bit::mask(start);
 
+    ull dests = 0;
     for (int i = 0; i < 4; i++) {
         // Possible destinations: In sequence, not same side, in pin or capture mask.
-        const ull dests = bb_sequence(start, offsets[i][0], offsets[i][1],
-                stop_at, false, true) & ~relbb.m_pieces & mask;
-        if (dests == 0)
-            continue;
-
-        for (int sq = 0; sq < 64; sq++)
-            if (Bit::get(dests, sq))
-                add_move(r_moves, start, sq, relbb.m_pieces);
+        dests |= bb_sequence(start, offsets[i][0], offsets[i][1], stop_at, false, true)
+            & ~relbb.m_pieces & mask;
     }
+    for (int sq = 0; sq < 64; sq++)
+        if (Bit::get(dests, sq))
+            add_move(r_moves, start, sq, relbb.m_pieces);
 }
 
 void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
@@ -160,19 +186,19 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
     std::cerr << "checkers\n"; Ascii::print(std::cerr, checkers); std::cerr << std::endl;
     std::cerr << "pinned\n"; Ascii::print(std::cerr, pinned); std::cerr << std::endl;
 
+    // King moves
     get_king_moves(relbb, kx, ky, attacked, r_moves);
 
     if (num_checkers >= 2) {
-        // Only king moves.
+        // Double check, only king moves.
         return;
     }
 
+    // Calculate push and capture mask if 1 check.
     ull capture_mask = 0xffffffffffffffff;
     ull push_mask = 0xffffffffffffffff;
     ull all_mask = 0xffffffffffffffff;
-
     if (num_checkers == 1) {
-        // Calculate push and capture mask.
         const int checker_pos = Bit::first(checkers);
         const int checker_x = checker_pos % 8, checker_y = checker_pos / 8;
         const int dx = (checker_x == kx ? 0 : (checker_x > kx ? 1 : -1)),
@@ -182,6 +208,7 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
         all_mask = push_mask | capture_mask;
     }
 
+    // Other pieces
     for (int sq = 0; sq < 64; sq++) {
         const int x = sq % 8, y = sq / 8;
 
@@ -191,15 +218,20 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
             continue;
         }
 
-        // Sliding
+        // Pin mask
         ull pin_mask = 0xffffffffffffffff;
         if (Bit::get(pinned, sq)) {
             const int dx = x == kx ? 0 : (x > kx ? 1 : -1),
                       dy = y == ky ? 0 : (y > ky ? 1 : -1);
             pin_mask = bb_sequence(kpos, dx, dy, relbb.t_pieces, false, false);
         }
-
         const ull sliding_mask = all_mask & pin_mask;
+
+        // Pawn
+        if (Bit::get(*relbb.mp, sq))
+            get_pawn_moves(relbb, x, y, pos.turn, sliding_mask, r_moves);
+
+        // Sliding
         if (Bit::get(*relbb.mb, sq) || Bit::get(*relbb.mq, sq))
             get_sliding_moves(relbb, x, y, BISHOP_OFFSETS, sliding_mask, r_moves);
         if (Bit::get(*relbb.mr, sq) || Bit::get(*relbb.mq, sq))
