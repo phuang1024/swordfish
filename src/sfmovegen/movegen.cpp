@@ -129,6 +129,25 @@ static inline void get_knight_moves(const RelativeBB& relbb, int x, int y, ull m
     }
 }
 
+static inline void get_sliding_moves(const RelativeBB& relbb, int x, int y, const int offsets[4][2],
+        ull mask, std::vector<Move>& r_moves) {
+    const int start = square(x, y);
+    // End sequence at all pieces except this.
+    const ull stop_at = relbb.a_pieces & ~Bit::mask(start);
+
+    for (int i = 0; i < 4; i++) {
+        // Possible destinations: In sequence, not same side, in pin or capture mask.
+        const ull dests = bb_sequence(start, offsets[i][0], offsets[i][1],
+                stop_at, false, true) & ~relbb.m_pieces & mask;
+        if (dests == 0)
+            continue;
+
+        for (int sq = 0; sq < 64; sq++)
+            if (Bit::get(dests, sq))
+                add_move(r_moves, start, sq, relbb.m_pieces);
+    }
+}
+
 void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
     RelativeBB relbb = pos.relative_bb(pos.turn);
     ull attacked, checkers, pinned;
@@ -165,9 +184,26 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
 
     for (int sq = 0; sq < 64; sq++) {
         const int x = sq % 8, y = sq / 8;
-        const bool this_pinned = Bit::get(pinned, sq);
-        if (!this_pinned && Bit::get(*relbb.mn, sq))
+
+        // Knight
+        if (!Bit::get(pinned, sq) && Bit::get(*relbb.mn, sq)) {
             get_knight_moves(relbb, x, y, all_mask, r_moves);
+            continue;
+        }
+
+        // Sliding
+        ull pin_mask = 0xffffffffffffffff;
+        if (Bit::get(pinned, sq)) {
+            const int dx = x == kx ? 0 : (x > kx ? 1 : -1),
+                      dy = y == ky ? 0 : (y > ky ? 1 : -1);
+            pin_mask = bb_sequence(kpos, dx, dy, relbb.t_pieces, false, false);
+        }
+
+        const ull sliding_mask = all_mask & pin_mask;
+        if (Bit::get(*relbb.mb, sq) || Bit::get(*relbb.mq, sq))
+            get_sliding_moves(relbb, x, y, BISHOP_OFFSETS, sliding_mask, r_moves);
+        if (Bit::get(*relbb.mr, sq) || Bit::get(*relbb.mq, sq))
+            get_sliding_moves(relbb, x, y, ROOK_OFFSETS, sliding_mask, r_moves);
     }
 }
 

@@ -7,7 +7,7 @@
 
 int main() {
     Position pos;
-    pos.setup_fen("3r4/8/3N4/3K4/8/2r5/8/8 w - - 0 1");
+    pos.setup_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
     std::vector<Move> moves;
     Movegen::get_legal_moves(pos, moves);
