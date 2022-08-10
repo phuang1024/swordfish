@@ -118,6 +118,7 @@ static inline void get_king_moves(const RelativeBB& relbb, int kx, int ky, ull d
 
 static inline void get_pawn_moves(const RelativeBB& relbb, int x, int y, bool turn, ull mask,
         std::vector<Move>& r_moves) {
+    // TODO promo, ep
     const int pawn_dir = turn ? 1 : -1;
     const int allow_double = (turn && y == 1) || (!turn && y == 6);
     const int start = square(x, y);
@@ -237,6 +238,8 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
         if (Bit::get(*relbb.mr, sq) || Bit::get(*relbb.mq, sq))
             get_sliding_moves(relbb, x, y, ROOK_OFFSETS, sliding_mask, r_moves);
     }
+
+    // TODO castling
 }
 
 

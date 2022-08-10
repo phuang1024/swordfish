@@ -51,6 +51,14 @@ constexpr ull
     START_BQ = 576460752303423488ULL,
     START_BK = 1152921504606846976ULL;
 
+enum Promo {
+    NONE,
+    KNIGHT,
+    BISHOP,
+    ROOK,
+    QUEEN
+};
+
 
 /**
  * Bit manipulation functions.
@@ -195,11 +203,13 @@ inline int in_board(int x, int y) {
  */
 class Move {
 public:
-    int from, to;
+    uch from, to;
+    uch promo;
 
-    Move(int from, int to) {
+    Move(uch from, uch to, uch promo = Promo::NONE) {
         this->from = from;
         this->to = to;
+        this->promo = promo;
     }
 
     inline std::string uci() const {
@@ -276,6 +286,8 @@ public:
         turn = WHITE;
         castling = 15;
         ep = -1;
+        moves50 = 0;
+        move = 1;
     }
 
     /**
@@ -378,5 +390,19 @@ public:
             std::cerr << "sfutils:Position:set_at: Invalid piece: " << piece << std::endl;
             throw 0;
         }
+    }
+
+    /**
+     * Play the move.
+     */
+    inline void push(const Move& m) {
+        // TODO promo and castling
+        // TODO update move50
+        ull& bb = piece_bb(m.from);
+        bb = Bit::set(Bit::unset(bb, m.from), m.to);
+
+        turn = !turn;
+        if (turn)
+            move++;
     }
 };
