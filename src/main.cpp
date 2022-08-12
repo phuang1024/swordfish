@@ -18,7 +18,7 @@ int main() {
     return 0;
     */
 
-    pos.setup_fen("8/8/8/8/3Nb3/5n2/3PPP2/K2R4 w - - 0 1");
+    pos.setup_fen("8/8/8/K2Pp2r/8/8/8/8 w - e6 0 1");
 
     std::vector<Move> moves;
     Movegen::get_legal_moves(pos, moves);

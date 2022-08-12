@@ -123,8 +123,8 @@ static inline void get_king_moves(const RelativeBB& relbb, int kx, int ky, ull d
     }
 }
 
-static inline void get_pawn_moves(const RelativeBB& relbb, int x, int y, bool turn, ull mask,
-        const int ep_square, std::vector<Move>& r_moves) {
+static inline void get_pawn_moves(const RelativeBB& relbb, int x, int y, bool turn, int kpos,
+        ull mask, const int ep_square, std::vector<Move>& r_moves) {
     const int pawn_dir = turn ? 1 : -1;
     const int one_sq_dest = square(x, y + pawn_dir);
     const bool allow_double = ((turn && y == 1) || (!turn && y == 6))
@@ -141,8 +141,20 @@ static inline void get_pawn_moves(const RelativeBB& relbb, int x, int y, bool tu
 
     // Capture moves
     ull capture_dests = relbb.t_pieces;
-    if (ep_square != -1)
-        capture_dests |= Bit::mask(ep_square);
+    if (ep_square != -1) {
+        // Check for EP discovered check.
+        ull pieces = relbb.a_pieces &
+            ~(Bit::mask(start) | Bit::mask(ep_square - 8*pawn_dir) | Bit::mask(kpos));
+        ull horiz_attacks = bb_sequence(kpos, 1, 0, pieces, false, true)
+                          | bb_sequence(kpos, -1, 0, pieces, false, true);
+
+        if (horiz_attacks & (*relbb.tr | *relbb.tq)) {
+            // There is check if we take EP.
+            // So no EP move.
+        } else {
+            capture_dests |= Bit::mask(ep_square);
+        }
+    }
     int sq;
     if (x > 0 && Bit::get(capture_dests, sq = one_sq_dest - 1))
         dests |= Bit::mask(sq);
@@ -252,7 +264,7 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
 
         // Pawn
         if (Bit::get(*relbb.mp, sq))
-            get_pawn_moves(relbb, x, y, pos.turn, pawn_mask, pos.ep, r_moves);
+            get_pawn_moves(relbb, x, y, pos.turn, kpos, pawn_mask, pos.ep, r_moves);
 
         // Sliding
         if (Bit::get(*relbb.mb, sq) || Bit::get(*relbb.mq, sq))
