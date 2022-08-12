@@ -232,6 +232,15 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
         all_mask = push_mask | capture_mask;
     }
 
+    // EP capture mask, destination square of pawn for EP capture evade check.
+    ull ep_capture_mask = 0;
+    if (pos.ep != -1) {
+        const int pawn_dir = pos.turn ? 1 : -1;
+        const int opp_pawn_sq = pos.ep - 8*pawn_dir;
+        if (Bit::get(checkers, opp_pawn_sq))
+            ep_capture_mask = Bit::mask(pos.ep);
+    }
+
     // Other pieces
     for (int sq = 0; sq < 64; sq++) {
         const int x = sq % 8, y = sq / 8;
@@ -250,10 +259,11 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
             pin_mask = bb_sequence(kpos, dx, dy, relbb.t_pieces, false, false);
         }
         const ull sliding_mask = all_mask & pin_mask;
+        const ull pawn_mask = (all_mask | ep_capture_mask) & pin_mask;
 
         // Pawn
         if (Bit::get(*relbb.mp, sq))
-            get_pawn_moves(relbb, x, y, pos.turn, sliding_mask, pos.ep, r_moves);
+            get_pawn_moves(relbb, x, y, pos.turn, pawn_mask, pos.ep, r_moves);
 
         // Sliding
         if (Bit::get(*relbb.mb, sq) || Bit::get(*relbb.mq, sq))
