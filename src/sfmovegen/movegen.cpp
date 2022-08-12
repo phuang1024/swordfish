@@ -103,6 +103,24 @@ static inline void add_move(std::vector<Move>& moves, int from, int to, ull m_pi
     moves.push_back(Move(from, to));
 }
 
+/**
+ */
+static inline void add_pawn_move(std::vector<Move>& moves, int from, int to, ull m_pieces, bool turn) {
+    if (Bit::get(m_pieces, to))
+        return;
+
+    const int y = to / 8;
+    const bool is_promo = (turn && y == 7) || (!turn && y == 0);
+    if (is_promo) {
+        moves.push_back(Move(from, to, Promo::KNIGHT));
+        moves.push_back(Move(from, to, Promo::BISHOP));
+        moves.push_back(Move(from, to, Promo::ROOK));
+        moves.push_back(Move(from, to, Promo::QUEEN));
+    } else {
+        moves.push_back(Move(from, to));
+    }
+}
+
 static inline void get_king_moves(const RelativeBB& relbb, int kx, int ky, ull danger,
         std::vector<Move>& r_moves) {
     const int start = square(kx, ky);
@@ -118,31 +136,33 @@ static inline void get_king_moves(const RelativeBB& relbb, int kx, int ky, ull d
 
 static inline void get_pawn_moves(const RelativeBB& relbb, int x, int y, bool turn, ull mask,
         std::vector<Move>& r_moves) {
-    // TODO promo, ep
+    // TODO ep
     const int pawn_dir = turn ? 1 : -1;
-    const int allow_double = (turn && y == 1) || (!turn && y == 6);
+    const int one_sq_dest = square(x, y + pawn_dir);
+    const bool allow_double = ((turn && y == 1) || (!turn && y == 6))
+        && !Bit::get(relbb.a_pieces, one_sq_dest);
     const int start = square(x, y);
 
     ull dests = 0;
 
     // Push moves
-    dests |= Bit::mask(square(x, y + pawn_dir));
+    dests |= Bit::mask(one_sq_dest);
     if (allow_double)
         dests |= Bit::mask(square(x, y + 2*pawn_dir));
     dests &= ~relbb.a_pieces;
 
     // Capture moves
     int sq;
-    if (x > 0 && Bit::get(relbb.t_pieces, sq = square(x-1, y+pawn_dir)))
+    if (x > 0 && Bit::get(relbb.t_pieces, sq = one_sq_dest - 1))
         dests |= Bit::mask(sq);
-    if (x < 7 && Bit::get(relbb.t_pieces, sq = square(x+1, y+pawn_dir)))
+    if (x < 7 && Bit::get(relbb.t_pieces, sq = one_sq_dest + 1))
         dests |= Bit::mask(sq);
 
     // Add to vector
     dests &= mask;
     for (int sq = 0; sq < 64; sq++)
         if (Bit::get(dests, sq))
-            add_move(r_moves, start, sq, relbb.m_pieces);
+            add_pawn_move(r_moves, start, sq, relbb.m_pieces, turn);
 }
 
 static inline void get_knight_moves(const RelativeBB& relbb, int x, int y, ull mask,

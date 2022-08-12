@@ -130,6 +130,19 @@ namespace Ascii {
     }
 
     /**
+     * Convert promo code (e.g. KNIGHT) into char representation (e.g. 'N')
+     */
+    inline char promo2char(int promo) {
+        switch (promo) {
+            case KNIGHT: return 'N';
+            case BISHOP: return 'B';
+            case ROOK: return 'R';
+            case QUEEN: return 'Q';
+            default: return ' ';
+        }
+    }
+
+    /**
      * Convert char (e.g. 'P') to piece (e.g. WP)
      */
     inline int char2piece(char ch) {
@@ -215,7 +228,10 @@ public:
     }
 
     inline std::string uci() const {
-        return Ascii::square2str(from) + Ascii::square2str(to);
+        std::string str = Ascii::square2str(from) + Ascii::square2str(to);
+        if (promo != Promo::NONE)
+            str += Ascii::promo2char(promo);
+        return str;
     }
 };
 

@@ -7,6 +7,8 @@
 
 int main() {
     Position pos;
+
+    /*
     pos.setup_std();
     Ascii::print(std::cerr, pos); std::cerr << std::endl;
     pos.push(Move(square(4, 1), square(4, 3)));
@@ -14,8 +16,9 @@ int main() {
     pos.push(Move(square(4, 6), square(4, 4)));
     Ascii::print(std::cerr, pos); std::cerr << std::endl;
     return 0;
+    */
 
-    pos.setup_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    pos.setup_fen("k7/4P3/8/8/3P1P2/7P/1K3PPP/8 w - - 0 1");
 
     std::vector<Move> moves;
     Movegen::get_legal_moves(pos, moves);
