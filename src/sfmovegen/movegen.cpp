@@ -136,7 +136,6 @@ static inline void get_king_moves(const RelativeBB& relbb, int kx, int ky, ull d
 
 static inline void get_pawn_moves(const RelativeBB& relbb, int x, int y, bool turn, ull mask,
         const int ep_square, std::vector<Move>& r_moves) {
-    // TODO ep avoid check.
     const int pawn_dir = turn ? 1 : -1;
     const int one_sq_dest = square(x, y + pawn_dir);
     const bool allow_double = ((turn && y == 1) || (!turn && y == 6))
@@ -256,7 +255,7 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
         if (Bit::get(pinned, sq)) {
             const int dx = x == kx ? 0 : (x > kx ? 1 : -1),
                       dy = y == ky ? 0 : (y > ky ? 1 : -1);
-            pin_mask = bb_sequence(kpos, dx, dy, relbb.t_pieces, false, false);
+            pin_mask = bb_sequence(kpos, dx, dy, relbb.t_pieces, false, true);
         }
         const ull sliding_mask = all_mask & pin_mask;
         const ull pawn_mask = (all_mask | ep_capture_mask) & pin_mask;
