@@ -95,20 +95,9 @@ void board_info(bool turn, const RelativeBB& relbb, ull& r_attacked, ull& r_chec
 
 
 /**
- * Doesn't add if to & m_pieces
- */
-static inline void add_move(std::vector<Move>& moves, int from, int to, ull m_pieces) {
-    if (Bit::get(m_pieces, to))
-        return;
-    moves.push_back(Move(from, to));
-}
-
-/**
+ * Adds promo moves if promo.
  */
 static inline void add_pawn_move(std::vector<Move>& moves, int from, int to, ull m_pieces, bool turn) {
-    if (Bit::get(m_pieces, to))
-        return;
-
     const int y = to / 8;
     const bool is_promo = (turn && y == 7) || (!turn && y == 0);
     if (is_promo) {
@@ -129,7 +118,7 @@ static inline void get_king_moves(const RelativeBB& relbb, int kx, int ky, ull d
         if (in_board(x, y)) {
             const int sq = square(x, y);
             if (!Bit::get(danger, sq))
-                add_move(r_moves, start, sq, relbb.m_pieces);
+                r_moves.push_back(Move(start, sq));
         }
     }
 }
@@ -175,7 +164,7 @@ static inline void get_knight_moves(const RelativeBB& relbb, int x, int y, ull m
         if (in_board(nx, ny)) {
             const int sq = square(nx, ny);
             if (Bit::get(mask, sq))
-                add_move(r_moves, start, sq, relbb.m_pieces);
+                r_moves.push_back(Move(start, sq));
         }
     }
 }
@@ -194,7 +183,7 @@ static inline void get_sliding_moves(const RelativeBB& relbb, int x, int y, cons
     }
     for (int sq = 0; sq < 64; sq++)
         if (Bit::get(dests, sq))
-            add_move(r_moves, start, sq, relbb.m_pieces);
+            r_moves.push_back(Move(start, sq));
 }
 
 void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
@@ -230,6 +219,7 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
         capture_mask = checkers;
         all_mask = push_mask | capture_mask;
     }
+    all_mask &= ~relbb.m_pieces;
 
     // EP capture mask, destination square of pawn for EP capture evade check.
     ull ep_capture_mask = 0;
@@ -257,8 +247,8 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
                       dy = y == ky ? 0 : (y > ky ? 1 : -1);
             pin_mask = bb_sequence(kpos, dx, dy, relbb.t_pieces, false, true);
         }
-        const ull sliding_mask = all_mask & pin_mask;
-        const ull pawn_mask = (all_mask | ep_capture_mask) & pin_mask;
+        const ull sliding_mask = all_mask & pin_mask & ~relbb.m_pieces;
+        const ull pawn_mask = (all_mask | ep_capture_mask) & pin_mask & ~relbb.m_pieces;
 
         // Pawn
         if (Bit::get(*relbb.mp, sq))
