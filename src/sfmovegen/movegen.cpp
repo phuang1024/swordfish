@@ -135,8 +135,8 @@ static inline void get_king_moves(const RelativeBB& relbb, int kx, int ky, ull d
 }
 
 static inline void get_pawn_moves(const RelativeBB& relbb, int x, int y, bool turn, ull mask,
-        std::vector<Move>& r_moves) {
-    // TODO ep
+        const int ep_square, std::vector<Move>& r_moves) {
+    // TODO ep avoid check.
     const int pawn_dir = turn ? 1 : -1;
     const int one_sq_dest = square(x, y + pawn_dir);
     const bool allow_double = ((turn && y == 1) || (!turn && y == 6))
@@ -152,10 +152,13 @@ static inline void get_pawn_moves(const RelativeBB& relbb, int x, int y, bool tu
     dests &= ~relbb.a_pieces;
 
     // Capture moves
+    ull capture_dests = relbb.t_pieces;
+    if (ep_square != -1)
+        capture_dests |= Bit::mask(ep_square);
     int sq;
-    if (x > 0 && Bit::get(relbb.t_pieces, sq = one_sq_dest - 1))
+    if (x > 0 && Bit::get(capture_dests, sq = one_sq_dest - 1))
         dests |= Bit::mask(sq);
-    if (x < 7 && Bit::get(relbb.t_pieces, sq = one_sq_dest + 1))
+    if (x < 7 && Bit::get(capture_dests, sq = one_sq_dest + 1))
         dests |= Bit::mask(sq);
 
     // Add to vector
@@ -250,7 +253,7 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
 
         // Pawn
         if (Bit::get(*relbb.mp, sq))
-            get_pawn_moves(relbb, x, y, pos.turn, sliding_mask, r_moves);
+            get_pawn_moves(relbb, x, y, pos.turn, sliding_mask, pos.ep, r_moves);
 
         // Sliding
         if (Bit::get(*relbb.mb, sq) || Bit::get(*relbb.mq, sq))

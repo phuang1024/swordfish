@@ -61,9 +61,9 @@ void Position::setup_fen(std::string fen) {
         if (ch == '-')
             continue;
         else if ('a' <= ch && ch <= 'h')
-            y = ch - 'a';
+            x = ch - 'a';
         else if ('1' <= ch && ch <= '8')
-            x = ch - '1';
+            y = ch - '1';
         else {
             std::cerr << "sfutils:Position:setup_fen: Invalid EP FEN: " << fen << std::endl;
             throw 0;

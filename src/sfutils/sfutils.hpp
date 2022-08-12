@@ -105,6 +105,23 @@ namespace Bit {
 
 
 /**
+ * Convert X, Y to square code.
+ */
+inline int square(int x, int y) {
+    return x + 8 * y;
+}
+
+inline int in_board(int sq) {
+    return 0 <= sq && sq < 64;
+}
+
+inline int in_board(int x, int y) {
+    return (0 <= x && x < 8)
+        && (0 <= y && y < 8);
+}
+
+
+/**
  * Convert between internal and human-readable notation.
  */
 namespace Ascii {
@@ -176,7 +193,7 @@ namespace Ascii {
      * Convert square str (e.g. "a1") to square code (e.g. 0)
      */
     inline int str2square(std::string str) {
-        return (str[1] - '1') * 8 + (str[0] - 'a');
+        return square(str[1] - '1', str[0] - 'a');
     }
 
     /**
@@ -193,23 +210,6 @@ namespace Ascii {
      * Print move.
      */
     void print(std::ostream& os, const Move& move);
-}
-
-
-/**
- * Convert X, Y to square code.
- */
-inline int square(int x, int y) {
-    return x + 8 * y;
-}
-
-inline int in_board(int sq) {
-    return 0 <= sq && sq < 64;
-}
-
-inline int in_board(int x, int y) {
-    return (0 <= x && x < 8)
-        && (0 <= y && y < 8);
 }
 
 
