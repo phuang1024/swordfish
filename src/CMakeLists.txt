@@ -8,6 +8,7 @@ set(CMAKE_CXX_FLAGS -Wall)
 
 add_subdirectory(sfutils)
 add_subdirectory(sfmovegen)
+add_subdirectory(sfsearch)
 
 configure_file(config.hpp.in config.hpp)
 add_executable(swordfish main.cpp)
@@ -15,9 +16,11 @@ add_executable(swordfish main.cpp)
 target_link_libraries(swordfish PUBLIC
     sfutils
     sfmovegen
+    sfsearch
 )
 target_include_directories(swordfish PUBLIC
     "${PROJECT_BINARY_DIR}"
     "${PROJECT_SOURCE_DIR}/sfutils"
     "${PROJECT_SOURCE_DIR}/sfmovegen"
+    "${PROJECT_SOURCE_DIR}/sfsearch"
 )

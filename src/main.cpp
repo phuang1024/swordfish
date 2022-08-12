@@ -1,8 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "sfmovegen.hpp"
-#include "sfutils.hpp"
+#include "sfsearch.hpp"
 
 
 int main() {
@@ -18,16 +17,10 @@ int main() {
     return 0;
     */
 
-    pos.setup_fen("5r2/8/8/8/8/8/8/R3K2R w KQ - 0 1");
-
-    std::vector<Move> moves;
-    Movegen::get_legal_moves(pos, moves);
+    //pos.setup_fen("5r2/8/8/8/8/8/8/R3K2R w KQ - 0 1");
+    pos.setup_std();
 
     Ascii::print(std::cerr, pos); std::cerr << std::endl;
-
-    std::cerr << moves.size() << " moves:\n";
-    for (auto move: moves) {
-        Ascii::print(std::cerr, move);
-        std::cerr << std::endl;
-    }
+    for (int depth = 1; depth < 7; depth++)
+    std::cerr << "perft, depth=" << depth << ": " << Perft::perft(pos, depth).uci() << std::endl;
 }

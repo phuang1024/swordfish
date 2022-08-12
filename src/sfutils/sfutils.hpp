@@ -291,6 +291,29 @@ public:
     }
 
     /**
+     * Copy other position.
+     */
+    Position(const Position& other) {
+        wp = other.wp;
+        wn = other.wn;
+        wb = other.wb;
+        wr = other.wr;
+        wq = other.wq;
+        wk = other.wk;
+        bp = other.bp;
+        bn = other.bn;
+        bb = other.bb;
+        br = other.br;
+        bq = other.bq;
+        bk = other.bk;
+        turn = other.turn;
+        castling = other.castling;
+        ep = other.ep;
+        moves50 = other.moves50;
+        move = other.move;
+    }
+
+    /**
      * Standard starting chess position.
      */
     void setup_std() {
