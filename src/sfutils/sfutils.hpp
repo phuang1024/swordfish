@@ -34,7 +34,9 @@ constexpr int
     CASTLE_K = 1,
     CASTLE_Q = 2,
     CASTLE_k = 4,
-    CASTLE_q = 8;
+    CASTLE_q = 8,
+    CASTLE_W = CASTLE_K | CASTLE_Q,
+    CASTLE_B = CASTLE_k | CASTLE_q;
 
 // Starting bitboards.
 constexpr ull
@@ -360,6 +362,10 @@ public:
      */
     std::string get_fen() const;
 
+    /**
+     * Doesn't clear other bbs first.
+     * You can do that with set_at(sq, EMPTY); set_at(sq, your_choice);
+     */
     void set_at(int sq, int piece) {
         if (piece == WP) wp = Bit::set(wp, sq);
         else if (piece == WN) wn = Bit::set(wn, sq);
@@ -394,13 +400,80 @@ public:
 
     /**
      * Play the move.
+     * Assumes move is legal.
+     * Otherwise, arbitrary behavior.
      */
     inline void push(const Move& m) {
-        // TODO promo and castling
         // TODO update move50
-        ull& bb = piece_bb(m.from);
-        bb = Bit::set(Bit::unset(bb, m.from), m.to);
 
+        // Erase m.to on all bitboards (capture).
+        set_at(m.to, EMPTY);
+
+        ull& bb = piece_bb(m.from);
+        bb = Bit::unset(bb, m.from);
+        if (m.promo == Promo::NONE) {
+            // Normal move
+            bb = Bit::set(bb, m.to);
+        } else {
+            // Promotion
+            if (turn) {
+                if (m.promo == Promo::KNIGHT) wn = Bit::set(wn, m.to);
+                else if (m.promo == Promo::BISHOP) wb = Bit::set(wb, m.to);
+                else if (m.promo == Promo::ROOK) wr = Bit::set(wr, m.to);
+                else if (m.promo == Promo::QUEEN) wq = Bit::set(wq, m.to);
+            } else {
+                if (m.promo == Promo::KNIGHT) bn = Bit::set(bn, m.to);
+                else if (m.promo == Promo::BISHOP) bb = Bit::set(bb, m.to);
+                else if (m.promo == Promo::ROOK) br = Bit::set(br, m.to);
+                else if (m.promo == Promo::QUEEN) bq = Bit::set(bq, m.to);
+            }
+        }
+
+        // Castling.
+        if (&bb == &wk) {
+            if (m.from == square(4, 0)) {
+                if (m.to == square(6, 0))
+                    wr = Bit::set(Bit::unset(wr, square(7, 0)), square(5, 0));
+                else if (m.to == square(2, 0))
+                    wr = Bit::set(Bit::unset(wr, square(0, 0)), square(3, 0));
+            }
+            castling &= ~CASTLE_W;
+        } else if (&bb == &bk) {
+            if (m.from == square(4, 7)) {
+                if (m.to == square(6, 7))
+                    br = Bit::set(Bit::unset(br, square(7, 7)), square(5, 7));
+                else if (m.to == square(2, 7))
+                    br = Bit::set(Bit::unset(br, square(0, 7)), square(3, 7));
+            }
+            castling &= ~CASTLE_B;
+        }
+        if (&bb == &wr) {
+            if (m.from == square(0, 0)) castling &= ~CASTLE_Q;
+            else if (m.from == square(7, 0)) castling &= ~CASTLE_K;
+        } else if (&bb == &br) {
+            if (m.from == square(0, 7)) castling &= ~CASTLE_q;
+            else if (m.from == square(7, 7)) castling &= ~CASTLE_k;
+        }
+
+        // EP capture.
+        if (m.to == ep) {
+            if (turn) {
+                bp = Bit::unset(bp, m.to - 8);
+            } else {
+                wp = Bit::unset(wp, m.to + 8);
+            }
+        }
+
+        // Change EP square.
+        bool coords_correct = (m.from % 8 == m.to % 8) && abs(m.from / 8 - m.to / 8) == 2;
+        if (coords_correct) {
+            if (turn) ep = m.to - 8;
+            else ep = m.to + 8;
+        } else {
+            ep = -1;
+        }
+
+        // Change turn.
         turn = !turn;
         if (turn)
             move++;

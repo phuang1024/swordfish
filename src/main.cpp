@@ -9,7 +9,9 @@ int main() {
     Position pos;
     pos.setup_std();
     Ascii::print(std::cerr, pos); std::cerr << std::endl;
-    pos.push(Move(12, 28));
+    pos.push(Move(square(4, 1), square(4, 3)));
+    Ascii::print(std::cerr, pos); std::cerr << std::endl;
+    pos.push(Move(square(4, 6), square(4, 4)));
     Ascii::print(std::cerr, pos); std::cerr << std::endl;
     return 0;
 
