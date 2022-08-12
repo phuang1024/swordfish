@@ -110,14 +110,14 @@ static inline void add_pawn_move(std::vector<Move>& moves, int from, int to, ull
     }
 }
 
-static inline void get_king_moves(const RelativeBB& relbb, int kx, int ky, ull danger,
+static inline void get_king_moves(const RelativeBB& relbb, int kx, int ky, ull mask,
         std::vector<Move>& r_moves) {
     const int start = square(kx, ky);
     for (int i = 0; i < 8; i++) {
         const int x = kx + KING_OFFSETS[i][0], y = ky + KING_OFFSETS[i][1];
         if (in_board(x, y)) {
             const int sq = square(x, y);
-            if (!Bit::get(danger, sq))
+            if (Bit::get(mask, sq))
                 r_moves.push_back(Move(start, sq));
         }
     }
@@ -206,12 +206,8 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
     const int kpos = Bit::first(*relbb.mk);
     const int kx = kpos % 8, ky = kpos / 8;
 
-    std::cerr << "attacked\n"; Ascii::print(std::cerr, attacked); std::cerr << std::endl;
-    std::cerr << "checkers\n"; Ascii::print(std::cerr, checkers); std::cerr << std::endl;
-    std::cerr << "pinned\n"; Ascii::print(std::cerr, pinned); std::cerr << std::endl;
-
     // King moves
-    get_king_moves(relbb, kx, ky, attacked, r_moves);
+    get_king_moves(relbb, kx, ky, ~attacked & ~relbb.m_pieces, r_moves);
 
     if (num_checkers >= 2) {
         // Double check, only king moves.
@@ -273,7 +269,21 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
             get_sliding_moves(relbb, x, y, ROOK_OFFSETS, sliding_mask, r_moves);
     }
 
-    // TODO castling
+    // Castling
+    if (num_checkers == 0) {
+        const ull castle_danger = (relbb.a_pieces | attacked) & ~Bit::mask(kpos);
+        if (pos.turn) {
+            if (pos.castling & CASTLE_K && !(castle_danger & CASTLE_SQS_K))
+                r_moves.push_back(Move(square(4, 0), square(6, 0)));
+            if (pos.castling & CASTLE_Q && !(castle_danger & CASTLE_SQS_Q))
+                r_moves.push_back(Move(square(4, 0), square(2, 0)));
+        } else {
+            if (pos.castling & CASTLE_k && !(castle_danger & CASTLE_SQS_k))
+                r_moves.push_back(Move(square(4, 7), square(6, 7)));
+            if (pos.castling & CASTLE_q && !(castle_danger & CASTLE_SQS_q))
+                r_moves.push_back(Move(square(4, 7), square(2, 7)));
+        }
+    }
 }
 
 

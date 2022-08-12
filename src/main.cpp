@@ -18,13 +18,13 @@ int main() {
     return 0;
     */
 
-    pos.setup_fen("8/8/8/K2Pp2r/8/8/8/8 w - e6 0 1");
+    pos.setup_fen("5r2/8/8/8/8/8/8/R3K2R w KQ - 0 1");
 
     std::vector<Move> moves;
     Movegen::get_legal_moves(pos, moves);
 
-    Ascii::print(std::cerr, pos);
-    std::cerr << std::endl;
+    Ascii::print(std::cerr, pos); std::cerr << std::endl;
+
     std::cerr << moves.size() << " moves:\n";
     for (auto move: moves) {
         Ascii::print(std::cerr, move);

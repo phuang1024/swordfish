@@ -37,6 +37,11 @@ constexpr int
     CASTLE_q = 8,
     CASTLE_W = CASTLE_K | CASTLE_Q,
     CASTLE_B = CASTLE_k | CASTLE_q;
+constexpr ull
+    CASTLE_SQS_K = 112ULL,
+    CASTLE_SQS_Q = 28ULL,
+    CASTLE_SQS_k = 8070450532247928832ULL,
+    CASTLE_SQS_q = 2017612633061982208ULL;
 
 // Starting bitboards.
 constexpr ull
