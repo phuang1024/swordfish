@@ -5,6 +5,8 @@
 
 
 int main() {
+    std::cerr << Bit::first(1 << 24) << std::endl;
+
     Position pos;
 
     /*

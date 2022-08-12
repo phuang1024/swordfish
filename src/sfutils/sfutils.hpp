@@ -72,6 +72,17 @@ enum Promo {
  * Bit manipulation functions.
  */
 namespace Bit {
+    constexpr int TABLE_POPCNT[256] = {
+        0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
+        1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
+        1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
+        2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
+        1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
+        2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
+        2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
+        3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,4,5,5,6,5,6,6,7,5,6,6,7,6,7,7,8
+    };
+
     inline ull mask(int i) {
         return 1ULL << i;
     }
@@ -89,22 +100,38 @@ namespace Bit {
     }
 
     inline int popcnt(ull b) {
-        // TODO use a lookup table per 8 bits
         int pop = 0;
-        for (int i = 0; i < 64; i++)
-            pop += get(b, i);
+        for (int i = 0; i < 8; i++) {
+            pop += TABLE_POPCNT[b & 255];
+            b >>= 8;
+        }
         return pop;
     }
 
     /**
+     * Assumes b has only one bit set.
      * Position of first bit set.
      * -1 if no bit set.
      */
     inline int first(ull b) {
-        // TODO use a lookup table per 8 bits.
-        for (int i = 0; i < 64; i++)
-            if (get(b, i))
-                return i;
+        for (int i = 0; i < 8; i++) {
+            int pos = -1;
+            uch n = b & 255;
+            switch (n) {
+                case 1: pos = 0; break;
+                case 2: pos = 1; break;
+                case 4: pos = 2; break;
+                case 8: pos = 3; break;
+                case 16: pos = 4; break;
+                case 32: pos = 5; break;
+                case 64: pos = 6; break;
+                case 128: pos = 7; break;
+            }
+            if (pos != -1)
+                return pos + 8*i;
+
+            b >>= 8;
+        }
         return -1;
     }
 }
