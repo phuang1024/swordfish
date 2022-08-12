@@ -28,10 +28,14 @@ int perft_run(Position& pos, int depth) {
 }
 
 SearchResult perft(Position& pos, int depth) {
-    const int nodes = perft_run(pos, depth);
+    const ull time_start = Time::time();
+
+    const ull nodes = perft_run(pos, depth);
+
     SearchResult res;
     res.data["depth"] = depth;
     res.data["nodes"] = nodes;
+    res.data["nps"] = Time::nps(nodes, Time::time()-time_start);
     return res;
 }
 

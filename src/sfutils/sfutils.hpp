@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <iostream>
 #include <string>
 
@@ -105,6 +106,29 @@ namespace Bit {
             if (get(b, i))
                 return i;
         return -1;
+    }
+}
+
+
+namespace Time {
+    /**
+     * Milliseconds since epoch.
+     */
+    inline ull time() {
+        const auto now = std::chrono::system_clock::now().time_since_epoch();
+        const ull elapse = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+        return elapse;
+    }
+
+    /**
+     * Returns nodes per second.
+     * 1e9 nps if elapse == 0
+     * @param elapse  Milliseconds
+     */
+    inline ull nps(ull nodes, ull elapse) {
+        if (elapse == 0)
+            return (int)1e9;
+        return nodes * 1000 / elapse;
     }
 }
 
