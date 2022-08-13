@@ -1,4 +1,5 @@
 #include <map>
+#include <sstream>
 #include <string>
 
 #include "sfutils.hpp"
@@ -25,6 +26,51 @@ public:
             str += " ";
         }
         return str;
+    }
+};
+
+
+/**
+ * Has base (first word, e.g. "position"), and map of key to int value, e.g. movetime 1000.
+ * Also "Position" attr, only set if it's a position command.
+ */
+class UCICommand {
+public:
+    std::string mode;
+    std::map<std::string, int> args;
+    Position pos;
+
+    UCICommand(std::istream& is) {
+        std::string line;
+        std::getline(is, line);
+
+        std::istringstream iss(line);
+        std::string word;
+
+        if (std::getline(iss, word, ' '))
+            mode = word;
+        else
+            return;
+
+        if (mode == "position") {
+            std::getline(iss, word, ' ');
+            if (word == "startpos") {
+                pos.setup_std();
+            } else if (word == "fen") {
+                std::string fen;
+                for (int i = 0; i < 6; i++) {
+                    std::getline(iss, word, ' ');
+                    fen += word + " ";
+                }
+                pos.setup_fen(fen);
+            }
+
+            if (std::getline(iss, word, ' ') && word == "moves") {
+                while (std::getline(iss, word, ' ')) {
+                    pos.push(Move(word));
+                }
+            }
+        }
     }
 };
 

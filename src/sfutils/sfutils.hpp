@@ -207,11 +207,24 @@ namespace Ascii {
      */
     inline char promo2char(int promo) {
         switch (promo) {
-            case KNIGHT: return 'N';
-            case BISHOP: return 'B';
-            case ROOK: return 'R';
-            case QUEEN: return 'Q';
+            case Promo::KNIGHT: return 'N';
+            case Promo::BISHOP: return 'B';
+            case Promo::ROOK: return 'R';
+            case Promo::QUEEN: return 'Q';
             default: return ' ';
+        }
+    }
+
+    /**
+     * Convert char promo (e.g. 'N') into promo code (e.g. KNIGHT)
+     */
+    inline int char2promo(char promo) {
+        switch (promo) {
+            case 'N': return Promo::KNIGHT;
+            case 'B': return Promo::BISHOP;
+            case 'R': return Promo::ROOK;
+            case 'Q': return Promo::QUEEN;
+            default: return -1;
         }
     }
 
@@ -281,6 +294,15 @@ public:
         this->from = from;
         this->to = to;
         this->promo = promo;
+    }
+
+    Move(std::string uci) {
+        from = Ascii::str2square(uci.substr(0, 2));
+        to = Ascii::str2square(uci.substr(2, 2));
+        if (uci.size() > 4)
+            promo = Ascii::char2promo(uci[4]);
+        else
+            promo = Promo::NONE;
     }
 
     inline std::string uci() const {

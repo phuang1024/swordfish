@@ -5,9 +5,26 @@
 
 
 int main() {
-    std::cerr << Bit::first(1 << 24) << std::endl;
-
     Position pos;
+
+    // UCI loop
+    while (true) {
+        UCICommand cmd(std::cin);
+
+        if (cmd.mode == "quit") {
+            break;
+        } else if (cmd.mode == "d") {
+            Ascii::print(std::cerr, pos);
+        } else if (cmd.mode == "position") {
+            pos = cmd.pos;
+        } else if (cmd.mode == "go") {
+            if (cmd.args.count("perft")) {
+                SearchResult res = Perft::perft(pos, cmd.args["perft"]);
+                std::cout << res.uci() << std::endl;
+            }
+        }
+    }
+
 
     /*
     pos.setup_std();
@@ -17,7 +34,6 @@ int main() {
     pos.push(Move(square(4, 6), square(4, 4)));
     Ascii::print(std::cerr, pos); std::cerr << std::endl;
     return 0;
-    */
 
     //pos.setup_fen("5r2/8/8/8/8/8/8/R3K2R w KQ - 0 1");
     pos.setup_std();
@@ -25,4 +41,5 @@ int main() {
     Ascii::print(std::cerr, pos); std::cerr << std::endl;
     for (int depth = 1; depth < 7; depth++)
     std::cerr << "perft, depth=" << depth << ": " << Perft::perft(pos, depth).uci() << std::endl;
+    */
 }
