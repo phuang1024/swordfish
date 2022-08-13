@@ -262,7 +262,7 @@ namespace Ascii {
      * Convert square str (e.g. "a1") to square code (e.g. 0)
      */
     inline int str2square(std::string str) {
-        return square(str[1] - '1', str[0] - 'a');
+        return square(str[0] - 'a', str[1] - '1');
     }
 
     /**

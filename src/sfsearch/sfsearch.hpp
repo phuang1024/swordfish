@@ -42,7 +42,8 @@ public:
 
     UCICommand(std::istream& is) {
         std::string line;
-        std::getline(is, line);
+        if (!std::getline(is, line))
+            mode = "quit";
 
         std::istringstream iss(line);
         std::string word;
@@ -53,6 +54,7 @@ public:
             return;
 
         if (mode == "position") {
+            // Set up position.
             std::getline(iss, word, ' ');
             if (word == "startpos") {
                 pos.setup_std();
@@ -68,6 +70,16 @@ public:
             if (std::getline(iss, word, ' ') && word == "moves") {
                 while (std::getline(iss, word, ' ')) {
                     pos.push(Move(word));
+                }
+            }
+        } else {
+            // Other args.
+            while (std::getline(iss, word, ' ')) {
+                std::string word2;
+                if (std::getline(iss, word2, ' ')) {
+                    args[word] = std::stoi(word2);
+                } else {
+                    args[word] = 1;
                 }
             }
         }

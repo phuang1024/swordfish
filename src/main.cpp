@@ -1,11 +1,17 @@
 #include <iostream>
 #include <vector>
 
+#include "config.hpp"
 #include "sfsearch.hpp"
 
 
 int main() {
+    // Print program info.
+    std::cerr << "Swordfish v" << VERSION_MAJOR << "." << VERSION_MINOR << "."
+        << VERSION_PATCH << std::endl << std::endl;
+
     Position pos;
+    pos.setup_std();
 
     // UCI loop
     while (true) {
