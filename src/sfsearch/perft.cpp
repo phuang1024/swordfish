@@ -8,7 +8,7 @@
 namespace Perft {
 
 
-int perft_run(Position& pos, int depth) {
+int perft_run(Position& pos, int depth, bool print_each_move = false) {
     if (depth <= 0)
         return 1;
 
@@ -18,11 +18,22 @@ int perft_run(Position& pos, int depth) {
     if (depth == 1)
         return moves.size();
 
-    int nodes = 0;
-    for (const Move& move: moves) {
+    ull nodes = 0;
+    for (int i = 0; i < moves.size(); i++) {
+        const Move& move = moves[i];
+
         Position new_pos = pos;
         new_pos.push(move);
-        nodes += perft_run(new_pos, depth-1);
+        const ull curr_nodes = perft_run(new_pos, depth-1);
+        nodes += curr_nodes;
+
+        if (print_each_move) {
+            SearchResult res;
+            res.data["currmove"] = move.uci();
+            res.data["currmovenumber"] = std::to_string(i + 1);
+            res.data["nodes"] = std::to_string(curr_nodes);
+            std::cout << res.uci() << std::endl;
+        }
     }
     return nodes;
 }
@@ -30,12 +41,12 @@ int perft_run(Position& pos, int depth) {
 SearchResult perft(Position& pos, int depth) {
     const ull time_start = Time::time();
 
-    const ull nodes = perft_run(pos, depth);
+    const ull nodes = perft_run(pos, depth, true);
 
     SearchResult res;
-    res.data["depth"] = depth;
-    res.data["nodes"] = nodes;
-    res.data["nps"] = Time::nps(nodes, Time::time()-time_start);
+    res.data["depth"] = std::to_string(depth);
+    res.data["nodes"] = std::to_string(nodes);
+    res.data["nps"] = std::to_string(Time::nps(nodes, Time::time()-time_start));
     return res;
 }
 

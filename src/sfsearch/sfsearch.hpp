@@ -1,3 +1,4 @@
+#include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
@@ -6,11 +7,11 @@
 
 
 /**
- * Map of std::string key to int value, e.g. depth=5
+ * Map of std::string key to string value, e.g. depth="5"
  */
 class SearchResult {
 public:
-    std::map<std::string, int> data;
+    std::map<std::string, std::string> data;
 
     /**
      * UCI representation of data.
@@ -22,7 +23,7 @@ public:
         for (const auto& [key, value]: data) {
             str += key;
             str += " ";
-            str += std::to_string(value);
+            str += value;
             str += " ";
         }
         return str;
