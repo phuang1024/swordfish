@@ -604,12 +604,13 @@ public:
         }
 
         // Change EP square.
-        bool coords_correct = (m.from % 8 == m.to % 8) && abs(m.from / 8 - m.to / 8) == 2;
-        if (coords_correct) {
-            if (turn) ep = m.to - 8;
-            else ep = m.to + 8;
-        } else {
-            ep = -1;
+        ep = -1;
+        if (&bb == &wp || &bb == &bp) {
+            bool coords_correct = (m.from % 8 == m.to % 8) && abs(m.from / 8 - m.to / 8) == 2;
+            if (coords_correct) {
+                if (turn) ep = m.to - 8;
+                else ep = m.to + 8;
+            }
         }
 
         // Change turn.

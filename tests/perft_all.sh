@@ -5,4 +5,4 @@
 
 set -e
 
-python perft.py --swordfish ../build/swordfish --stockfish $STOCKFISH --maxdepth 5 --fen "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+python perft.py --swordfish ../build/swordfish --stockfish $STOCKFISH --maxdepth 6 --fen "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"

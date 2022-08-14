@@ -203,10 +203,10 @@ static inline void get_sliding_moves(const RelativeBB& relbb, int x, int y, cons
             if (!in_board(cx, cy))
                 break;
             const int sq = square(cx, cy);
-            if (!Bit::get(mask, sq))
-                break;
             if (Bit::get(relbb.m_pieces, sq))
                 break;
+            if (!Bit::get(mask, sq))
+                continue;
             r_moves.push_back(Move(start, sq));
             if (Bit::get(relbb.t_pieces, sq))
                 break;
@@ -235,11 +235,15 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
     ull push_mask = 0xffffffffffffffff;
     ull all_mask = 0xffffffffffffffff;
     if (num_checkers == 1) {
-        const int checker_pos = Bit::first(checkers);
-        const int checker_x = checker_pos % 8, checker_y = checker_pos / 8;
-        const int dx = (checker_x == kx ? 0 : (checker_x > kx ? 1 : -1)),
-                  dy = (checker_y == ky ? 0 : (checker_y > ky ? 1 : -1));
-        push_mask = bb_sequence(kpos, dx, dy, checkers, false, false);
+        if (checkers & (*relbb.tb | *relbb.tr | *relbb.tq)) {
+            const int checker_pos = Bit::first(checkers);
+            const int checker_x = checker_pos % 8, checker_y = checker_pos / 8;
+            const int dx = (checker_x == kx ? 0 : (checker_x > kx ? 1 : -1)),
+                      dy = (checker_y == ky ? 0 : (checker_y > ky ? 1 : -1));
+            push_mask = bb_sequence(kpos, dx, dy, checkers, false, false);
+        } else {
+            push_mask = 0;
+        }
         capture_mask = checkers;
         all_mask = push_mask | capture_mask;
     }

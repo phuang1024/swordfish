@@ -28,11 +28,11 @@ class PerftResult:
 def start_perft(exe, fen, depth):
     proc = Popen(exe, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
 
-    start = time.time()
     proc.stdin.write(f"position fen {fen}\n".encode())
     proc.stdin.write(f"go perft {depth}\n".encode())
     proc.stdin.flush()
     proc.stdin.close()
+    start = time.time()
     proc.wait()
     if proc.returncode != 0:
         print(f"Executable {exe} failed:")
@@ -77,6 +77,7 @@ def read_stockfish(exe, fen, depth):
 
 
 def debug_wrong(sword_exe, stock_exe, fen, depth):
+    print(f"Wrong result at fen {fen}, depth {depth}")
     sword = read_swordfish(sword_exe, fen, depth)
     stock = read_stockfish(stock_exe, fen, depth)
 
@@ -88,6 +89,8 @@ def debug_wrong(sword_exe, stock_exe, fen, depth):
                 board = chess.Board(fen)
                 board.push_uci(sub)
                 return debug_wrong(sword_exe, stock_exe, board.fen(), depth-1)
+
+    raise ValueError("Unknown error.")
 
 def print_move_table(sword_exe, stock_exe, fen):
     sword = read_swordfish(sword_exe, fen, 1).submoves.keys()
