@@ -34,6 +34,7 @@ public:
 /**
  * Has base (first word, e.g. "position"), and map of key to int value, e.g. movetime 1000.
  * Also "Position" attr, only set if it's a position command.
+ * TODO maybe this should be moved to a new library
  */
 class UCICommand {
 public:
@@ -92,9 +93,15 @@ public:
 /**
  * Move generation performance test.
  */
-namespace Perft {
+namespace Search {
     /**
      * nodes: Number of leaf nodes.
      */
     SearchResult perft(Position& pos, int depth);
+
+    /**
+     * Minimax.
+     * pv: Bestmove.
+     */
+    SearchResult search(Position& pos, int depth, bool ret_move = true);
 }

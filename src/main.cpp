@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "config.hpp"
+#include "sfeval.hpp"
 #include "sfsearch.hpp"
 
 
@@ -20,13 +21,19 @@ int main() {
         if (cmd.mode == "quit") {
             break;
         } else if (cmd.mode == "d") {
-            Ascii::print(std::cerr, pos);
+            Ascii::print(std::cout, pos);
+        } else if (cmd.mode == "eval") {
+            const int score = Eval::eval(pos);
+            std::cout << score << " cp (pov white)" << std::endl;
         } else if (cmd.mode == "position") {
             pos = cmd.pos;
         } else if (cmd.mode == "go") {
             if (cmd.args.count("perft")) {
-                SearchResult res = Perft::perft(pos, cmd.args["perft"]);
+                SearchResult res = Search::perft(pos, cmd.args["perft"]);
                 std::cout << res.uci() << std::endl;
+            } else {
+                SearchResult res = Search::search(pos, 1);
+                std::cout << "bestmove " << res.data["pv"] << std::endl;
             }
         }
     }

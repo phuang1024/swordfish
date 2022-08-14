@@ -300,6 +300,13 @@ public:
     uch from, to;
     uch promo;
 
+    /**
+     * NO initialization.
+     * May contain arbitrary values.
+     */
+    Move() {
+    }
+
     Move(uch from, uch to, uch promo = Promo::NONE) {
         this->from = from;
         this->to = to;

@@ -5,7 +5,7 @@
 #include "sfutils.hpp"
 
 
-namespace Perft {
+namespace Search {
 
 
 int perft_run(Position& pos, int depth, bool print_each_move = false) {
