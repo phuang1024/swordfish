@@ -5,6 +5,7 @@ Finds where an error occurs.
 
 import argparse
 import time
+import sys
 from subprocess import Popen, STDOUT, PIPE
 from collections import namedtuple
 
@@ -27,6 +28,7 @@ def start_perft(exe, fen, depth):
     proc = Popen(exe, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
 
     start = time.time()
+    proc.stdin.write(f"position fen {fen}\n".encode())
     proc.stdin.write(f"go perft {depth}\n".encode())
     proc.stdin.flush()
     proc.stdin.close()
@@ -72,6 +74,20 @@ def read_stockfish(exe, fen, depth):
     return res
 
 
+def debug_wrong(sword_exe, stock_exe, fen, depth):
+    sword = read_swordfish(sword_exe, fen, depth)
+    stock = read_stockfish(stock_exe, fen, depth)
+
+    if set(sword.submoves.keys()) != set(stock.submoves.keys()):
+        return fen
+    else:
+        for sub in sword.submoves:
+            if sword.submoves[sub] != stock.submoves[sub]:
+                board = chess.Board(fen)
+                board.push_uci(sub)
+                return debug_wrong(sword_exe, stock_exe, board.fen(), depth-1)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Perft test")
     parser.add_argument("--swordfish", help="Path to the swordfish binary")
@@ -82,7 +98,7 @@ def main():
 
     print("Move generation accuracy and performance test:")
     print("- Position:", args.fen)
-    print("- Depth:", args.maxdepth)
+    print("- Max test depth:", args.maxdepth)
     print()
 
     for depth in range(1, args.maxdepth+1):
@@ -92,8 +108,14 @@ def main():
             print(f"- Depth {depth}: nodes={sword.nodes}, stockfish_nps={stock.nps}, swordfish_nps={sword.nps}")
         else:
             print(f"- Depth {depth}: Incorrect: swordfish_nodes={sword.nodes}, stockfish_nodes={stock.nodes}")
-            break
+            print("Finding wrong position...")
+            wrong = debug_wrong(args.swordfish, args.stockfish, args.fen, depth)
+            print("Wrong position:", wrong)
+            print(chess.Board(wrong))
+            return 1
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
