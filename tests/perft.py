@@ -10,6 +10,7 @@ from subprocess import Popen, STDOUT, PIPE
 from collections import namedtuple
 
 import chess
+from colorama import Fore
 
 
 class PerftResult:
@@ -76,7 +77,6 @@ def read_stockfish(exe, fen, depth):
 
 
 def debug_wrong(sword_exe, stock_exe, fen, depth):
-    print(depth, fen)
     sword = read_swordfish(sword_exe, fen, depth)
     stock = read_stockfish(stock_exe, fen, depth)
 
@@ -93,10 +93,18 @@ def print_move_table(sword_exe, stock_exe, fen):
     sword = read_swordfish(sword_exe, fen, 1).submoves.keys()
     stock = read_stockfish(stock_exe, fen, 1).submoves.keys()
 
-    print(f"UCI    Stockfish   Swordfish")
     moves = set(sword) | set(stock)
     for move in moves:
-        print(f"{move:6} {move in stock}        {move in sword}")
+        good = move in sword and move in stock
+        sys.stdout.write(Fore.GREEN if good else Fore.RED)
+        print(move, end="   ")
+        if good:
+            print("Correct")
+        else:
+            if move in sword:
+                print("Incorrect")
+            else:
+                print("Missing")
 
 
 def main():
@@ -116,13 +124,18 @@ def main():
         sword = read_swordfish(args.swordfish, args.fen, depth)
         stock = read_stockfish(args.stockfish, args.fen, depth)
         if (sword.nodes == stock.nodes):
+            sys.stdout.write(Fore.GREEN)
             print(f"- Depth {depth}: nodes={sword.nodes}, stockfish_nps={stock.nps}, swordfish_nps={sword.nps}")
         else:
+            sys.stdout.write(Fore.RED)
             print(f"- Depth {depth}: Incorrect: swordfish_nodes={sword.nodes}, stockfish_nodes={stock.nodes}")
+
+            sys.stdout.write(Fore.RESET)
             print("Finding wrong position...")
             wrong = debug_wrong(args.swordfish, args.stockfish, args.fen, depth)
             print("Wrong position:", wrong)
             print(chess.Board(wrong))
+            print()
             print_move_table(args.swordfish, args.stockfish, wrong)
             return 1
 
@@ -130,4 +143,6 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    ret = main()
+    sys.stdout.write(Fore.RESET)
+    sys.exit(ret)
