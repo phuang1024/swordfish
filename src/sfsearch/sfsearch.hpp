@@ -70,7 +70,8 @@ public:
 
             if (std::getline(iss, word, ' ') && word == "moves") {
                 while (std::getline(iss, word, ' ')) {
-                    pos.push(Move(word));
+                    const Move m(word);
+                    pos.push(m);
                 }
             }
         } else {

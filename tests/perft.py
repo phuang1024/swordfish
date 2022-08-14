@@ -142,6 +142,9 @@ def main():
             print_move_table(args.swordfish, args.stockfish, wrong)
             return 1
 
+    sys.stdout.write(Fore.BLUE)
+    print("Test passed.")
+    print()
     return 0
 
 

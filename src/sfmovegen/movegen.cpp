@@ -118,17 +118,22 @@ static inline bool add_move(int from, int to, ull mask, std::vector<Move>& r_mov
 /**
  * Adds promo moves if promo.
  */
-static inline void add_pawn_move(std::vector<Move>& moves, int from, int to, ull m_pieces, bool turn) {
+static inline bool add_pawn_move(int from, int to, ull mask, bool turn, std::vector<Move>& r_moves) {
+    if (!Bit::get(mask, to))
+        return false;
+
     const int y = to / 8;
     const bool is_promo = (turn && y == 7) || (!turn && y == 0);
     if (is_promo) {
-        moves.push_back(Move(from, to, Promo::KNIGHT));
-        moves.push_back(Move(from, to, Promo::BISHOP));
-        moves.push_back(Move(from, to, Promo::ROOK));
-        moves.push_back(Move(from, to, Promo::QUEEN));
+        r_moves.push_back(Move(from, to, Promo::KNIGHT));
+        r_moves.push_back(Move(from, to, Promo::BISHOP));
+        r_moves.push_back(Move(from, to, Promo::ROOK));
+        r_moves.push_back(Move(from, to, Promo::QUEEN));
     } else {
-        moves.push_back(Move(from, to));
+        r_moves.push_back(Move(from, to));
     }
+
+    return true;
 }
 
 static inline void get_king_moves(const RelativeBB& relbb, int kx, int ky, ull mask,
@@ -151,8 +156,8 @@ static inline void get_pawn_moves(const RelativeBB& relbb, int x, int y, bool tu
 
     // Push moves
     const ull push_mask = mask & ~relbb.a_pieces;
-    add_move(start, one_sq_dest, push_mask, r_moves);
-    if ((turn && y == 1) || (!turn && y == 6))
+    add_pawn_move(start, one_sq_dest, push_mask, turn, r_moves);
+    if ((turn && y == 1) || (!turn && y == 6))   // Double push
         if (!Bit::get(relbb.a_pieces, one_sq_dest))
             add_move(start, start + 16*pawn_dir, push_mask, r_moves);
 
@@ -174,9 +179,9 @@ static inline void get_pawn_moves(const RelativeBB& relbb, int x, int y, bool tu
     }
     int sq;
     if (x > 0 && Bit::get(capture_dests, sq = one_sq_dest - 1))
-        add_move(start, sq, mask, r_moves);
+        add_pawn_move(start, sq, mask, turn, r_moves);
     if (x < 7 && Bit::get(capture_dests, sq = one_sq_dest + 1))
-        add_move(start, sq, mask, r_moves);
+        add_pawn_move(start, sq, mask, turn, r_moves);
 }
 
 static inline void get_knight_moves(const RelativeBB& relbb, int x, int y, ull mask,
@@ -205,9 +210,8 @@ static inline void get_sliding_moves(const RelativeBB& relbb, int x, int y, cons
             const int sq = square(cx, cy);
             if (Bit::get(relbb.m_pieces, sq))
                 break;
-            if (!Bit::get(mask, sq))
-                continue;
-            r_moves.push_back(Move(start, sq));
+            if (Bit::get(mask, sq))
+                r_moves.push_back(Move(start, sq));
             if (Bit::get(relbb.t_pieces, sq))
                 break;
         }
@@ -295,7 +299,8 @@ void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
 
     // Castling
     if (num_checkers == 0) {
-        const ull castle_danger = (relbb.a_pieces | attacked) & ~Bit::mask(kpos);
+        const ull castle_attacked = attacked & ~Bit::mask(square(1, 0)) & ~Bit::mask(square(1, 7));
+        const ull castle_danger = (relbb.a_pieces | castle_attacked) & ~Bit::mask(kpos);
         if (pos.turn) {
             if (pos.castling & CASTLE_K && !(castle_danger & CASTLE_SQS_K))
                 r_moves.push_back(Move(square(4, 0), square(6, 0)));

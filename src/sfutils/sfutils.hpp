@@ -40,9 +40,9 @@ constexpr int
     CASTLE_B = CASTLE_k | CASTLE_q;
 constexpr ull
     CASTLE_SQS_K = 112ULL,
-    CASTLE_SQS_Q = 28ULL,
+    CASTLE_SQS_Q = 30ULL,
     CASTLE_SQS_k = 8070450532247928832ULL,
-    CASTLE_SQS_q = 2017612633061982208ULL;
+    CASTLE_SQS_q = 2161727821137838080ULL;
 
 // Starting bitboards.
 constexpr ull
@@ -217,10 +217,10 @@ namespace Ascii {
      */
     inline char promo2char(int promo) {
         switch (promo) {
-            case Promo::KNIGHT: return 'N';
-            case Promo::BISHOP: return 'B';
-            case Promo::ROOK: return 'R';
-            case Promo::QUEEN: return 'Q';
+            case Promo::KNIGHT: return 'n';
+            case Promo::BISHOP: return 'b';
+            case Promo::ROOK: return 'r';
+            case Promo::QUEEN: return 'q';
             default: return ' ';
         }
     }
@@ -230,10 +230,10 @@ namespace Ascii {
      */
     inline int char2promo(char promo) {
         switch (promo) {
-            case 'N': return Promo::KNIGHT;
-            case 'B': return Promo::BISHOP;
-            case 'R': return Promo::ROOK;
-            case 'Q': return Promo::QUEEN;
+            case 'n': return Promo::KNIGHT;
+            case 'b': return Promo::BISHOP;
+            case 'r': return Promo::ROOK;
+            case 'q': return Promo::QUEEN;
             default: return -1;
         }
     }
@@ -313,6 +313,13 @@ public:
             promo = Ascii::char2promo(uci[4]);
         else
             promo = Promo::NONE;
+    }
+
+    /**
+     * from == sq || to == sq
+     */
+    inline bool affects(int sq) const {
+        return from == sq || to == sq;
     }
 
     inline std::string uci() const {
@@ -548,11 +555,11 @@ public:
         // Erase m.to on all bitboards (capture).
         set_at(m.to, EMPTY);
 
-        ull& bb = piece_bb(m.from);
-        bb = Bit::unset(bb, m.from);
+        ull& board = piece_bb(m.from);
+        board = Bit::unset(board, m.from);
         if (m.promo == Promo::NONE) {
             // Normal move
-            bb = Bit::set(bb, m.to);
+            board = Bit::set(board, m.to);
         } else {
             // Promotion
             if (turn) {
@@ -569,7 +576,7 @@ public:
         }
 
         // Castling.
-        if (&bb == &wk) {
+        if (&board == &wk) {
             if (m.from == square(4, 0)) {
                 if (m.to == square(6, 0))
                     wr = Bit::set(Bit::unset(wr, square(7, 0)), square(5, 0));
@@ -577,7 +584,7 @@ public:
                     wr = Bit::set(Bit::unset(wr, square(0, 0)), square(3, 0));
             }
             castling &= ~CASTLE_W;
-        } else if (&bb == &bk) {
+        } else if (&board == &bk) {
             if (m.from == square(4, 7)) {
                 if (m.to == square(6, 7))
                     br = Bit::set(Bit::unset(br, square(7, 7)), square(5, 7));
@@ -586,16 +593,13 @@ public:
             }
             castling &= ~CASTLE_B;
         }
-        if (&bb == &wr) {
-            if (m.from == square(0, 0)) castling &= ~CASTLE_Q;
-            else if (m.from == square(7, 0)) castling &= ~CASTLE_K;
-        } else if (&bb == &br) {
-            if (m.from == square(0, 7)) castling &= ~CASTLE_q;
-            else if (m.from == square(7, 7)) castling &= ~CASTLE_k;
-        }
+        if (m.affects(square(0, 0))) castling &= ~CASTLE_Q;
+        else if (m.affects(square(7, 0))) castling &= ~CASTLE_K;
+        else if (m.affects(square(0, 7))) castling &= ~CASTLE_q;
+        else if (m.affects(square(7, 7))) castling &= ~CASTLE_k;
 
         // EP capture.
-        if ((&bb == &wp || &bb == &bp) && m.to == ep) {
+        if ((&board == &wp || &board == &bp) && m.to == ep) {
             if (turn) {
                 bp = Bit::unset(bp, m.to - 8);
             } else {
@@ -605,7 +609,7 @@ public:
 
         // Change EP square.
         ep = -1;
-        if (&bb == &wp || &bb == &bp) {
+        if (&board == &wp || &board == &bp) {
             bool coords_correct = (m.from % 8 == m.to % 8) && abs(m.from / 8 - m.to / 8) == 2;
             if (coords_correct) {
                 if (turn) ep = m.to - 8;
