@@ -18,7 +18,7 @@ int perft_run(Position& pos, int depth, bool print_each_move = false) {
     if (depth == 1) {
         // Print out nodes for each move
         if (print_each_move) {
-            for (int i = 0; i < moves.size(); i++) {
+            for (int i = 0; i < (int)moves.size(); i++) {
                 const Move& move = moves[i];
                 SearchResult res;
                 res.data["currmove"] = move.uci();
@@ -32,7 +32,7 @@ int perft_run(Position& pos, int depth, bool print_each_move = false) {
     }
 
     ull nodes = 0;
-    for (int i = 0; i < moves.size(); i++) {
+    for (int i = 0; i < (int)moves.size(); i++) {
         const Move& move = moves[i];
 
         Position new_pos = pos;
@@ -56,10 +56,12 @@ SearchResult perft(Position& pos, int depth) {
 
     const ull nodes = perft_run(pos, depth, true);
 
+    const ull elapse = Time::elapse(time_start);
     SearchResult res;
     res.data["depth"] = std::to_string(depth);
     res.data["nodes"] = std::to_string(nodes);
-    res.data["nps"] = std::to_string(Time::nps(nodes, Time::time()-time_start));
+    res.data["nps"] = std::to_string(Time::nps(nodes, elapse));
+    res.data["time"] = std::to_string(elapse);
     return res;
 }
 

@@ -2,6 +2,8 @@
 
 
 void Position::setup_fen(std::string fen) {
+    setup_empty();
+
     std::string::iterator it = fen.begin();
     char ch;
 

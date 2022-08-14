@@ -36,6 +36,7 @@ def start_perft(exe, fen, depth):
     if proc.returncode != 0:
         print(f"Executable {exe} failed:")
         print(proc.stdout.read().decode())
+        raise ValueError
 
     elapse = time.time() - start
 
@@ -75,6 +76,7 @@ def read_stockfish(exe, fen, depth):
 
 
 def debug_wrong(sword_exe, stock_exe, fen, depth):
+    print(depth, fen)
     sword = read_swordfish(sword_exe, fen, depth)
     stock = read_stockfish(stock_exe, fen, depth)
 
@@ -86,6 +88,15 @@ def debug_wrong(sword_exe, stock_exe, fen, depth):
                 board = chess.Board(fen)
                 board.push_uci(sub)
                 return debug_wrong(sword_exe, stock_exe, board.fen(), depth-1)
+
+def print_move_table(sword_exe, stock_exe, fen):
+    sword = read_swordfish(sword_exe, fen, 1).submoves.keys()
+    stock = read_stockfish(stock_exe, fen, 1).submoves.keys()
+
+    print(f"UCI    Stockfish   Swordfish")
+    moves = set(sword) | set(stock)
+    for move in moves:
+        print(f"{move:6} {move in stock}        {move in sword}")
 
 
 def main():
@@ -112,6 +123,7 @@ def main():
             wrong = debug_wrong(args.swordfish, args.stockfish, args.fen, depth)
             print("Wrong position:", wrong)
             print(chess.Board(wrong))
+            print_move_table(args.swordfish, args.stockfish, wrong)
             return 1
 
     return 0

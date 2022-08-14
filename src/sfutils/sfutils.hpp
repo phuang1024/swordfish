@@ -100,6 +100,9 @@ namespace Bit {
     }
 
     inline int popcnt(ull b) {
+        if (b == 0)
+            return 0;
+
         int pop = 0;
         for (int i = 0; i < 8; i++) {
             pop += TABLE_POPCNT[b & 255];
@@ -145,6 +148,13 @@ namespace Time {
         const auto now = std::chrono::system_clock::now().time_since_epoch();
         const ull elapse = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
         return elapse;
+    }
+
+    /**
+     * ms elapsed since arg
+     */
+    inline ull elapse(ull t) {
+        return time() - t;
     }
 
     /**
@@ -387,9 +397,21 @@ public:
     }
 
     /**
+     * Setup everything empty.
+     */
+    inline void setup_empty() {
+        wp = wn = wb = wr = wq = wk = bp = bn = bb = br = bq = bk = 0;
+        turn = false;
+        castling = 0;
+        ep = -1;
+        moves50 = 0;
+        move = 0;
+    }
+
+    /**
      * Standard starting chess position.
      */
-    void setup_std() {
+    inline void setup_std() {
         wp = START_WP;
         wn = START_WN;
         wb = START_WB;
@@ -573,7 +595,7 @@ public:
         }
 
         // EP capture.
-        if (m.to == ep) {
+        if ((&bb == &wp || &bb == &bp) && m.to == ep) {
             if (turn) {
                 bp = Bit::unset(bp, m.to - 8);
             } else {

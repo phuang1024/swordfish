@@ -57,7 +57,6 @@ void board_info(bool turn, const RelativeBB& relbb, ull& r_attacked, ull& r_chec
     const ull a_pieces_nok = relbb.m_pieces | t_pieces_nok;
     const int tkpos = Bit::first(*relbb.tk);
 
-    ull sliding_attacks = 0;  // Used to compute pins.
     for (int i = 0; i < 64; i++) {
         const int x = i % 8, y = i / 8;
         ull attacks = 0;
@@ -71,11 +70,9 @@ void board_info(bool turn, const RelativeBB& relbb, ull& r_attacked, ull& r_chec
         }
         if (Bit::get(*relbb.mb, i) || Bit::get(*relbb.mq, i)) {
             attacks |= attacks_sliding(x, y, BISHOP_OFFSETS, a_pieces_nok);
-            sliding_attacks |= attacks;
         }
         if (Bit::get(*relbb.mr, i) || Bit::get(*relbb.mq, i)) {
             attacks |= attacks_sliding(x, y, ROOK_OFFSETS, a_pieces_nok);
-            sliding_attacks |= attacks;
         }
 
         r_attacked |= attacks;
@@ -83,14 +80,26 @@ void board_info(bool turn, const RelativeBB& relbb, ull& r_attacked, ull& r_chec
             r_checkers = Bit::set(r_checkers, i);
     }
 
-    // Compute sliding attacks from enemy king.
-    ull king_sliding = 0;
-    for (int i = 0; i < 4; i++) {
-        king_sliding |= bb_sequence(tkpos, KING_OFFSETS[i][0], KING_OFFSETS[i][1], a_pieces_nok,
-            false, true);
-    }
+    // Compute pins
+    for (int i = 0; i < 8; i++) {
+        const int dx = KING_OFFSETS[i][0], dy = KING_OFFSETS[i][1];
+        const ull line = bb_sequence(tkpos, dx, dy, relbb.m_pieces, false, true);
+        if (line & relbb.m_pieces) {
+            ull poi = *relbb.mq;  // Pieces of interest (can pin this direction).
+            if (dx == 0 || dy == 0)
+                poi |= *relbb.mr;
+            else
+                poi |= *relbb.mb;
 
-    r_pinned = sliding_attacks & king_sliding & t_pieces_nok;
+            if (line & poi) {
+                const ull in_middle = line & relbb.t_pieces;
+                if (Bit::popcnt(in_middle) == 1) {
+                    const int sq = Bit::first(in_middle);
+                    r_pinned = Bit::set(r_pinned, sq);
+                }
+            }
+        }
+    }
 }
 
 
@@ -142,8 +151,9 @@ static inline void get_pawn_moves(const RelativeBB& relbb, int x, int y, bool tu
 
     // Push moves
     const ull push_mask = mask & ~relbb.a_pieces;
-    if (add_move(start, one_sq_dest, push_mask, r_moves))
-        if ((turn && y == 1) || (!turn && y == 6))
+    add_move(start, one_sq_dest, push_mask, r_moves);
+    if ((turn && y == 1) || (!turn && y == 6))
+        if (!Bit::get(relbb.a_pieces, one_sq_dest))
             add_move(start, start + 16*pawn_dir, push_mask, r_moves);
 
     // Capture moves
