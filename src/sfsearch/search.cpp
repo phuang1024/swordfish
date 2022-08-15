@@ -16,10 +16,10 @@ static int score_search(Position& pos, int depth) {
         return pos.turn ? score : -score;
     }
 
-    int max_score = -1e9;
-
     std::vector<Move> moves;
     Movegen::get_legal_moves(pos, moves);
+
+    int max_score = -1e9;
     for (const Move& move: moves) {
         Position new_pos = pos;
         new_pos.push(move);
@@ -34,11 +34,7 @@ static int score_search(Position& pos, int depth) {
 
 SearchResult search(Position& pos, int depth) {
     SearchResult res;
-
-    const int score = score_search(pos, depth);
-    res.data["cp"] = std::to_string(score);
     res.data["depth"] = std::to_string(depth);
-    return res;
 
     std::vector<Move> moves;
     Movegen::get_legal_moves(pos, moves);
@@ -49,7 +45,7 @@ SearchResult search(Position& pos, int depth) {
         Position new_pos = pos;
         new_pos.push(move);
 
-        const int score = Eval::eval(new_pos);
+        const int score = -score_search(new_pos, depth);
         if (score > best_score) {
             best_score = score;
             best_move = move;
@@ -57,6 +53,7 @@ SearchResult search(Position& pos, int depth) {
     }
 
     res.data["pv"] = best_move.uci();
+    res.data["cp"] = std::to_string(best_score);
     return res;
 }
 
