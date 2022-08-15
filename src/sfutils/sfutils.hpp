@@ -140,6 +140,21 @@ namespace Bit {
 }
 
 
+namespace Random {
+    /**
+     * Returns a random ULL. Range is all possible.
+     */
+    inline ull randull() {
+        ull x = 0;
+        for (int i = 0; i < 8; i++) {
+            const ull r = rand() & 255;
+            x |= r << (8*i);
+        }
+        return x;
+    }
+}
+
+
 namespace Time {
     /**
      * Milliseconds since epoch.
