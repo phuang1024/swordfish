@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -104,4 +106,74 @@ namespace Search {
      * pv: Bestmove.
      */
     SearchResult search(Position& pos, int depth);
+}
+
+
+/**
+ * Call Transposition::init() before using.
+ */
+namespace Transposition {
+    static bool inited = false;
+    static ull HASH_PIECES[12][64],
+               HASH_CASTLE[16],
+               HASH_EP[8],
+               HASH_TURN[2];
+
+    /**
+     * Transposition entry.
+     */
+    struct TP {
+        Position pos;
+        uch depth;
+        int score;
+    };
+
+    /**
+     * Transposition table.
+     */
+    struct TPTable {
+        TP* table;
+        int size;
+
+        ~TPTable() {
+            delete[] table;
+        }
+
+        TPTable(int size) {
+            this->size = size;
+            table = new TP[size];
+        }
+    };
+
+    inline void init() {
+        if (!inited) {
+            // Set hash bits.
+            for (int i = 0; i < 12; i++)
+                for (int j = 0; j < 64; j++)
+                    HASH_PIECES[i][j] = Random::randull();
+            for (int i = 0; i < 16; i++)
+                HASH_CASTLE[i] = Random::randull();
+            for (int i = 0; i < 8; i++)
+                HASH_EP[i] = Random::randull();
+            for (int i = 0; i < 2; i++)
+                HASH_TURN[i] = Random::randull();
+        }
+
+        inited = true;
+    }
+
+    inline ull hash(const Position& pos) {
+        ull digest = 0;
+
+        for (int sq = 0; sq < 64; sq++) {
+            const int piece = pos.piece_at(sq);
+            if (piece != EMPTY) {
+                digest ^= HASH_PIECES[piece-1][sq];
+            }
+        }
+        digest ^= HASH_CASTLE[pos.castling];
+        digest ^= HASH_EP[pos.ep % 8];
+        digest ^= HASH_TURN[pos.turn];
+        return digest;
+    }
 }

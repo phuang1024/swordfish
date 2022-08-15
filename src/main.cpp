@@ -12,6 +12,8 @@ int main() {
     std::cerr << "Swordfish v" << VERSION_MAJOR << "." << VERSION_MINOR << "."
         << VERSION_PATCH << std::endl << std::endl;
 
+    Transposition::init();
+
     Position pos;
     pos.setup_std();
 
@@ -23,6 +25,7 @@ int main() {
             break;
         } else if (cmd.mode == "d") {
             Ascii::print(std::cout, pos);
+            std::cout << "Hash: " << Transposition::hash(pos) << std::endl << std::endl;
         } else if (cmd.mode == "eval") {
             const int score = Eval::eval(pos);
             std::cout << score << " cp (pov white)" << std::endl;
