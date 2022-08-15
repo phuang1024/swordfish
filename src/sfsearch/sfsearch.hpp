@@ -103,5 +103,5 @@ namespace Search {
      * Minimax.
      * pv: Bestmove.
      */
-    SearchResult search(Position& pos, int depth, bool ret_move = true);
+    SearchResult search(Position& pos, int depth);
 }
