@@ -10,7 +10,7 @@ namespace Search {
 /**
  * Returns best score.
  */
-static int score_search(Position& pos, int depth, ull& r_nodes) {
+static int score_search(Position& pos, int depth, int alpha, int beta, ull& r_nodes) {
     if (depth == 0) {
         const int score = Eval::eval(pos);
         return pos.turn ? score : -score;
@@ -20,16 +20,18 @@ static int score_search(Position& pos, int depth, ull& r_nodes) {
     Movegen::get_legal_moves(pos, moves);
     r_nodes += moves.size();
 
-    int max_score = -1e9;
     for (const Move& move: moves) {
         Position new_pos = pos;
         new_pos.push(move);
-        const int score = -score_search(new_pos, depth-1, r_nodes);
-        if (score > max_score)
-            max_score = score;
+
+        const int score = -score_search(new_pos, depth-1, -beta, -alpha, r_nodes);
+        if (score >= beta)
+            return beta;
+        if (score > alpha)
+            alpha = score;
     }
 
-    return max_score;
+    return alpha;
 }
 
 
@@ -49,7 +51,7 @@ SearchResult search(Position& pos, int depth) {
         Position new_pos = pos;
         new_pos.push(move);
 
-        const int score = -score_search(new_pos, depth, nodes);
+        const int score = -score_search(new_pos, depth, -1e9, 1e9, nodes);
         if (score > best_score) {
             best_score = score;
             best_move = move;
