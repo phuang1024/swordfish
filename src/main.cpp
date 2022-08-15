@@ -39,25 +39,9 @@ int main() {
                 SearchResult res = Search::perft(pos, cmd.args["perft"]);
                 std::cout << res.uci() << std::endl;
             } else {
-                const ull time_start = Time::time();
-                const int maxdepth = cmd.args.count("depth") ? cmd.args["depth"] : -1;
-
-                SearchResult res;
-                for (int depth = 1; ; depth++) {
-                    res = Search::search(pos, depth);
-                    std::cout << res.uci() << std::endl;
-
-                    if (maxdepth != -1) {
-                        if (depth >= maxdepth) {
-                            break;
-                        }
-                    } else {
-                        if (Time::elapse(time_start) > 1000)
-                            break;
-                    }
-                }
-
-                std::cout << "bestmove " << res.data["pv"] << std::endl;
+                const int maxdepth = cmd.args.count("depth") ? cmd.args["depth"] : 5;
+                const Move bestmove = Search::search(pos, maxdepth);
+                std::cout << "bestmove " << bestmove.uci() << std::endl;
             }
         }
     }

@@ -4,6 +4,15 @@
 namespace Eval {
 
 
+/**
+ * Checks if the game finished (checkmate, stalemate, draw).
+ * @return  Large negative if black wins, large positive if white wins, 0 if draw.
+ */
+static inline int check_eog(bool turn, int move_count) {
+    if (move_count == 0) {
+    }
+}
+
 static inline int material(const Position& pos) {
     int score = 0;
     score += 100 * (Bit::popcnt(pos.wp) - Bit::popcnt(pos.bp));
