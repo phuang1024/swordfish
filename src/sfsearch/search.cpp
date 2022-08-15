@@ -3,6 +3,9 @@
 #include "sfsearch.hpp"
 #include "sfutils.hpp"
 
+using Transposition::TP;
+using Transposition::TPTable;
+
 
 namespace Search {
 
@@ -10,7 +13,8 @@ namespace Search {
 /**
  * From https://www.chessprogramming.org/Quiescence_Search
  */
-static int quiesce_search(Position& pos, int alpha, int beta, int my_depth, int& r_maxdepth, ull& r_nodes) {
+static int quiesce_search(Position& pos, int alpha, int beta, int my_depth,
+        int& r_maxdepth, ull& r_nodes) {
     if (my_depth > r_maxdepth)
         r_maxdepth = my_depth;
 
@@ -48,7 +52,22 @@ static int quiesce_search(Position& pos, int alpha, int beta, int my_depth, int&
 /**
  * Returns best score.
  */
-static int score_search(Position& pos, int depth, int alpha, int beta, int& r_maxdepth, ull& r_nodes) {
+static int score_search(TPTable& tptable, Position& pos, int depth, int alpha, int beta,
+        int& r_maxdepth, ull& r_nodes) {
+    const ull hash = Transposition::hash(pos);
+    TP* tp = tptable.get(hash);
+    if (tp->depth >= depth) {
+        if (pos == tp->pos) {
+            return tp->score;
+        }
+        /*
+        if (tp->score >= beta)
+            return beta;
+        if (tp->score > alpha)
+            alpha = tp->score;
+        */
+    }
+
     if (depth == 0) {
         const int score = quiesce_search(pos, alpha, beta, 0, r_maxdepth, r_nodes);
         return score;
@@ -62,19 +81,27 @@ static int score_search(Position& pos, int depth, int alpha, int beta, int& r_ma
         Position new_pos = pos;
         new_pos.push(move);
 
-        const int score = -score_search(new_pos, depth-1, -beta, -alpha, r_maxdepth, r_nodes);
+        const int score = -score_search(tptable, new_pos, depth-1, -beta, -alpha, r_maxdepth, r_nodes);
         if (score >= beta)
             return beta;
         if (score > alpha)
             alpha = score;
     }
 
+    if (depth > tp->depth) {
+        tp->pos = pos;
+        tp->depth = depth;
+        tp->score = alpha;
+    }
     return alpha;
 }
 
 
 SearchResult search(Position& pos, int depth) {
     const ull time_start = Time::time();
+
+    Transposition::init();
+    TPTable tptable;
 
     std::vector<Move> moves;
     Movegen::get_legal_moves(pos, moves);
@@ -87,7 +114,7 @@ SearchResult search(Position& pos, int depth) {
         Position new_pos = pos;
         new_pos.push(move);
 
-        const int score = -score_search(new_pos, depth, -1e9, 1e9, max_quie_depth, nodes);
+        const int score = -score_search(tptable, new_pos, depth, -1e9, 1e9, max_quie_depth, nodes);
         if (score > best_score) {
             best_score = score;
             best_move = move;

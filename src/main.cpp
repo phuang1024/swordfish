@@ -12,8 +12,6 @@ int main() {
     std::cerr << "Swordfish v" << VERSION_MAJOR << "." << VERSION_MINOR << "."
         << VERSION_PATCH << std::endl << std::endl;
 
-    Transposition::init();
-
     Position pos;
     pos.setup_std();
 
@@ -25,7 +23,6 @@ int main() {
             break;
         } else if (cmd.mode == "d") {
             Ascii::print(std::cout, pos);
-            std::cout << "Hash: " << Transposition::hash(pos) << std::endl << std::endl;
         } else if (cmd.mode == "eval") {
             const int score = Eval::eval(pos);
             std::cout << score << " cp (pov white)" << std::endl;
@@ -43,14 +40,21 @@ int main() {
                 std::cout << res.uci() << std::endl;
             } else {
                 const ull time_start = Time::time();
+                const int maxdepth = cmd.args.count("depth") ? cmd.args["depth"] : -1;
 
                 SearchResult res;
                 for (int depth = 1; ; depth++) {
                     res = Search::search(pos, depth);
                     std::cout << res.uci() << std::endl;
 
-                    if (Time::elapse(time_start) > 1000)
-                        break;
+                    if (maxdepth != -1) {
+                        if (depth >= maxdepth) {
+                            break;
+                        }
+                    } else {
+                        if (Time::elapse(time_start) > 1000)
+                            break;
+                    }
                 }
 
                 std::cout << "bestmove " << res.data["pv"] << std::endl;

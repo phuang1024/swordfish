@@ -465,6 +465,28 @@ public:
      */
     void setup_fen(std::string fen);
 
+    friend inline bool operator==(const Position& lhs, const Position& rhs) {
+        return (
+            lhs.wp == rhs.wp &&
+            lhs.wn == rhs.wn &&
+            lhs.wb == rhs.wb &&
+            lhs.wr == rhs.wr &&
+            lhs.wq == rhs.wq &&
+            lhs.wk == rhs.wk &&
+            lhs.bp == rhs.bp &&
+            lhs.bn == rhs.bn &&
+            lhs.bb == rhs.bb &&
+            lhs.br == rhs.br &&
+            lhs.bq == rhs.bq &&
+            lhs.bk == rhs.bk &&
+            lhs.turn == rhs.turn &&
+            lhs.castling == rhs.castling &&
+            lhs.ep == rhs.ep //&&
+            //lhs.moves50 == rhs.moves50 &&
+            //lhs.move == rhs.move
+        );
+    }
+
     /**
      * Get piece code at position.
      */

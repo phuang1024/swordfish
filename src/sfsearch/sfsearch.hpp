@@ -93,23 +93,6 @@ public:
 
 
 /**
- * Move generation performance test.
- */
-namespace Search {
-    /**
-     * nodes: Number of leaf nodes.
-     */
-    SearchResult perft(Position& pos, int depth);
-
-    /**
-     * Minimax.
-     * pv: Bestmove.
-     */
-    SearchResult search(Position& pos, int depth);
-}
-
-
-/**
  * Call Transposition::init() before using.
  */
 namespace Transposition {
@@ -124,8 +107,13 @@ namespace Transposition {
      */
     struct TP {
         Position pos;
-        uch depth;
+        char depth;
         int score;
+
+        TP() {
+            // This means unitialized
+            depth = -1;
+        }
     };
 
     /**
@@ -139,9 +127,13 @@ namespace Transposition {
             delete[] table;
         }
 
-        TPTable(int size) {
+        TPTable(int size = 1e6 + 1) {
             this->size = size;
             table = new TP[size];
+        }
+
+        TP* get(ull hash) {
+            return &table[hash % size];
         }
     };
 
@@ -176,4 +168,21 @@ namespace Transposition {
         digest ^= HASH_TURN[pos.turn];
         return digest;
     }
+}
+
+
+/**
+ * Move generation performance test.
+ */
+namespace Search {
+    /**
+     * nodes: Number of leaf nodes.
+     */
+    SearchResult perft(Position& pos, int depth);
+
+    /**
+     * Minimax.
+     * pv: Bestmove.
+     */
+    SearchResult search(Position& pos, int depth);
 }
