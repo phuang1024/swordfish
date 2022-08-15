@@ -82,7 +82,7 @@ static int score_search(TPTable& tptable, Position& pos, int depth, int alpha, i
 }
 
 
-static void root_search(TPTable& tptable, Position& pos, int depth,
+static void root_search(TPTable& tptable, Position& pos, int depth, int alpha, int beta,
         Move& r_bestmove, int& r_bestscore) {
     std::vector<Move> moves;
     Movegen::get_legal_moves(pos, moves);
@@ -92,8 +92,12 @@ static void root_search(TPTable& tptable, Position& pos, int depth,
         new_pos.push(move);
 
         const int score = -score_search(tptable, new_pos, depth, -1e9, 1e9);
-        if (score > r_bestscore) {
-            r_bestscore = score;
+        if (score >= beta) {
+            r_bestscore = beta;
+            return;
+        }
+        if (score > alpha) {
+            alpha = score;
             r_bestmove = move;
         }
     }
@@ -108,10 +112,21 @@ Move search(Position& pos, int maxdepth) {
     int r_bestscore;
     for (int depth = 1; depth <= maxdepth; depth++) {
         const ull time_start = Time::time();
-        r_bestscore = -1e9;
-        root_search(tptable, pos, depth, r_bestmove, r_bestscore);
-        const ull elapse = Time::elapse(time_start);
 
+        // Aspiration window.
+        int upper = 10, lower = 10;
+        while (true) {
+            int alpha = r_bestscore - lower, beta = r_bestscore + upper;
+            root_search(tptable, pos, depth, alpha, beta, r_bestmove, r_bestscore);
+            if (r_bestscore == alpha)
+                lower *= 2;
+            else if (r_bestscore == beta)
+                upper *= 2;
+            else
+                break;
+        }
+
+        const ull elapse = Time::elapse(time_start);
         SearchResult res;
         res.data["depth"] = std::to_string(depth);
         //res.data["seldepth"] = std::to_string(depth+max_quie_depth);
