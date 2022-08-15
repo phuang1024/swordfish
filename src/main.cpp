@@ -25,6 +25,12 @@ int main() {
         } else if (cmd.mode == "eval") {
             const int score = Eval::eval(pos);
             std::cout << score << " cp (pov white)" << std::endl;
+        } else if (cmd.mode == "isready") {
+            std::cout << "readyok" << std::endl;
+        } else if (cmd.mode == "uci") {
+            std::cout << "uciok" << std::endl;
+        } else if (cmd.mode == "ucinewgame") {
+            pos.setup_std();
         } else if (cmd.mode == "position") {
             pos = cmd.pos;
         } else if (cmd.mode == "go") {
