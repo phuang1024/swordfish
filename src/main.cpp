@@ -4,6 +4,7 @@
 
 #include "config.hpp"
 #include "sfeval.hpp"
+#include "sfmovegen.hpp"
 #include "sfsearch.hpp"
 
 
@@ -24,7 +25,9 @@ int main() {
         } else if (cmd.mode == "d") {
             Ascii::print(std::cout, pos);
         } else if (cmd.mode == "eval") {
-            const int score = Eval::eval(pos);
+            std::vector<Move> moves;
+            Movegen::get_legal_moves(pos, moves);
+            const int score = Eval::eval(pos, moves.size());
             std::cout << score << " cp (pov white)" << std::endl;
         } else if (cmd.mode == "isready") {
             std::cout << "readyok" << std::endl;

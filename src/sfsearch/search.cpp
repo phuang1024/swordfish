@@ -14,16 +14,18 @@ namespace Search {
  * From https://www.chessprogramming.org/Quiescence_Search
  */
 static int quiesce_search(Position& pos, int alpha, int beta) {
-    int stand_pat = Eval::eval(pos) * (pos.turn ? 1 : -1);
+    std::vector<Move> moves;
+    Movegen::get_legal_moves(pos, moves);
+
+    int stand_pat = Eval::eval(pos, moves.size()) * (pos.turn ? 1 : -1);
+    if (moves.size() == 0)
+        return stand_pat;
     if (stand_pat >= beta)
         return beta;
     if (alpha < stand_pat)
         alpha = stand_pat;
 
     const ull t_pieces = pos.relative_bb(pos.turn).t_pieces;
-
-    std::vector<Move> moves;
-    Movegen::get_legal_moves(pos, moves);
 
     for (const Move& move: moves) {
         if (!Bit::get(t_pieces, move.to))
@@ -47,6 +49,15 @@ static int quiesce_search(Position& pos, int alpha, int beta) {
  * Returns best score.
  */
 static int score_search(TPTable& tptable, Position& pos, int depth, int alpha, int beta) {
+    std::vector<Move> moves;
+    Movegen::get_legal_moves(pos, moves);
+
+    int stand_pat = Eval::eval(pos, moves.size()) * (pos.turn ? 1 : -1);
+    if (moves.size() == 0)
+        return stand_pat;
+    if (stand_pat >= beta)
+        return beta;
+
     const ull hash = Transposition::hash(pos);
     TP* tp = tptable.get(hash);
     bool tp_equal = false;
@@ -61,8 +72,6 @@ static int score_search(TPTable& tptable, Position& pos, int depth, int alpha, i
         return score;
     }
 
-    std::vector<Move> moves;
-    Movegen::get_legal_moves(pos, moves);
     /* Move ordering
     if (tp_equal) {
         moves.push_back(tp->bestmove);
@@ -131,9 +140,9 @@ Move search(Position& pos, int maxdepth) {
         while (true) {
             int alpha = r_bestscore - lower, beta = r_bestscore + upper;
             root_search(tptable, pos, depth, alpha, beta, r_bestmove, r_bestscore);
-            if (r_bestscore == alpha)
+            if (r_bestscore <= alpha)
                 lower *= 2;
-            else if (r_bestscore == beta)
+            else if (r_bestscore >= beta)
                 upper *= 2;
             else
                 break;

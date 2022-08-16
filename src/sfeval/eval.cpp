@@ -10,7 +10,13 @@ namespace Eval {
  */
 static inline int check_eog(bool turn, int move_count) {
     if (move_count == 0) {
+        if (turn)
+            return -MATE_SCORE;
+        else
+            return MATE_SCORE;
     }
+    // TODO stalemate check
+    return 123456789;   // No eog code.
 }
 
 static inline int material(const Position& pos) {
@@ -23,7 +29,11 @@ static inline int material(const Position& pos) {
     return score;
 }
 
-int eval(const Position& pos) {
+int eval(const Position& pos, int move_count) {
+    const int eog = check_eog(pos.turn, move_count);
+    if (eog != 123456789)
+        return eog;
+
     return material(pos);
 }
 
