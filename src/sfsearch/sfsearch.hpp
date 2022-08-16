@@ -109,6 +109,7 @@ namespace Transposition {
         Position pos;
         char depth;
         int score;
+        Move bestmove;
 
         TP() {
             // This means unitialized

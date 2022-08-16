@@ -39,7 +39,7 @@ int main() {
                 SearchResult res = Search::perft(pos, cmd.args["perft"]);
                 std::cout << res.uci() << std::endl;
             } else {
-                const int maxdepth = cmd.args.count("depth") ? cmd.args["depth"] : 5;
+                const int maxdepth = cmd.args.count("depth") ? cmd.args["depth"] : 4;
                 const Move bestmove = Search::search(pos, maxdepth);
                 std::cout << "bestmove " << bestmove.uci() << std::endl;
             }

@@ -49,8 +49,10 @@ static int quiesce_search(Position& pos, int alpha, int beta) {
 static int score_search(TPTable& tptable, Position& pos, int depth, int alpha, int beta) {
     const ull hash = Transposition::hash(pos);
     TP* tp = tptable.get(hash);
-    if (tp->depth >= depth) {
-        if (pos == tp->pos)
+    bool tp_equal = false;
+    if (tp->depth != -1) {
+        tp_equal = pos == tp->pos;
+        if (tp_equal && tp->depth >= depth)
             return tp->score;
     }
 
@@ -61,22 +63,31 @@ static int score_search(TPTable& tptable, Position& pos, int depth, int alpha, i
 
     std::vector<Move> moves;
     Movegen::get_legal_moves(pos, moves);
+    /* Move ordering
+    if (tp_equal) {
+        moves.push_back(tp->bestmove);
+    }*/
 
-    for (const Move& move: moves) {
+    Move bestmove(0, 0);
+    for (int i = moves.size() - 1; i >= 0; i--) {
+        const Move& move = moves[i];
         Position new_pos = pos;
         new_pos.push(move);
 
         const int score = -score_search(tptable, new_pos, depth-1, -beta, -alpha);
         if (score >= beta)
             return beta;
-        if (score > alpha)
+        if (score > alpha) {
+            bestmove = move;
             alpha = score;
+        }
     }
 
-    if (depth > tp->depth) {
+    if (bestmove.from != 0 && bestmove.to != 0 && depth > tp->depth) {
         tp->pos = pos;
         tp->depth = depth;
         tp->score = alpha;
+        tp->bestmove = bestmove;
     }
     return alpha;
 }
@@ -101,6 +112,8 @@ static void root_search(TPTable& tptable, Position& pos, int depth, int alpha, i
             r_bestmove = move;
         }
     }
+
+    r_bestscore = alpha;
 }
 
 
@@ -109,7 +122,7 @@ Move search(Position& pos, int maxdepth) {
     TPTable tptable;
 
     Move r_bestmove(0, 0);
-    int r_bestscore;
+    int r_bestscore = 0;
     for (int depth = 1; depth <= maxdepth; depth++) {
         const ull time_start = Time::time();
 
