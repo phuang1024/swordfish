@@ -30,7 +30,7 @@ static void unified_search(
         bool is_root, bool is_quiesce,
         int& r_eval, Move& r_bestmove, ull& r_nodes, int& r_maxdepth)
 {
-    if (Time::elapse(time_start) > movetime)
+    if (maxdepth != 1 && Time::elapse(time_start) > movetime)
         return;
 
     std::vector<Move> legal_moves;
@@ -146,7 +146,8 @@ Move search(Position& pos, int maxdepth, int movetime) {
         int max_search_depth = 0;
 
         // Aspiration window.
-        int curr_best_eval;   // Best eval for this depth.
+        int curr_best_eval;
+        Move curr_best_move;
         int lower, upper;
         lower = upper = (depth == 1 ? 1e9 : 10);
 
@@ -156,7 +157,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
                     time_start, tptable, pos, depth, 0, movetime,
                     alpha, beta,
                     true, false,
-                    curr_best_eval, best_move, nodes, max_search_depth);
+                    curr_best_eval, curr_best_move, nodes, max_search_depth);
 
             // Increase window if fail.
             if (curr_best_eval <= alpha)
@@ -170,6 +171,8 @@ Move search(Position& pos, int maxdepth, int movetime) {
             break;
 
         best_eval = curr_best_eval;
+        best_move = curr_best_move;
+
         SearchResult res;
         res.data["depth"] = std::to_string(depth);
         res.data["seldepth"] = std::to_string(max_search_depth);

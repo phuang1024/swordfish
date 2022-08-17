@@ -43,7 +43,6 @@ int main() {
                 std::cout << res.uci() << std::endl;
             } else {
                 const int movetime = Search::get_movetime(pos, cmd.args);
-                std::cerr << "time " << movetime << std::endl;
                 const int maxdepth = cmd.args.count("depth") ? cmd.args["depth"] : 1000;
                 const Move bestmove = Search::search(pos, maxdepth, movetime);
                 std::cout << "bestmove " << bestmove.uci() << std::endl;
