@@ -12,31 +12,33 @@ namespace Search {
 
 /**
  * Alpha beta negamax search that can act like:
- * * Root node: Sets best move as well.
- * * Normal search: Normal.
- * * Quiescence search: Evaluates when position is quiet.
+ * * Root node: Sets both r_eval and r_bestmove.
+ * * Normal search: Sets r_eval, ignores r_bestmove.
+ * * Quiescence search: Evaluates as soon as position is quiet.
  *
- * Algorithms implemented using pseudocode from https://chessprogramming.org
+ * Some algorithms implemented using pseudocode from https://chessprogramming.org
  *
  * @param pos  Position to search on.
  * @param maxdepth  Max depth of normal search (quiesce if exceeds).
  * @param mydepth  Depth of this node.
  * @param r_eval  Eval of this node relative to position's turn.
  * @param r_bestmove  Best move. Only set if root search.
+ * @param r_maxdepth  Max depth of search.
  */
 static void unified_search(
         Position& pos, int maxdepth, int mydepth,
         int alpha, int beta,
         bool is_root, bool is_quiesce,
-        int& r_eval, Move& r_bestmove)
+        int& r_eval, Move& r_bestmove, ull& r_nodes, int& r_maxdepth)
 {
     std::vector<Move> legal_moves;
     Movegen::get_legal_moves(pos, legal_moves);
     const int remain_depth = maxdepth - mydepth;
     const int static_eval = Eval::eval_rel(pos, legal_moves.size());
 
-    Move best_move(0, 0);
-    bool beta_cutoff = false;
+    // Set statistic variables.
+    r_nodes++;
+    r_maxdepth = std::max(r_maxdepth, mydepth);
 
     // End of game.
     if (legal_moves.size() == 0) {
@@ -44,13 +46,13 @@ static void unified_search(
         return;
     }
 
-    // Start quie search.
+    // Start quie search if remaining depth 0.
     if (!is_quiesce && remain_depth <= 0) {
         unified_search(
                 pos, maxdepth, mydepth + 1,
                 alpha, beta,
                 false, true,
-                r_eval, r_bestmove);
+                r_eval, r_bestmove, r_nodes, r_maxdepth);
         return;
     }
 
@@ -64,6 +66,8 @@ static void unified_search(
     if (is_quiesce)
         alpha = std::max(alpha, static_eval);
 
+    Move best_move(0, 0);
+    bool beta_cutoff = false;
     for (int i = legal_moves.size() - 1; i >= 0; i--) {
         const Move& move = legal_moves[i];
 
@@ -80,7 +84,7 @@ static void unified_search(
                 new_pos, maxdepth, mydepth + 1,
                 -beta, -alpha,
                 false, is_quiesce,
-                curr_eval, r_bestmove);
+                curr_eval, r_bestmove, r_nodes, r_maxdepth);
         curr_eval = -curr_eval;
 
         // Check alpha beta.
@@ -108,8 +112,12 @@ Move search(Position& pos, int maxdepth) {
 
     Move best_move(0, 0);
     int best_eval = 0;
+
+    // Iterative deepening.
     for (int depth = 1; depth <= maxdepth; depth++) {
         const ull time_start = Time::time();
+        ull nodes = 0;
+        int max_search_depth = 0;
 
         /*
         // Aspiration window.
@@ -131,16 +139,16 @@ Move search(Position& pos, int maxdepth) {
                 pos, depth, 0,
                 -1e9, 1e9,
                 true, false,
-                best_eval, best_move);
+                best_eval, best_move, nodes, max_search_depth);
 
         const ull elapse = Time::elapse(time_start);
         SearchResult res;
         res.data["depth"] = std::to_string(depth);
-        //res.data["seldepth"] = std::to_string(depth+max_quie_depth);
+        res.data["seldepth"] = std::to_string(max_search_depth);
         res.data["pv"] = best_move.uci();
         res.data["score cp"] = std::to_string(best_eval);
-        //res.data["nodes"] = std::to_string(nodes);
-        //res.data["nps"] = std::to_string(Time::nps(nodes, elapse));
+        res.data["nodes"] = std::to_string(nodes);
+        res.data["nps"] = std::to_string(Time::nps(nodes, elapse));
         res.data["time"] = std::to_string(elapse);
         std::cout << res.uci() << std::endl;
     }
