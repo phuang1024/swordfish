@@ -128,7 +128,7 @@ def main():
         stock = read_stockfish(args.stockfish, args.fen, depth)
         if (sword.nodes == stock.nodes):
             sys.stdout.write(Fore.GREEN)
-            print(f"- Depth {depth}: nodes={sword.nodes}, stockfish_nps={stock.nps}, swordfish_nps={sword.nps}")
+            print(f"- Depth {depth}: nodes={sword.nodes}, stockfish_nps={stock.nps/1e6 :.3f}M, swordfish_nps={sword.nps/1e6 :.3f}M")
         else:
             sys.stdout.write(Fore.RED)
             print(f"- Depth {depth}: Incorrect: swordfish_nodes={sword.nodes}, stockfish_nodes={stock.nodes}")
