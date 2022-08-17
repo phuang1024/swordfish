@@ -37,5 +37,10 @@ int eval(const Position& pos, int move_count) {
     return material(pos);
 }
 
+int eval_rel(const Position& pos, int move_count) {
+    const int score = eval(pos, move_count);
+    return pos.turn ? score : -score;
+}
+
 
 }
