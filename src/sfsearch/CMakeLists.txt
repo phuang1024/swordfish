@@ -1,4 +1,4 @@
-add_library(sfsearch perft.cpp search.cpp)
+add_library(sfsearch perft.cpp search.cpp uci.cpp)
 
 target_link_libraries(sfsearch PUBLIC
     sfeval
