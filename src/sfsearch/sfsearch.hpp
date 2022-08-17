@@ -107,8 +107,8 @@ namespace Transposition {
      */
     struct TP {
         Position pos;
-        char depth;
-        int score;
+        char depth;  // Depth of search.
+        int eval;
         Move bestmove;
 
         TP() {
