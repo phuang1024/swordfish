@@ -168,7 +168,7 @@ namespace Time {
     /**
      * ms elapsed since arg
      */
-    inline ull elapse(ull t) {
+    inline int elapse(ull t) {
         return time() - t;
     }
 

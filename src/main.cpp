@@ -42,8 +42,10 @@ int main() {
                 SearchResult res = Search::perft(pos, cmd.args["perft"]);
                 std::cout << res.uci() << std::endl;
             } else {
-                const int maxdepth = cmd.args.count("depth") ? cmd.args["depth"] : 5;
-                const Move bestmove = Search::search(pos, maxdepth);
+                const int movetime = Search::get_movetime(pos, cmd.args);
+                std::cerr << "time " << movetime << std::endl;
+                const int maxdepth = cmd.args.count("depth") ? cmd.args["depth"] : 1000;
+                const Move bestmove = Search::search(pos, maxdepth, movetime);
                 std::cout << "bestmove " << bestmove.uci() << std::endl;
             }
         }

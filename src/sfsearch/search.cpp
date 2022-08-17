@@ -25,11 +25,14 @@ namespace Search {
  * @param r_maxdepth  Max depth of search.
  */
 static void unified_search(
-        TPTable& tptable, Position& pos, int maxdepth, int mydepth,
+        ull time_start, TPTable& tptable, Position& pos, int maxdepth, int mydepth, int movetime,
         int alpha, int beta,
         bool is_root, bool is_quiesce,
         int& r_eval, Move& r_bestmove, ull& r_nodes, int& r_maxdepth)
 {
+    if (Time::elapse(time_start) > movetime)
+        return;
+
     std::vector<Move> legal_moves;
     Movegen::get_legal_moves(pos, legal_moves);
     const int remain_depth = maxdepth - mydepth;
@@ -51,7 +54,7 @@ static void unified_search(
     // Start quie search if remaining depth 0.
     if (!is_quiesce && remain_depth <= 0) {
         unified_search(
-                tptable, pos, maxdepth, mydepth + 1,
+                time_start, tptable, pos, maxdepth, mydepth + 1, movetime,
                 alpha, beta,
                 false, true,
                 r_eval, r_bestmove, r_nodes, r_maxdepth);
@@ -94,7 +97,7 @@ static void unified_search(
         // Get eval of new position.
         int curr_eval;
         unified_search(
-                tptable, new_pos, maxdepth, mydepth + 1,
+                time_start, tptable, new_pos, maxdepth, mydepth + 1, movetime,
                 -beta, -alpha,
                 false, is_quiesce,
                 curr_eval, r_bestmove, r_nodes, r_maxdepth);
@@ -127,7 +130,7 @@ static void unified_search(
 }
 
 
-Move search(Position& pos, int maxdepth) {
+Move search(Position& pos, int maxdepth, int movetime) {
     const ull time_start = Time::time();
 
     Transposition::init();
@@ -150,7 +153,7 @@ Move search(Position& pos, int maxdepth) {
         while (true) {
             const int alpha = best_eval - lower, beta = best_eval + upper;
             unified_search(
-                    tptable, pos, depth, 0,
+                    time_start, tptable, pos, depth, 0, movetime,
                     alpha, beta,
                     true, false,
                     curr_best_eval, best_move, nodes, max_search_depth);
@@ -163,8 +166,10 @@ Move search(Position& pos, int maxdepth) {
             else
                 break;
         }
-        best_eval = curr_best_eval;
+        if (Time::elapse(time_start) > movetime)
+            break;
 
+        best_eval = curr_best_eval;
         SearchResult res;
         res.data["depth"] = std::to_string(depth);
         res.data["seldepth"] = std::to_string(max_search_depth);
@@ -177,6 +182,30 @@ Move search(Position& pos, int maxdepth) {
     }
 
     return best_move;
+}
+
+
+int get_movetime(const Position& pos, std::map<std::string, int>& args) {
+    if (args.count("movetime"))
+        return args["movetime"];
+
+    int time_left = -1, time_inc = 0;
+    if (pos.turn) {
+        if (args.count("wtime")) time_left = args["wtime"];
+        if (args.count("winc")) time_inc = args["winc"];
+    } else {
+        if (args.count("btime")) time_left = args["btime"];
+        if (args.count("binc")) time_inc = args["binc"];
+    }
+
+    if (time_left == -1)
+        return 1e9;  // Defaults to inf.
+
+    int moves_left = std::max(40-pos.move, 10);
+    int est_time_left = time_left + moves_left*time_inc;
+    int move_time = est_time_left / moves_left;
+    move_time = std::min(move_time, (int)(time_left * 0.6));
+    return move_time;
 }
 
 
