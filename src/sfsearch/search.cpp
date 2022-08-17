@@ -107,6 +107,8 @@ static void unified_search(
 
 
 Move search(Position& pos, int maxdepth) {
+    const ull time_start = Time::time();
+
     Transposition::init();
     TPTable tptable;
 
@@ -115,41 +117,40 @@ Move search(Position& pos, int maxdepth) {
 
     // Iterative deepening.
     for (int depth = 1; depth <= maxdepth; depth++) {
-        const ull time_start = Time::time();
+        const ull time_start_curr = Time::time();
         ull nodes = 0;
         int max_search_depth = 0;
 
-        /*
         // Aspiration window.
-        int curr_bestscore;   // Best score for this depth.
-        int lower = 10, upper = 10;
+        int curr_best_eval;   // Best eval for this depth.
+        int lower, upper;
+        lower = upper = (depth == 1 ? 1e9 : 10);
+
         while (true) {
-            int alpha = r_bestscore - lower, beta = r_bestscore + upper;
-            root_search(tptable, pos, depth, 0, alpha, beta, r_bestmove, curr_bestscore);
-            if (curr_bestscore <= alpha)
+            const int alpha = best_eval - lower, beta = best_eval + upper;
+            unified_search(
+                    pos, depth, 0,
+                    alpha, beta,
+                    true, false,
+                    curr_best_eval, best_move, nodes, max_search_depth);
+
+            // Increase window if fail.
+            if (curr_best_eval <= alpha)
                 lower *= 2;
-            else if (curr_bestscore >= beta)
+            else if (curr_best_eval >= beta)
                 upper *= 2;
             else
                 break;
         }
-        r_bestscore = curr_bestscore;
-        */
-        unified_search(
-                pos, depth, 0,
-                -1e9, 1e9,
-                true, false,
-                best_eval, best_move, nodes, max_search_depth);
 
-        const ull elapse = Time::elapse(time_start);
         SearchResult res;
         res.data["depth"] = std::to_string(depth);
         res.data["seldepth"] = std::to_string(max_search_depth);
         res.data["pv"] = best_move.uci();
         res.data["score cp"] = std::to_string(best_eval);
         res.data["nodes"] = std::to_string(nodes);
-        res.data["nps"] = std::to_string(Time::nps(nodes, elapse));
-        res.data["time"] = std::to_string(elapse);
+        res.data["nps"] = std::to_string(Time::nps(nodes, Time::elapse(time_start_curr)));
+        res.data["time"] = std::to_string(Time::elapse(time_start));
         std::cout << res.uci() << std::endl;
     }
 
