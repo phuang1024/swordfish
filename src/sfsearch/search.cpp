@@ -36,7 +36,7 @@ static void unified_search(
     const int static_eval = Eval::eval_rel(pos, legal_moves.size());
     const ull hash = Transposition::hash(pos);
     TP& tp = *tptable.get(hash);
-    const bool tp_good = (tp.depth >= remain_depth && tp.pos == pos);
+    const bool tp_equal = (tp.depth != -1 && tp.pos == pos);
 
     // Set statistic variables.
     r_nodes++;
@@ -58,12 +58,15 @@ static void unified_search(
         return;
     }
 
-    // Return TP eval if good.
-    if (tp_good) {
-        r_eval = tp.eval;
-        if (is_root)
-            r_bestmove = tp.bestmove;
-        return;
+    if (tp_equal) {
+        if (!is_root && tp.depth >= remain_depth) {
+            // Return TP eval if good.
+            r_eval = tp.eval;
+            return;
+        } else {
+            // Otherwise move ordering.
+            legal_moves.push_back(tp.best_move);
+        }
     }
 
     // Only used in quiesce.
@@ -115,10 +118,12 @@ static void unified_search(
     r_eval = beta_cutoff ? beta : alpha;
 
     // Write to TP.
-    tp.pos = pos;
-    tp.depth = remain_depth;
-    tp.eval = r_eval;
-    tp.bestmove = best_move;
+    if (best_move.from != 0 && best_move.to != 0) {
+        tp.pos = pos;
+        tp.depth = remain_depth;
+        tp.eval = r_eval;
+        tp.best_move = best_move;
+    }
 }
 
 
@@ -158,6 +163,7 @@ Move search(Position& pos, int maxdepth) {
             else
                 break;
         }
+        best_eval = curr_best_eval;
 
         SearchResult res;
         res.data["depth"] = std::to_string(depth);
