@@ -27,7 +27,7 @@ int main() {
         } else if (cmd.mode == "eval") {
             std::vector<Move> moves;
             Movegen::get_legal_moves(pos, moves);
-            const int score = Eval::eval(pos, moves.size());
+            const int score = Eval::eval(pos, moves.size(), 0);
             std::cout << score << " cp (pov white)" << std::endl;
         } else if (cmd.mode == "isready") {
             std::cout << "readyok" << std::endl;

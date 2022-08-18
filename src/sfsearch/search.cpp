@@ -36,10 +36,12 @@ static void unified_search(
     std::vector<Move> legal_moves;
     Movegen::get_legal_moves(pos, legal_moves);
     const int remain_depth = maxdepth - mydepth;
-    const int static_eval = Eval::eval_rel(pos, legal_moves.size());
+    const int static_eval = Eval::eval_rel(pos, legal_moves.size(), mydepth);
+    /*
     const ull hash = Transposition::hash(pos);
     TP& tp = *tptable.get(hash);
-    const bool tp_equal = (tp.depth != -1 && tp.pos == pos);
+    const bool tp_good = (tp.depth != -1 && tp.pos == pos);
+    */
 
     // Set statistic variables.
     r_nodes++;
@@ -51,25 +53,30 @@ static void unified_search(
         return;
     }
 
-    // Start quie search if remaining depth 0.
-    if (!is_quiesce && remain_depth <= 0) {
-        unified_search(
-                time_start, tptable, pos, maxdepth, mydepth + 1, movetime,
-                alpha, beta,
-                false, true,
-                r_eval, r_bestmove, r_nodes, r_maxdepth);
-        return;
-    }
-
-    if (tp_equal) {
+    // Use TP.
+    /*
+    if (tp_good) {
+        //std::cerr << +tp.depth << ' ' << remain_depth << std::endl;
         if (!is_root && tp.depth >= remain_depth) {
             // Return TP eval if good.
             r_eval = tp.eval;
             return;
         } else {
             // Otherwise move ordering.
-            legal_moves.push_back(tp.best_move);
+            //legal_moves.push_back(tp.best_move);
         }
+    }
+    */
+
+    // Start quie search if remaining depth 0.
+    if (!is_quiesce && remain_depth == 0) {
+        r_eval = static_eval;
+        unified_search(
+                time_start, tptable, pos, maxdepth, mydepth + 1, movetime,
+                alpha, beta,
+                false, true,
+                r_eval, r_bestmove, r_nodes, r_maxdepth);
+        return;
     }
 
     // Only used in quiesce.
@@ -121,12 +128,11 @@ static void unified_search(
     r_eval = beta_cutoff ? beta : alpha;
 
     // Write to TP.
-    if (best_move.from != 0 && best_move.to != 0) {
-        tp.pos = pos;
-        tp.depth = remain_depth;
-        tp.eval = r_eval;
-        tp.best_move = best_move;
-    }
+    /*
+    if (!(best_move.from == 0 && best_move.to == 0))
+        if (remain_depth > tp.depth)
+            tptable.set(hash, pos, remain_depth, r_eval);
+    */
 }
 
 
@@ -177,10 +183,15 @@ Move search(Position& pos, int maxdepth, int movetime) {
         res.data["depth"] = std::to_string(depth);
         res.data["seldepth"] = std::to_string(max_search_depth);
         res.data["pv"] = best_move.uci();
-        res.data["score cp"] = std::to_string(best_eval);
         res.data["nodes"] = std::to_string(nodes);
         res.data["nps"] = std::to_string(Time::nps(nodes, Time::elapse(time_start_curr)));
         res.data["time"] = std::to_string(Time::elapse(time_start));
+        res.data["hashfull"] = std::to_string(tptable.get_hashfull());
+        if (best_eval > 1e5) {
+            res.data["score mate"] = std::to_string((Eval::MATE_SCORE-best_eval+1) / 2);
+        } else {
+            res.data["score cp"] = std::to_string(best_eval);
+        }
         std::cout << res.uci() << std::endl;
     }
 

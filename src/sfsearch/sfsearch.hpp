@@ -78,18 +78,37 @@ namespace Transposition {
     struct TPTable {
         TP* table;
         int size;
+        int used;
 
         ~TPTable() {
             delete[] table;
         }
 
-        TPTable(int size = 1e6 + 1) {
+        TPTable(int size = 1e6 + 3) {
             this->size = size;
+            used = 0;
             table = new TP[size];
         }
 
         TP* get(ull hash) {
             return &table[hash % size];
+        }
+
+        void set(ull hash, const Position& pos, char depth, int eval) {
+            // TODO currently best_move is not set.
+            TP* tp = get(hash);
+            if (tp->depth == -1)
+                used++;
+            tp->pos = pos;
+            tp->depth = depth;
+            tp->eval = eval;
+        }
+
+        /**
+         * UCI hashfull value.
+         */
+        int get_hashfull() {
+            return 1000ULL * used / size;
         }
     };
 
