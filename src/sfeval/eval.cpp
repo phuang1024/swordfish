@@ -69,17 +69,21 @@ static constexpr int MAP_KING[64] = {
 
 /**
  * Checks if the game finished (checkmate, stalemate, draw).
+ * @param attacks  Opposite turn's attacks.
+ * @param kpos  Current turn's king pos.
  * @return  Large negative if black wins, large positive if white wins, 0 if draw.
  */
-static inline int check_eog(bool turn, int move_count, int mydepth) {
+static inline int check_eog(bool turn, int move_count, ull attacks, int kpos, int mydepth) {
     if (move_count == 0) {
+        if (!Bit::get(attacks, kpos))
+            return 0;
+
         if (turn)
             return -MATE_SCORE + mydepth;
         else
             return MATE_SCORE - mydepth;
     }
-    // TODO stalemate check
-    return 123456789;   // No eog code.
+    return 123456789;   // No eog constant.
 }
 
 static inline int material(const Position& pos) {
@@ -116,20 +120,16 @@ static inline int piece_map(const Position& pos) {
     return score;
 }
 
-int eval(const Position& pos, int move_count, int mydepth) {
-    const int eog = check_eog(pos.turn, move_count, mydepth);
+int eval(const Position& pos, int move_count, ull attacks, int kpos, int mydepth) {
+    const int eog = check_eog(pos.turn, move_count, attacks, kpos, mydepth);
     if (eog != 123456789)
         return eog;
 
     const int mat = material(pos);
     const int pm = piece_map(pos);
 
-    return mat + 0.11*pm;
-}
-
-int eval_rel(const Position& pos, int move_count, int mydepth) {
-    const int score = eval(pos, move_count, mydepth);
-    return pos.turn ? score : -score;
+    const int score = mat + 0.11*pm;
+    return score;
 }
 
 

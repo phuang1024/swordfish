@@ -13,7 +13,8 @@ int perft_run(Position& pos, int depth, bool print_each_move = false) {
         return 1;
 
     std::vector<Move> moves;
-    Movegen::get_legal_moves(pos, moves);
+    ull attacks;
+    Movegen::get_legal_moves(pos, moves, attacks);
 
     if (depth == 1) {
         // Print out nodes for each move

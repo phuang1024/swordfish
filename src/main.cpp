@@ -26,9 +26,11 @@ int main() {
             Ascii::print(std::cout, pos);
         } else if (cmd.mode == "eval") {
             std::vector<Move> moves;
-            Movegen::get_legal_moves(pos, moves);
-            const int score = Eval::eval(pos, moves.size(), 0);
-            std::cout << score << " cp (pov white)" << std::endl;
+            ull attacks;
+            Movegen::get_legal_moves(pos, moves, attacks);
+            int kpos = Bit::first(*pos.relative_bb(pos.turn).mk);
+            const int score = Eval::eval(pos, moves.size(), attacks, kpos, 0);
+            std::cout << score << " cp (pov current turn)" << std::endl;
         } else if (cmd.mode == "isready") {
             std::cout << "readyok" << std::endl;
         } else if (cmd.mode == "uci") {

@@ -34,9 +34,12 @@ static void unified_search(
         return;
 
     std::vector<Move> legal_moves;
-    Movegen::get_legal_moves(pos, legal_moves);
+    ull attacks;
+    int kpos = Bit::first(*pos.relative_bb(pos.turn).mk);
+    Movegen::get_legal_moves(pos, legal_moves, attacks);
     const int remain_depth = std::max(maxdepth - mydepth, 0);
-    const int static_eval = Eval::eval_rel(pos, legal_moves.size(), mydepth);
+    const int static_eval = Eval::eval(pos, legal_moves.size(), attacks, kpos, mydepth)
+        * (pos.turn ? 1 : -1);
     const ull hash = Transposition::hash(pos);
     TP& tp = *tptable.get(hash);
     const bool tp_good = (tp.depth != -1 && tp.pos == pos);
@@ -187,7 +190,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
         res.data["time"] = std::to_string(elapse);
         res.data["hashfull"] = std::to_string(tptable.get_hashfull());
         if (best_eval > 1e5) {
-            res.data["score mate"] = std::to_string((Eval::MATE_SCORE-best_eval+1) / 2);
+            res.data["score mate"] = std::to_string(Eval::MATE_SCORE-best_eval);
         } else {
             res.data["score cp"] = std::to_string(best_eval);
         }

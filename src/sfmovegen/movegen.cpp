@@ -218,10 +218,11 @@ static inline void get_sliding_moves(const RelativeBB& relbb, int x, int y, cons
     }
 }
 
-void get_legal_moves(Position& pos, std::vector<Move>& r_moves) {
+void get_legal_moves(Position& pos, std::vector<Move>& r_moves, ull& r_attacks) {
     RelativeBB relbb = pos.relative_bb(pos.turn);
     ull attacked, checkers, pinned;
     board_info(!pos.turn, relbb.swap_sides(), attacked, checkers, pinned);
+    r_attacks = attacked;
     const int num_checkers = Bit::popcnt(checkers);
     const int kpos = Bit::first(*relbb.mk);
     const int kx = kpos % 8, ky = kpos / 8;

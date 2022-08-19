@@ -5,12 +5,7 @@ namespace Eval {
     constexpr int MATE_SCORE = 1e6;
 
     /**
-     * Evaluation in centipawns from white's pov.
+     * Evaluation in centipawns from current turn's pov.
      */
-    int eval(const Position& pos, int move_count, int depth);
-
-    /**
-     * Eval relative to position's side (positive is good).
-     */
-    int eval_rel(const Position& pos, int move_count, int depth);
+    int eval(const Position& pos, int move_count, ull attacks, int kpos, int mydepth);
 }

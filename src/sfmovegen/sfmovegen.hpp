@@ -58,6 +58,7 @@ namespace Movegen {
     /**
      * Get all legal moves.
      * Appends moves to r_moves
+     * @param r_attacks  Other side's attacks.
      */
-    void get_legal_moves(Position& pos, std::vector<Move>& r_moves);
+    void get_legal_moves(Position& pos, std::vector<Move>& r_moves, ull& r_attacks);
 }
