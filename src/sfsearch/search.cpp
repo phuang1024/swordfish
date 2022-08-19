@@ -52,6 +52,7 @@ static void unified_search(
     }
 
     // Use TP.
+    /*
     if (tp_good) {
         //std::cerr << +tp.depth << ' ' << remain_depth << std::endl;
         if (!is_root && tp.depth >= remain_depth) {
@@ -63,6 +64,7 @@ static void unified_search(
             //legal_moves.push_back(tp.best_move);
         }
     }
+    */
 
     // Start quie search if remaining depth 0.
     if (!is_quiesce && remain_depth == 0) {
