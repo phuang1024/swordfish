@@ -35,13 +35,11 @@ static void unified_search(
 
     std::vector<Move> legal_moves;
     Movegen::get_legal_moves(pos, legal_moves);
-    const int remain_depth = maxdepth - mydepth;
+    const int remain_depth = std::max(maxdepth - mydepth, 0);
     const int static_eval = Eval::eval_rel(pos, legal_moves.size(), mydepth);
-    /*
     const ull hash = Transposition::hash(pos);
     TP& tp = *tptable.get(hash);
     const bool tp_good = (tp.depth != -1 && tp.pos == pos);
-    */
 
     // Set statistic variables.
     r_nodes++;
@@ -54,7 +52,6 @@ static void unified_search(
     }
 
     // Use TP.
-    /*
     if (tp_good) {
         //std::cerr << +tp.depth << ' ' << remain_depth << std::endl;
         if (!is_root && tp.depth >= remain_depth) {
@@ -66,11 +63,9 @@ static void unified_search(
             //legal_moves.push_back(tp.best_move);
         }
     }
-    */
 
     // Start quie search if remaining depth 0.
     if (!is_quiesce && remain_depth == 0) {
-        r_eval = static_eval;
         unified_search(
                 time_start, tptable, pos, maxdepth, mydepth + 1, movetime,
                 alpha, beta,
@@ -128,16 +123,16 @@ static void unified_search(
     r_eval = beta_cutoff ? beta : alpha;
 
     // Write to TP.
-    /*
-    if (!(best_move.from == 0 && best_move.to == 0))
+    //if (!(best_move.from == 0 && best_move.to == 0))
+    if (!beta_cutoff)
         if (remain_depth > tp.depth)
             tptable.set(hash, pos, remain_depth, r_eval);
-    */
 }
 
 
 Move search(Position& pos, int maxdepth, int movetime) {
     const ull time_start = Time::time();
+    ull nodes = 0;
 
     Transposition::init();
     TPTable tptable;
@@ -147,8 +142,6 @@ Move search(Position& pos, int maxdepth, int movetime) {
 
     // Iterative deepening.
     for (int depth = 1; depth <= maxdepth; depth++) {
-        const ull time_start_curr = Time::time();
-        ull nodes = 0;
         int max_search_depth = 0;
 
         // Aspiration window.
@@ -158,7 +151,9 @@ Move search(Position& pos, int maxdepth, int movetime) {
         lower = upper = (depth == 1 ? 1e9 : 10);
 
         while (true) {
-            const int alpha = best_eval - lower, beta = best_eval + upper;
+            //const int alpha = best_eval - lower, beta = best_eval + upper;
+            //TODO currently window disabled: we can only write to TP if search doesnt fail.
+            int alpha = -1e9, beta = 1e9;
             unified_search(
                     time_start, tptable, pos, depth, 0, movetime,
                     alpha, beta,
@@ -179,13 +174,15 @@ Move search(Position& pos, int maxdepth, int movetime) {
         best_eval = curr_best_eval;
         best_move = curr_best_move;
 
+        const int elapse = Time::elapse(time_start);
+
         SearchResult res;
         res.data["depth"] = std::to_string(depth);
         res.data["seldepth"] = std::to_string(max_search_depth);
         res.data["pv"] = best_move.uci();
         res.data["nodes"] = std::to_string(nodes);
-        res.data["nps"] = std::to_string(Time::nps(nodes, Time::elapse(time_start_curr)));
-        res.data["time"] = std::to_string(Time::elapse(time_start));
+        res.data["nps"] = std::to_string(Time::nps(nodes, elapse));
+        res.data["time"] = std::to_string(elapse);
         res.data["hashfull"] = std::to_string(tptable.get_hashfull());
         if (best_eval > 1e5) {
             res.data["score mate"] = std::to_string((Eval::MATE_SCORE-best_eval+1) / 2);
