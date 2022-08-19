@@ -190,7 +190,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
         res.data["time"] = std::to_string(elapse);
         res.data["hashfull"] = std::to_string(tptable.get_hashfull());
         if (best_eval > 1e5) {
-            res.data["score mate"] = std::to_string(Eval::MATE_SCORE-best_eval);
+            res.data["score mate"] = std::to_string((Eval::MATE_SCORE-best_eval+1) / 2);
         } else {
             res.data["score cp"] = std::to_string(best_eval);
         }
