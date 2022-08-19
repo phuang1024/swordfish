@@ -55,6 +55,7 @@ static void unified_search(
     }
 
     // Use TP.
+    int tp_skip_ind = -1;
     if (tp_good) {
         if (!is_root && tp.depth >= remain_depth
                 && tp.alpha >= alpha && tp.beta <= beta) {
@@ -65,6 +66,12 @@ static void unified_search(
 
         // Otherwise move ordering.
         if (!tp.best_move.is_null()) {
+            for (int i = 0; i < (int)legal_moves.size(); i++) {
+                if (legal_moves[i] == tp.best_move) {
+                    tp_skip_ind = i;
+                    break;
+                }
+            }
             legal_moves.push_back(tp.best_move);
         }
     }
@@ -92,6 +99,9 @@ static void unified_search(
     Move best_move(0, 0);
     bool beta_cutoff = false;
     for (int i = legal_moves.size() - 1; i >= 0; i--) {
+        if (i == tp_skip_ind)
+            continue;
+
         const Move& move = legal_moves[i];
 
         // Check if quiesce and capture move.

@@ -44,6 +44,17 @@ constexpr ull
     CASTLE_SQS_k = 8070450532247928832ULL,
     CASTLE_SQS_q = 2161727821137838080ULL;
 
+constexpr ull FILES[8] = {
+    72340172838076673ULL,
+    144680345676153346ULL,
+    289360691352306692ULL,
+    578721382704613384ULL,
+    1157442765409226768ULL,
+    2314885530818453536ULL,
+    4629771061636907072ULL,
+    9259542123273814144ULL,
+};
+
 // Starting bitboards.
 constexpr ull
     START_WP = 65280ULL,
@@ -354,6 +365,10 @@ public:
 
     inline bool is_null() const {
         return from == 0 && to == 0;
+    }
+
+    friend bool operator==(const Move& lhs, const Move& rhs) {
+        return lhs.from == rhs.from && lhs.to == rhs.to && lhs.promo == rhs.promo;
     }
 };
 

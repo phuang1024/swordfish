@@ -99,7 +99,7 @@ static inline int material(const Position& pos) {
 static inline int piece_map_onep(ull mine, ull theirs, const int map[64]) {
     int score = 0;
     for (int i = 0; i < 64; i++) {
-        if (Bit::get(mine, 63-i))
+        if (Bit::get(mine, i))
             score += map[63-i];
         if (Bit::get(theirs, i))
             score -= map[i];
@@ -107,6 +107,9 @@ static inline int piece_map_onep(ull mine, ull theirs, const int map[64]) {
     return score;
 }
 
+/**
+ * Opening and middlegame policy.
+ */
 static inline int piece_map(const Position& pos) {
     int pawns = piece_map_onep(pos.wp, pos.bp, MAP_PAWN);
     int knights = piece_map_onep(pos.wn, pos.bn, MAP_KNIGHT);
@@ -116,12 +119,29 @@ static inline int piece_map(const Position& pos) {
     int kings = piece_map_onep(pos.wk, pos.bk, MAP_KING);
 
     return (
-        1.2 * pawns +
+        1.3 * pawns +
         0.8 * knights +
-        1 * bishops +
-        1.1 * rooks +
-        1.2 * queens +
+        0.9 * bishops +
+        1.2 * rooks +
+        1.3 * queens +
         1.1 * kings
+    );
+}
+
+static inline int pawn_structure(ull wp, ull bp) {
+    // Stacked pawns.
+    int w_stacked = 0, b_stacked = 0;
+    for (int x = 0; x < 8; x++) {
+        int w_count = Bit::popcnt(wp & FILES[x]),
+            b_count = Bit::popcnt(bp & FILES[x]);
+        if (w_count > 0)
+            w_stacked += w_count - 1;
+        if (b_count > 0)
+            b_stacked += b_count - 1;
+    }
+
+    return (
+        (b_stacked - w_stacked)
     );
 }
 
@@ -132,8 +152,9 @@ int eval(const Position& pos, int move_count, ull attacks, int kpos, int mydepth
 
     const int mat = material(pos);
     const int pm = piece_map(pos);
+    const int pawns = pawn_structure(pos.wp, pos.bp);
 
-    const int score = mat + 0.1*pm;
+    const int score = mat + 0.1*pm + pawns;
     return score;
 }
 
