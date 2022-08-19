@@ -56,15 +56,16 @@ static void unified_search(
 
     // Use TP.
     if (tp_good) {
-        if (!is_root && tp.depth >= remain_depth) {
+        if (!is_root && tp.depth >= remain_depth
+                && tp.alpha >= alpha && tp.beta <= beta) {
             // Return TP eval if good.
-            //r_eval = tp.eval;
-            //return;
-        } else {
-            // Otherwise move ordering.
-            if (!tp.best_move.is_null()) {
-                legal_moves.push_back(tp.best_move);
-            }
+            r_eval = tp.eval;
+            return;
+        }
+
+        // Otherwise move ordering.
+        if (!tp.best_move.is_null()) {
+            legal_moves.push_back(tp.best_move);
         }
     }
 
