@@ -316,10 +316,11 @@ public:
     uch promo;
 
     /**
-     * NO initialization.
-     * May contain arbitrary values.
+     * Initializes to null (from = to = 0)
      */
     Move() {
+        from = to = 0;
+        promo = Promo::NONE;
     }
 
     Move(uch from, uch to, uch promo = Promo::NONE) {
@@ -349,6 +350,10 @@ public:
         if (promo != Promo::NONE)
             str += Ascii::promo2char(promo);
         return str;
+    }
+
+    inline bool is_null() const {
+        return from == 0 && to == 0;
     }
 };
 

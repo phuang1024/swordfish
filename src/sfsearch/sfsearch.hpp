@@ -61,9 +61,9 @@ namespace Transposition {
      * Transposition entry.
      */
     struct TP {
-        Position pos;
+        ull hash;
         char depth;  // Depth of search.
-        int eval;
+        int eval, alpha, beta;
         Move best_move;
 
         TP() {
@@ -94,14 +94,17 @@ namespace Transposition {
             return &table[hash % size];
         }
 
-        void set(ull hash, const Position& pos, char depth, int eval) {
-            // TODO currently best_move is not set.
+        void set(ull hash, char depth, int eval, int alpha, int beta, Move best_move) {
             TP* tp = get(hash);
             if (tp->depth == -1)
                 used++;
-            tp->pos = pos;
+
+            tp->hash = hash;
             tp->depth = depth;
             tp->eval = eval;
+            tp->alpha = alpha;
+            tp->beta = beta;
+            tp->best_move = best_move;
         }
 
         /**

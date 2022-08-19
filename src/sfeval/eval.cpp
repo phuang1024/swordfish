@@ -96,28 +96,33 @@ static inline int material(const Position& pos) {
     return score;
 }
 
-static inline int piece_map(const Position& pos) {
+static inline int piece_map_onep(ull mine, ull theirs, const int map[64]) {
     int score = 0;
     for (int i = 0; i < 64; i++) {
-        const int piece = pos.piece_at(i);
-        if (piece == EMPTY)
-            continue;
-
-        const int sq = piece <= WK ? 63-i : i;  // Piece maps are reversed.
-        const int mult = piece <= WK ? 1 : -1;
-        int curr_score;
-        switch (piece) {
-            case WP: case BP: curr_score = MAP_PAWN[sq]; break;
-            case WN: case BN: curr_score = MAP_KNIGHT[sq]; break;
-            case WB: case BB: curr_score = MAP_BISHOP[sq]; break;
-            case WR: case BR: curr_score = MAP_ROOK[sq]; break;
-            case WQ: case BQ: curr_score = MAP_QUEEN[sq]; break;
-            case WK: case BK: curr_score = MAP_KING[sq]; break;
-        }
-        score += curr_score * mult;
+        if (Bit::get(mine, 63-i))
+            score += map[63-i];
+        if (Bit::get(theirs, i))
+            score -= map[i];
     }
-
     return score;
+}
+
+static inline int piece_map(const Position& pos) {
+    int pawns = piece_map_onep(pos.wp, pos.bp, MAP_PAWN);
+    int knights = piece_map_onep(pos.wn, pos.bn, MAP_KNIGHT);
+    int bishops = piece_map_onep(pos.wb, pos.bb, MAP_BISHOP);
+    int rooks = piece_map_onep(pos.wr, pos.br, MAP_ROOK);
+    int queens = piece_map_onep(pos.wq, pos.bq, MAP_QUEEN);
+    int kings = piece_map_onep(pos.wk, pos.bk, MAP_KING);
+
+    return (
+        1.2 * pawns +
+        0.8 * knights +
+        1 * bishops +
+        1.1 * rooks +
+        1.2 * queens +
+        1.1 * kings
+    );
 }
 
 int eval(const Position& pos, int move_count, ull attacks, int kpos, int mydepth) {
@@ -128,7 +133,7 @@ int eval(const Position& pos, int move_count, ull attacks, int kpos, int mydepth
     const int mat = material(pos);
     const int pm = piece_map(pos);
 
-    const int score = mat + 0.11*pm;
+    const int score = mat + 0.1*pm;
     return score;
 }
 

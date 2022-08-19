@@ -42,7 +42,7 @@ static void unified_search(
         * (pos.turn ? 1 : -1);
     const ull hash = Transposition::hash(pos);
     TP& tp = *tptable.get(hash);
-    const bool tp_good = (tp.depth != -1 && tp.pos == pos);
+    const bool tp_good = (tp.depth != -1 && tp.hash == hash);
 
     // Set statistic variables.
     r_nodes++;
@@ -55,19 +55,18 @@ static void unified_search(
     }
 
     // Use TP.
-    /*
     if (tp_good) {
-        //std::cerr << +tp.depth << ' ' << remain_depth << std::endl;
         if (!is_root && tp.depth >= remain_depth) {
             // Return TP eval if good.
-            r_eval = tp.eval;
-            return;
+            //r_eval = tp.eval;
+            //return;
         } else {
             // Otherwise move ordering.
-            //legal_moves.push_back(tp.best_move);
+            if (!tp.best_move.is_null()) {
+                legal_moves.push_back(tp.best_move);
+            }
         }
     }
-    */
 
     // Start quie search if remaining depth 0.
     if (!is_quiesce && remain_depth == 0) {
@@ -128,10 +127,9 @@ static void unified_search(
     r_eval = beta_cutoff ? beta : alpha;
 
     // Write to TP.
-    //if (!(best_move.from == 0 && best_move.to == 0))
     if (!beta_cutoff)
         if (remain_depth > tp.depth)
-            tptable.set(hash, pos, remain_depth, r_eval);
+            tptable.set(hash, remain_depth, r_eval, alpha, beta, best_move);
 }
 
 
