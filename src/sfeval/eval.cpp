@@ -65,6 +65,16 @@ static constexpr int MAP_KING[64] = {
      20, 20,  0,  0,  0,  0, 20, 20,
      20, 30, 10,  0,  0, 10, 30, 20
 };
+static constexpr int MAP_KING_EG[64] = {
+    -50,-40,-30,-20,-20,-30,-40,-50,
+    -30,-20,-10,  0,  0,-10,-20,-30,
+    -30,-10, 20, 30, 30, 20,-10,-30,
+    -30,-10, 30, 40, 40, 30,-10,-30,
+    -30,-10, 30, 40, 40, 30,-10,-30,
+    -30,-10, 20, 30, 30, 20,-10,-30,
+    -30,-30,  0,  0,  0,  0,-30,-30,
+    -50,-30,-30,-30,-30,-30,-30,-50
+};
 
 
 /**
@@ -86,20 +96,24 @@ static inline int check_eog(bool turn, int move_count, ull attacks, int kpos, in
     return 123456789;   // No eog constant.
 }
 
-static inline int material(const Position& pos) {
-    int score = 0;
-    score += 100 * (Bit::popcnt(pos.wp) - Bit::popcnt(pos.bp));
-    score += 300 * (Bit::popcnt(pos.wn) - Bit::popcnt(pos.bn));
-    score += 300 * (Bit::popcnt(pos.wb) - Bit::popcnt(pos.bb));
-    score += 500 * (Bit::popcnt(pos.wr) - Bit::popcnt(pos.br));
-    score += 900 * (Bit::popcnt(pos.wq) - Bit::popcnt(pos.bq));
-    return score;
+static inline void material(const Position& pos, int& r_white, int& r_black) {
+    r_white = r_black = 0;
+    r_white += Bit::popcnt(pos.wp);
+    r_black += Bit::popcnt(pos.bp);
+    r_white += 3 * Bit::popcnt(pos.wn);
+    r_black += 3 * Bit::popcnt(pos.bn);
+    r_white += 3 * Bit::popcnt(pos.wb);
+    r_black += 3 * Bit::popcnt(pos.bb);
+    r_white += 5 * Bit::popcnt(pos.wr);
+    r_black += 5 * Bit::popcnt(pos.br);
+    r_white += 9 * Bit::popcnt(pos.wq);
+    r_black += 9 * Bit::popcnt(pos.bq);
 }
 
 /**
  * Opening and middlegame policy.
  */
-static inline int piece_map(const Position& pos) {
+static inline int piece_map(const Position& pos, int phase) {
     int pawns, knights, bishops, rooks, queens, kings;
     pawns = knights = bishops = rooks = queens = kings = 0;
 
@@ -116,7 +130,10 @@ static inline int piece_map(const Position& pos) {
             case WB: case BB: bishops += mult * MAP_BISHOP[sq]; break;
             case WR: case BR: rooks += mult * MAP_ROOK[sq]; break;
             case WQ: case BQ: queens += mult * MAP_QUEEN[sq]; break;
-            case WK: case BK: kings += mult * MAP_KING[sq]; break;
+            case WK: case BK:
+                kings += mult * ((100-phase) * MAP_KING[sq]
+                                 + phase * MAP_KING_EG[sq]) / 100;
+                break;
         }
     }
 
@@ -126,7 +143,7 @@ static inline int piece_map(const Position& pos) {
         0.9 * bishops +
         1.2 * rooks +
         1.3 * queens +
-        1.1 * kings
+        1 * kings
     );
 }
 
@@ -152,11 +169,16 @@ int eval(const Position& pos, int move_count, ull attacks, int kpos, int mydepth
     if (eog != 123456789)
         return eog;
 
-    const int mat = material(pos);
-    const int pm = piece_map(pos);
+    int mat_w, mat_b;
+    material(pos, mat_w, mat_b);
+    int mat_total = mat_w + mat_b;
+    int mat_score = 100 * (mat_w-mat_b);
+
+    const int phase = std::min(std::max(-5*mat_total + 250, 0), 100);
+    const int pm = piece_map(pos, phase);
     //const int pawns = pawn_structure(pos.wp, pos.bp);
 
-    const int score = mat + 0.1*pm;// + pawns;
+    const int score = mat_score + 0.1*pm;// + pawns;
     return score;
 }
 
