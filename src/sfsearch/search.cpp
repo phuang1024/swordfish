@@ -56,13 +56,22 @@ static void unified_search(
 
     // Use TP.
     int tp_skip_ind = -1;
-        /*
     if (tp_good) {
-        if (!is_root && tp.depth >= remain_depth
-                && tp.alpha >= alpha && tp.beta <= beta) {
+        if (!is_root && tp.depth >= remain_depth) {
             // Return TP eval if good.
-            r_eval = tp.eval;
-            return;
+            if (tp.alpha >= alpha && tp.beta <= beta) {
+                // Exact TP.
+                r_eval = tp.eval;
+                return;
+            } else if (tp.alpha >= beta) {
+                // Beta cut.
+                r_eval = beta;
+                return;
+            } else if (tp.beta <= alpha) {
+                // Alpha cut.
+                r_eval = alpha;
+                return;
+            }
         }
 
         // Otherwise move ordering.
@@ -78,7 +87,6 @@ static void unified_search(
             legal_moves.push_back(tp.best_move);
         }
     }
-        */
 
     // Start quie search if remaining depth 0.
     if (!is_quiesce && remain_depth == 0) {
@@ -102,11 +110,20 @@ static void unified_search(
 
     Move best_move(0, 0);
     bool beta_cutoff = false;
+    int currmovenumber = 1;
     for (int i = legal_moves.size() - 1; i >= 0; i--) {
         if (i == tp_skip_ind)
             continue;
 
         const Move& move = legal_moves[i];
+        if (is_root) {
+            SearchResult res;
+            res.data["depth"] = std::to_string(remain_depth);
+            res.data["currmove"] = move.uci();
+            res.data["currmovenumber"] = std::to_string(currmovenumber);
+            std::cout << res.uci() << std::endl;
+        }
+        currmovenumber++;
 
         // Check if quiesce and capture move.
         if (is_quiesce && !Bit::get(t_pieces, move.to))
@@ -142,9 +159,14 @@ static void unified_search(
     r_eval = beta_cutoff ? beta : alpha;
 
     // Write to TP.
-    if (!beta_cutoff)
-        if (remain_depth > tp.depth)
+    if (!beta_cutoff) {
+        // Simple way to decide if overwrite.
+        int tp_useful = tp.depth + (tp.beta-tp.alpha)/40;
+        int curr_useful = remain_depth + (beta-alpha)/40;
+        if (curr_useful > tp_useful) {
             tptable.set(hash, remain_depth, r_eval, alpha, beta, best_move);
+        }
+    }
 }
 
 

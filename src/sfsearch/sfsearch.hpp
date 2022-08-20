@@ -84,7 +84,7 @@ namespace Transposition {
             delete[] table;
         }
 
-        TPTable(int size = 1e6 + 3) {
+        TPTable(int size = 1e7 + 3) {
             this->size = size;
             used = 0;
             table = new TP[size];
