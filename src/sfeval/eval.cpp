@@ -96,27 +96,29 @@ static inline int material(const Position& pos) {
     return score;
 }
 
-static inline int piece_map_onep(ull mine, ull theirs, const int map[64]) {
-    int score = 0;
-    for (int i = 0; i < 64; i++) {
-        if (Bit::get(mine, i))
-            score += map[63-i];
-        if (Bit::get(theirs, i))
-            score -= map[i];
-    }
-    return score;
-}
-
 /**
  * Opening and middlegame policy.
  */
 static inline int piece_map(const Position& pos) {
-    int pawns = piece_map_onep(pos.wp, pos.bp, MAP_PAWN);
-    int knights = piece_map_onep(pos.wn, pos.bn, MAP_KNIGHT);
-    int bishops = piece_map_onep(pos.wb, pos.bb, MAP_BISHOP);
-    int rooks = piece_map_onep(pos.wr, pos.br, MAP_ROOK);
-    int queens = piece_map_onep(pos.wq, pos.bq, MAP_QUEEN);
-    int kings = piece_map_onep(pos.wk, pos.bk, MAP_KING);
+    int pawns, knights, bishops, rooks, queens, kings;
+    pawns = knights = bishops = rooks = queens = kings = 0;
+
+    for (int i = 0; i < 64; i++) {
+        const int piece = pos.piece_at(i);
+        if (piece == EMPTY)
+            continue;
+
+        const int sq = piece <= WK ? 63-i : i;  // Piece maps are reversed.
+        const int mult = piece <= WK ? 1 : -1;
+        switch (piece) {
+            case WP: case BP: pawns += mult * MAP_PAWN[sq]; break;
+            case WN: case BN: knights += mult * MAP_KNIGHT[sq]; break;
+            case WB: case BB: bishops += mult * MAP_BISHOP[sq]; break;
+            case WR: case BR: rooks += mult * MAP_ROOK[sq]; break;
+            case WQ: case BQ: queens += mult * MAP_QUEEN[sq]; break;
+            case WK: case BK: kings += mult * MAP_KING[sq]; break;
+        }
+    }
 
     return (
         1.3 * pawns +
@@ -152,9 +154,9 @@ int eval(const Position& pos, int move_count, ull attacks, int kpos, int mydepth
 
     const int mat = material(pos);
     const int pm = piece_map(pos);
-    const int pawns = pawn_structure(pos.wp, pos.bp);
+    //const int pawns = pawn_structure(pos.wp, pos.bp);
 
-    const int score = mat + 0.1*pm + pawns;
+    const int score = mat + 0.1*pm;// + pawns;
     return score;
 }
 
