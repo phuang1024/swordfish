@@ -215,6 +215,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
         best_move = curr_best_move;
 
         const int elapse = Time::elapse(time_start);
+        bool search_done = false;
 
         SearchResult res;
         res.data["depth"] = std::to_string(depth);
@@ -224,12 +225,18 @@ Move search(Position& pos, int maxdepth, int movetime) {
         res.data["nps"] = std::to_string(Time::nps(nodes, elapse));
         res.data["time"] = std::to_string(elapse);
         res.data["hashfull"] = std::to_string(tptable.get_hashfull());
-        if (best_eval > 1e5) {
-            res.data["score mate"] = std::to_string((Eval::MATE_SCORE-best_eval+1) / 2);
+        if (abs(best_eval) > 1e5) {
+            int mate_in = (Eval::MATE_SCORE - abs(best_eval) + 1) / 2;
+            res.data["score mate"] = std::to_string(mate_in * (best_eval > 0 ? 1 : -1));
+            if (mate_in <= depth)
+                search_done = true;
         } else {
             res.data["score cp"] = std::to_string(best_eval);
         }
         std::cout << res.uci() << std::endl;
+
+        if (search_done)
+            break;
     }
 
     return best_move;
