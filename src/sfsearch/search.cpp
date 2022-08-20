@@ -259,9 +259,9 @@ int get_movetime(const Position& pos, std::map<std::string, int>& args) {
     if (time_left == -1)
         return 1e9;  // Defaults to inf.
 
-    int moves_left = std::max(40-pos.move, 10);
+    int moves_left = std::max(50-pos.move, 12);
     int est_time_left = time_left + moves_left*time_inc;
-    int move_time = est_time_left / moves_left;
+    int move_time = est_time_left / moves_left * 0.7;
     move_time = std::min(move_time, (int)(time_left * 0.6));
     return move_time;
 }
