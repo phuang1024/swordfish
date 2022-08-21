@@ -56,12 +56,14 @@ static void unified_search(
     int tp_skip_ind = -1;
     if (tp_good) {
         // Check if beta cutoff.
+        /*
         if (!is_root && tp.depth >= remain_depth) {
             if (tp.eval >= beta && tp.alpha < beta) {
                 r_eval = beta;
                 return;
             }
         }
+        */
 
         // Move ordering.
         if (!tp.best_move.is_null()) {
@@ -111,8 +113,8 @@ static void unified_search(
         // TP alpha-beta should be outside current alpha-beta.
         if (tp_good) {
             if (!is_root && tp.depth >= remain_depth) {
-                if (tp.alpha <= alpha) {
-                    r_eval = tp.eval;
+                if (tp.alpha <= alpha && tp.beta >= beta) {
+                    r_eval = std::min(tp.eval, beta);
                     return;
                 }
             }
