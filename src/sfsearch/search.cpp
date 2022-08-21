@@ -30,9 +30,7 @@ static void unified_search(
         bool is_root, bool is_quiesce,
         int& r_eval, Move& r_bestmove, ull& r_nodes, int& r_maxdepth)
 {
-    if (maxdepth != 1 && Time::elapse(time_start) > movetime)
-        return;
-
+    const int alpha_init = alpha;
     std::vector<Move> legal_moves;
     ull attacks;
     int kpos = Bit::first(*pos.relative_bb(pos.turn).mk);
@@ -54,28 +52,20 @@ static void unified_search(
         return;
     }
 
-    // Use TP.
+    // Transposition
     int tp_skip_ind = -1;
     if (tp_good) {
+        // Check if beta cutoff.
         if (!is_root && tp.depth >= remain_depth) {
-            // Return TP eval if good.
-            if (tp.alpha >= alpha && tp.beta <= beta) {
-                // Exact TP.
-                r_eval = tp.eval;
-                return;
-            } else if (tp.alpha >= beta) {
-                // Beta cut.
+            if (tp.eval >= beta && tp.alpha < beta) {
                 r_eval = beta;
-                return;
-            } else if (tp.beta <= alpha) {
-                // Alpha cut.
-                r_eval = alpha;
                 return;
             }
         }
 
-        // Otherwise move ordering.
+        // Move ordering.
         if (!tp.best_move.is_null()) {
+            // Skip matching move already in vector.
             for (int i = 0; i < (int)legal_moves.size(); i++) {
                 if (legal_moves[i] == tp.best_move) {
                     tp_skip_ind = i;
@@ -84,6 +74,7 @@ static void unified_search(
             }
             if (tp_skip_ind == -1)
                 throw 1;
+
             legal_moves.push_back(tp.best_move);
         }
     }
@@ -110,20 +101,24 @@ static void unified_search(
 
     Move best_move(0, 0);
     bool beta_cutoff = false;
-    int currmovenumber = 1;
     for (int i = legal_moves.size() - 1; i >= 0; i--) {
+        if (remain_depth > 3 && maxdepth != 1 && Time::elapse(time_start) > movetime)
+            return;
         if (i == tp_skip_ind)
             continue;
 
-        const Move& move = legal_moves[i];
-        if (is_root) {
-            SearchResult res;
-            res.data["depth"] = std::to_string(remain_depth);
-            res.data["currmove"] = move.uci();
-            res.data["currmovenumber"] = std::to_string(currmovenumber);
-            std::cout << res.uci() << std::endl;
+        // Return TP score if current alpha-beta bounds are good enough.
+        // TP alpha-beta should be outside current alpha-beta.
+        if (tp_good) {
+            if (!is_root && tp.depth >= remain_depth) {
+                if (tp.alpha <= alpha) {
+                    r_eval = tp.eval;
+                    return;
+                }
+            }
         }
-        currmovenumber++;
+
+        const Move& move = legal_moves[i];
 
         // Check if quiesce and capture move.
         if (is_quiesce && !Bit::get(t_pieces, move.to))
@@ -159,13 +154,11 @@ static void unified_search(
     r_eval = beta_cutoff ? beta : alpha;
 
     // Write to TP.
-    if (!beta_cutoff) {
-        // Simple way to decide if overwrite.
-        int tp_useful = tp.depth + (tp.beta-tp.alpha)/40;
-        int curr_useful = remain_depth + (beta-alpha)/40;
-        if (curr_useful > tp_useful) {
-            tptable.set(hash, remain_depth, r_eval, alpha, beta, best_move);
-        }
+    bool write = false;
+    write |= remain_depth > tp.depth;
+    write |= (remain_depth == tp.depth) && (alpha_init < tp.alpha) && (beta > tp.beta);
+    if (write) {
+        tptable.set(hash, remain_depth, r_eval, alpha_init, beta, best_move);
     }
 }
 
@@ -208,7 +201,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
             else
                 break;
         }
-        if (Time::elapse(time_start) > movetime)
+        if (depth > 1 && Time::elapse(time_start) > movetime)
             break;
 
         best_eval = curr_best_eval;
@@ -228,7 +221,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
         if (abs(best_eval) > 1e5) {
             int mate_in = (Eval::MATE_SCORE - abs(best_eval) + 1) / 2;
             res.data["score mate"] = std::to_string(mate_in * (best_eval > 0 ? 1 : -1));
-            if (mate_in <= depth)
+            if (movetime < 1e9 && mate_in <= depth)
                 search_done = true;
         } else {
             res.data["score cp"] = std::to_string(best_eval);

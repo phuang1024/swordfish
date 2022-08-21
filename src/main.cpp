@@ -11,7 +11,7 @@
 int main() {
     // Print program info.
     std::cerr << "Swordfish v" << VERSION_MAJOR << "." << VERSION_MINOR << "."
-        << VERSION_PATCH << std::endl << std::endl;
+        << VERSION_PATCH << std::endl;
 
     Position pos;
     pos.setup_std();
@@ -45,7 +45,7 @@ int main() {
                 std::cout << res.uci() << std::endl;
             } else {
                 const int movetime = Search::get_movetime(pos, cmd.args);
-                const int maxdepth = cmd.args.count("depth") ? cmd.args["depth"] : 1000;
+                const int maxdepth = cmd.args.count("depth") ? cmd.args["depth"] : 255;
                 const Move bestmove = Search::search(pos, maxdepth, movetime);
                 std::cout << "bestmove " << bestmove.uci() << std::endl;
             }
