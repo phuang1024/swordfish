@@ -23,21 +23,33 @@ namespace Transposition {
      */
     struct TP {
         ull hash;
-        char depth;  // Depth of search.
+        // Depth of search.
+        char depth;
         int eval, alpha, beta;
-        Move best_move;
+        uch move_count;
+        // 0 <= i < num_moves, search legal_moves[move_order[i]]
+        int* move_order;
+
+        ~TP() {
+            if (move_order != nullptr)
+                delete[] move_order;
+        }
 
         TP() {
             // This means unitialized
             depth = -1;
+            move_order = nullptr;
         }
     };
 
     /**
      * Transposition table.
      */
-    struct TPTable {
+    class TPTable {
+    private:
         TP* table;
+
+    public:
         int size;
         int used;
 
@@ -55,7 +67,10 @@ namespace Transposition {
             return &table[hash % size];
         }
 
-        void set(ull hash, char depth, int eval, int alpha, int beta, Move best_move) {
+        /**
+         * @param move_order  Same format as TP::move_order
+         */
+        void set(ull hash, char depth, int eval, int alpha, int beta, int move_count, int* move_order) {
             TP* tp = get(hash);
             if (tp->depth == -1)
                 used++;
@@ -65,7 +80,14 @@ namespace Transposition {
             tp->eval = eval;
             tp->alpha = alpha;
             tp->beta = beta;
-            tp->best_move = best_move;
+            if (tp->move_order == nullptr || tp->move_count != move_count) {
+                if (tp->move_order != nullptr)
+                    delete[] tp->move_order;
+                tp->move_order = new int[move_count];
+                tp->move_count = move_count;
+                for (int i = 0; i < move_count; i++)
+                    tp->move_order[i] = move_order[i];
+            }
         }
 
         /**

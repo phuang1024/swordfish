@@ -1,3 +1,5 @@
+#include <set>
+
 #include "sfeval.hpp"
 #include "sfmovegen.hpp"
 #include "sfsearch.hpp"
@@ -30,15 +32,18 @@ static void unified_search(
         bool do_nmp, bool do_delta,
         int& r_eval, std::vector<Move>& r_pv, ull& r_nodes, int& r_maxdepth)
 {
-    const int alpha_init = alpha;
-    const RelativeBB relbb = pos.relative_bb(pos.turn);
     std::vector<Move> legal_moves;
     ull attacks;
-    int kpos = Bit::first(*pos.relative_bb(pos.turn).mk);
     Movegen::get_legal_moves(pos, legal_moves, attacks);
+    std::set<std::pair<int, int>> move_order;  // (score, legal_moves index)
+
+    const int alpha_init = alpha;
+    const RelativeBB relbb = pos.relative_bb(pos.turn);
+    const int kpos = Bit::first(*pos.relative_bb(pos.turn).mk);
     const int remain_depth = std::max(maxdepth - mydepth, 0);
     const int static_eval = Eval::eval(pos, legal_moves.size(), attacks, kpos, mydepth)
         * (pos.turn ? 1 : -1);
+
     const ull hash = Transposition::hash(pos);
     TP& tp = *tptable.get(hash);
     const bool tp_good = (tp.depth != -1 && tp.hash == hash);
@@ -51,35 +56,6 @@ static void unified_search(
     if (legal_moves.size() == 0) {
         r_eval = static_eval;
         return;
-    }
-
-    // Transposition
-    int tp_skip_ind = -1;
-    if (tp_good) {
-        // Check if beta cutoff.
-        /*
-        if (!is_root && tp.depth >= remain_depth) {
-            if (tp.eval >= beta && tp.alpha < beta) {
-                r_eval = beta;
-                return;
-            }
-        }
-        */
-
-        // Move ordering.
-        if (!tp.best_move.is_null()) {
-            // Skip matching move already in vector.
-            for (int i = 0; i < (int)legal_moves.size(); i++) {
-                if (legal_moves[i] == tp.best_move) {
-                    tp_skip_ind = i;
-                    break;
-                }
-            }
-            if (tp_skip_ind == -1)
-                throw 1;
-
-            legal_moves.push_back(tp.best_move);
-        }
     }
 
     // Start quie search if remaining depth 0.
@@ -99,11 +75,9 @@ static void unified_search(
 
     bool beta_cutoff = false;
     int currmovenumber = 1;
-    for (int i = legal_moves.size() - 1; i >= 0; i--) {
+    for (int i = 0; i < (int)legal_moves.size(); i++) {
         if (remain_depth > 3 && maxdepth != 1 && Time::elapse(time_start) > movetime)
             return;
-        if (i == tp_skip_ind)
-            continue;
 
         // Return TP score if current alpha-beta bounds are good enough.
         // TP alpha-beta should be outside current alpha-beta.
@@ -191,23 +165,34 @@ static void unified_search(
         }
         if (curr_eval > alpha) {
             alpha = curr_eval;
+
+            // Set pv.
             r_pv.resize(0);
             r_pv.push_back(move);
             for (const Move& m: curr_pv)
                 r_pv.push_back(m);
         }
+
+        // Set move order.
+        move_order.insert(std::pair<int, int>(curr_eval, i));
     }
 
     // Set returns.
     r_eval = beta_cutoff ? beta : alpha;
 
     // Write to TP.
-    bool write = false;
-    write |= remain_depth > tp.depth;
-    write |= (remain_depth == tp.depth) && (alpha_init < tp.alpha) && (beta > tp.beta);
-    if (write) {
-        const Move best_move = r_pv.size() > 0 ? r_pv[0] : Move();
-        tptable.set(hash, remain_depth, r_eval, alpha_init, beta, best_move);
+    if (!beta_cutoff) {
+        bool write = false;
+        write |= remain_depth > tp.depth;
+        write |= (remain_depth == tp.depth) && (alpha_init < tp.alpha) && (beta > tp.beta);
+        if (write) {
+            // Make move order array.
+            int* order_arr = new int[legal_moves.size()];
+            int i = 0;
+            for (auto it = move_order.rbegin(); it != move_order.rend(); it++)
+                order_arr[i++] = it->second;
+            tptable.set(hash, remain_depth, r_eval, alpha_init, beta, legal_moves.size(), order_arr);
+        }
     }
 }
 
