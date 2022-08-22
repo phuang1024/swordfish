@@ -116,6 +116,10 @@ static void unified_search(
 
         const Move& move = legal_moves[i];
 
+        // Because of NMP, this may occur.
+        if (Bit::get(pos.wk|pos.bk, move.to))
+            continue;
+
         // Check if quiesce and capture move.
         if (is_quiesce && !Bit::get(relbb.t_pieces, move.to))
             continue;

@@ -691,5 +691,8 @@ public:
         turn = !turn;
         if (turn)
             move++;
+
+        if (wk == 0 || bk == 0)
+            throw 123;
     }
 };
