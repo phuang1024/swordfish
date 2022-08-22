@@ -9,6 +9,17 @@
 namespace Ascii {
 
 
+std::string move_list(const std::vector<Move>& moves) {
+    std::string str = "";
+    for (int i = 0; i < (int)moves.size(); i++) {
+        str += moves[i].uci();
+        if (i < (int)moves.size() - 1)
+            str += " ";
+    }
+    return str;
+}
+
+
 void print(std::ostream& os, ull bb) {
     for (int y = 7; y >= 0; y--) {
         for (int x = 0; x < 8; x++) {

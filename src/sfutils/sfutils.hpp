@@ -3,6 +3,7 @@
 #include <chrono>
 #include <iostream>
 #include <string>
+#include <vector>
 
 using uch = unsigned char;
 using ull = unsigned long long;
@@ -300,6 +301,11 @@ namespace Ascii {
     inline int str2square(std::string str) {
         return square(str[0] - 'a', str[1] - '1');
     }
+
+    /**
+     * Space separated UCI reprs.
+     */
+    std::string move_list(const std::vector<Move>& moves);
 
     /**
      * Print bitboard.

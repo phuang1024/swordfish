@@ -21,14 +21,13 @@ namespace Search {
  * @param maxdepth  Max depth of normal search (quiesce if exceeds).
  * @param mydepth  Depth of this node.
  * @param r_eval  Eval of this node relative to position's turn.
- * @param r_bestmove  Best move. Only set if root search.
  * @param r_maxdepth  Max depth of search.
  */
 static void unified_search(
         ull time_start, TPTable& tptable, Position& pos, int maxdepth, int mydepth, int movetime,
         int alpha, int beta,
         bool is_root, bool is_quiesce,
-        int& r_eval, Move& r_bestmove, ull& r_nodes, int& r_maxdepth)
+        int& r_eval, std::vector<Move>& r_pv, ull& r_nodes, int& r_maxdepth)
 {
     const int alpha_init = alpha;
     std::vector<Move> legal_moves;
@@ -87,7 +86,7 @@ static void unified_search(
                 time_start, tptable, pos, maxdepth, mydepth + 1, movetime,
                 alpha, beta,
                 false, true,
-                r_eval, r_bestmove, r_nodes, r_maxdepth);
+                r_eval, r_pv, r_nodes, r_maxdepth);
         return;
     }
 
@@ -101,7 +100,6 @@ static void unified_search(
     if (is_quiesce)
         alpha = std::max(alpha, static_eval);
 
-    Move best_move(0, 0);
     bool beta_cutoff = false;
     for (int i = legal_moves.size() - 1; i >= 0; i--) {
         if (remain_depth > 3 && maxdepth != 1 && Time::elapse(time_start) > movetime)
@@ -131,11 +129,12 @@ static void unified_search(
 
         // Get eval of new position.
         int curr_eval;
+        std::vector<Move> curr_pv;
         unified_search(
                 time_start, tptable, new_pos, maxdepth, mydepth + 1, movetime,
                 -beta, -alpha,
                 false, is_quiesce,
-                curr_eval, r_bestmove, r_nodes, r_maxdepth);
+                curr_eval, curr_pv, r_nodes, r_maxdepth);
         curr_eval = -curr_eval;
 
         // Check alpha beta.
@@ -145,14 +144,14 @@ static void unified_search(
         }
         if (curr_eval > alpha) {
             alpha = curr_eval;
-            best_move = move;
+            r_pv.resize(0);
+            r_pv.push_back(move);
+            for (const Move& m: curr_pv)
+                r_pv.push_back(m);
         }
     }
 
     // Set returns.
-    if (is_root) {
-        r_bestmove = best_move;
-    }
     r_eval = beta_cutoff ? beta : alpha;
 
     // Write to TP.
@@ -160,6 +159,7 @@ static void unified_search(
     write |= remain_depth > tp.depth;
     write |= (remain_depth == tp.depth) && (alpha_init < tp.alpha) && (beta > tp.beta);
     if (write) {
+        const Move best_move = r_pv.size() > 0 ? r_pv[0] : Move();
         tptable.set(hash, remain_depth, r_eval, alpha_init, beta, best_move);
     }
 }
@@ -172,7 +172,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
     Transposition::init();
     TPTable tptable;
 
-    Move best_move(0, 0);
+    std::vector<Move> pv;
     int best_eval = 0;
 
     // Iterative deepening.
@@ -181,7 +181,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
 
         // Aspiration window.
         int curr_best_eval;
-        Move curr_best_move;
+        std::vector<Move> curr_pv;
         int lower, upper;
         lower = upper = (depth == 1 ? 1e9 : 10);
 
@@ -193,7 +193,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
                     time_start, tptable, pos, depth, 0, movetime,
                     alpha, beta,
                     true, false,
-                    curr_best_eval, curr_best_move, nodes, max_search_depth);
+                    curr_best_eval, curr_pv, nodes, max_search_depth);
 
             // Increase window if fail.
             if (curr_best_eval <= alpha)
@@ -207,7 +207,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
             break;
 
         best_eval = curr_best_eval;
-        best_move = curr_best_move;
+        pv = curr_pv;
 
         const int elapse = Time::elapse(time_start);
         bool search_done = false;
@@ -215,7 +215,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
         SearchResult res;
         res.data["depth"] = std::to_string(depth);
         res.data["seldepth"] = std::to_string(max_search_depth);
-        res.data["pv"] = best_move.uci();
+        res.data["pv"] = Ascii::move_list(pv);
         res.data["nodes"] = std::to_string(nodes);
         res.data["nps"] = std::to_string(Time::nps(nodes, elapse));
         res.data["time"] = std::to_string(elapse);
@@ -234,7 +234,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
             break;
     }
 
-    return best_move;
+    return pv[0];
 }
 
 
