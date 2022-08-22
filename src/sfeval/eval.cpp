@@ -178,7 +178,7 @@ int eval(const Position& pos, int move_count, ull attacks, int kpos, int mydepth
     const int pm = piece_map(pos, phase);
     //const int pawns = pawn_structure(pos.wp, pos.bp);
 
-    const int score = mat_score + 0.1*pm;// + pawns;
+    const int score = mat_score + 0.13*pm;// + pawns;
     return score;
 }
 

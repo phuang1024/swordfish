@@ -19,14 +19,13 @@ namespace Search {
  * Some algorithms implemented using pseudocode from https://chessprogramming.org
  *
  * @param maxdepth  Max depth of normal search (quiesce if exceeds).
- * @param mydepth  Depth of this node.
- * @param r_eval  Eval of this node relative to position's turn.
- * @param r_maxdepth  Max depth of search.
+ * @param do_nmp  Whether to use null move pruning.
  */
 static void unified_search(
         ull time_start, TPTable& tptable, Position& pos, int maxdepth, int mydepth, int movetime,
         int alpha, int beta,
         bool is_root, bool is_quiesce,
+        bool do_nmp,
         int& r_eval, std::vector<Move>& r_pv, ull& r_nodes, int& r_maxdepth)
 {
     const int alpha_init = alpha;
@@ -86,6 +85,7 @@ static void unified_search(
                 time_start, tptable, pos, maxdepth, mydepth + 1, movetime,
                 alpha, beta,
                 false, true,
+                do_nmp,
                 r_eval, r_pv, r_nodes, r_maxdepth);
         return;
     }
@@ -124,6 +124,27 @@ static void unified_search(
         if (is_quiesce && !Bit::get(t_pieces, move.to))
             continue;
 
+        // Null move pruning.
+        if (remain_depth >= 4) {
+            Position new_pos = pos;
+            new_pos.turn = !new_pos.turn;  // Null move.
+
+            int null_eval;
+            std::vector<Move> null_pv;
+            unified_search(
+                    time_start, tptable, new_pos, maxdepth-2, mydepth + 1, movetime,
+                    -beta, -alpha,
+                    false, is_quiesce,
+                    do_nmp,
+                    null_eval, null_pv, r_nodes, r_maxdepth);
+            null_eval = -null_eval;
+
+            if (null_eval >= beta) {
+                r_eval = beta;
+                return;
+            }
+        }
+
         Position new_pos = pos;
         new_pos.push(move);
 
@@ -134,6 +155,7 @@ static void unified_search(
                 time_start, tptable, new_pos, maxdepth, mydepth + 1, movetime,
                 -beta, -alpha,
                 false, is_quiesce,
+                do_nmp,
                 curr_eval, curr_pv, r_nodes, r_maxdepth);
         curr_eval = -curr_eval;
 
@@ -193,6 +215,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
                     time_start, tptable, pos, depth, 0, movetime,
                     alpha, beta,
                     true, false,
+                    true,
                     curr_best_eval, curr_pv, nodes, max_search_depth);
 
             // Increase window if fail.
