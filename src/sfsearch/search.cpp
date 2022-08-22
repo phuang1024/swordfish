@@ -20,15 +20,17 @@ namespace Search {
  *
  * @param maxdepth  Max depth of normal search (quiesce if exceeds).
  * @param do_nmp  Whether to use null move pruning.
+ * @param do_delta  Whether to use delta pruning.
  */
 static void unified_search(
         ull time_start, TPTable& tptable, Position& pos, int maxdepth, int mydepth, int movetime,
         int alpha, int beta,
         bool is_root, bool is_quiesce,
-        bool do_nmp,
+        bool do_nmp, bool do_delta,
         int& r_eval, std::vector<Move>& r_pv, ull& r_nodes, int& r_maxdepth)
 {
     const int alpha_init = alpha;
+    const RelativeBB relbb = pos.relative_bb(pos.turn);
     std::vector<Move> legal_moves;
     ull attacks;
     int kpos = Bit::first(*pos.relative_bb(pos.turn).mk);
@@ -85,15 +87,9 @@ static void unified_search(
                 time_start, tptable, pos, maxdepth, mydepth + 1, movetime,
                 alpha, beta,
                 false, true,
-                do_nmp,
+                do_nmp, do_delta,
                 r_eval, r_pv, r_nodes, r_maxdepth);
         return;
-    }
-
-    // Only used in quiesce.
-    ull t_pieces;
-    if (is_quiesce) {
-        t_pieces = pos.relative_bb(pos.turn).t_pieces;
     }
 
     // Start at static eval in case no captures for quie.
@@ -121,8 +117,25 @@ static void unified_search(
         const Move& move = legal_moves[i];
 
         // Check if quiesce and capture move.
-        if (is_quiesce && !Bit::get(t_pieces, move.to))
+        if (is_quiesce && !Bit::get(relbb.t_pieces, move.to))
             continue;
+
+        // Delta pruning.
+        if (is_quiesce) {
+            int delta = 0;
+            if (Bit::get(*relbb.tp, move.to))
+                delta = 1;
+            else if (Bit::get(*relbb.tn, move.to) || Bit::get(*relbb.tb, move.to))
+                delta = 3;
+            else if (Bit::get(*relbb.tr, move.to))
+                delta = 5;
+            else if (Bit::get(*relbb.tq, move.to))
+                delta = 9;
+            delta = static_eval + 100*delta + 200;   // 200 cp safety.
+
+            if (delta <= alpha)
+                continue;
+        }
 
         // Null move pruning.
         if (remain_depth >= 4) {
@@ -135,7 +148,7 @@ static void unified_search(
                     time_start, tptable, new_pos, maxdepth-2, mydepth + 1, movetime,
                     -beta, -alpha,
                     false, is_quiesce,
-                    do_nmp,
+                    do_nmp, do_delta,
                     null_eval, null_pv, r_nodes, r_maxdepth);
             null_eval = -null_eval;
 
@@ -155,7 +168,7 @@ static void unified_search(
                 time_start, tptable, new_pos, maxdepth, mydepth + 1, movetime,
                 -beta, -alpha,
                 false, is_quiesce,
-                do_nmp,
+                do_nmp, do_delta,
                 curr_eval, curr_pv, r_nodes, r_maxdepth);
         curr_eval = -curr_eval;
 
@@ -215,7 +228,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
                     time_start, tptable, pos, depth, 0, movetime,
                     alpha, beta,
                     true, false,
-                    true,
+                    true, true,
                     curr_best_eval, curr_pv, nodes, max_search_depth);
 
             // Increase window if fail.
