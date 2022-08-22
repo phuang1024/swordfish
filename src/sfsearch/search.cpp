@@ -92,6 +92,10 @@ static void unified_search(
 
         const Move& move = legal_moves[i];
 
+        // Because of NMP, a king capture may occur.
+        if (Bit::get(pos.wk|pos.bk, move.to))
+            continue;
+
         // If root, print currmove info.
         if (is_root) {
             SearchResult res;
