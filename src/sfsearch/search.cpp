@@ -2,6 +2,7 @@
 #include "sfmovegen.hpp"
 #include "sfsearch.hpp"
 #include "sfutils.hpp"
+#include "sfuci.hpp"
 
 using Transposition::TP;
 using Transposition::TPTable;
