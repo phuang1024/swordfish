@@ -2,6 +2,7 @@
 
 #include "sfmovegen.hpp"
 #include "sfsearch.hpp"
+#include "sfuci.hpp"
 #include "sfutils.hpp"
 
 

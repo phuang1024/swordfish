@@ -2,6 +2,7 @@
 #include "sfmovegen.hpp"
 #include "sfsearch.hpp"
 #include "sfutils.hpp"
+#include "sfuci.hpp"
 
 using Transposition::TP;
 using Transposition::TPTable;
@@ -97,6 +98,7 @@ static void unified_search(
         alpha = std::max(alpha, static_eval);
 
     bool beta_cutoff = false;
+    int currmovenumber = 1;
     for (int i = legal_moves.size() - 1; i >= 0; i--) {
         if (remain_depth > 3 && maxdepth != 1 && Time::elapse(time_start) > movetime)
             return;
@@ -105,8 +107,8 @@ static void unified_search(
 
         // Return TP score if current alpha-beta bounds are good enough.
         // TP alpha-beta should be outside current alpha-beta.
-        if (tp_good) {
-            if (!is_root && tp.depth >= remain_depth) {
+        if (!is_root && tp_good) {
+            if (tp.depth >= remain_depth) {
                 if (tp.alpha <= alpha && tp.beta >= beta) {
                     r_eval = std::min(tp.eval, beta);
                     return;
@@ -116,9 +118,18 @@ static void unified_search(
 
         const Move& move = legal_moves[i];
 
-        // Because of NMP, this may occur.
+        // Because of NMP, a king capture may occur.
         if (Bit::get(pos.wk|pos.bk, move.to))
             continue;
+
+        // If root, print currmove info.
+        if (is_root) {
+            SearchResult res;
+            res.data["depth"] = std::to_string(maxdepth);
+            res.data["currmove"] = move.uci();
+            res.data["currmovenumber"] = std::to_string(currmovenumber++);
+            std::cerr << res.uci() << std::endl;
+        }
 
         // Check if quiesce and capture move.
         if (is_quiesce && !Bit::get(relbb.t_pieces, move.to))
@@ -137,8 +148,9 @@ static void unified_search(
                 delta = 9;
             delta = static_eval + 100*delta + 200;   // 200 cp safety.
 
-            if (delta <= alpha)
+            if (delta <= alpha) {
                 continue;
+            }
         }
 
         // Null move pruning.
