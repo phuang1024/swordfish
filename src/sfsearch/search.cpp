@@ -35,7 +35,7 @@ static void unified_search(
     std::vector<Move> legal_moves;
     ull attacks;
     Movegen::get_legal_moves(pos, legal_moves, attacks);
-    std::set<std::pair<int, int>> move_order;  // (score, legal_moves index)
+    std::multiset<std::pair<int, int>> move_order;  // (score, legal_moves index)
 
     const int alpha_init = alpha;
     const RelativeBB relbb = pos.relative_bb(pos.turn);
@@ -90,7 +90,11 @@ static void unified_search(
             }
         }
 
-        const Move& move = legal_moves[i];
+        // Use move ordering if possible.
+        if (tp.move_order != nullptr)
+            std::cerr << tp.move_order[i] << std::endl;
+        const Move& move = (tp.move_order != nullptr) ?
+            legal_moves[tp.move_order[i]] : legal_moves[i];
 
         // Because of NMP, a king capture may occur.
         if (Bit::get(pos.wk|pos.bk, move.to))
@@ -193,9 +197,16 @@ static void unified_search(
             // Make move order array.
             int* order_arr = new int[legal_moves.size()];
             int i = 0;
-            for (auto it = move_order.rbegin(); it != move_order.rend(); it++)
+            for (auto it = move_order.rbegin(); it != move_order.rend(); it++) {
                 order_arr[i++] = it->second;
+            }
+            if (i != (int)legal_moves.size()) {
+                std::cerr << move_order.size() << ' ' << i << ' ' << legal_moves.size() << std::endl;
+                throw 1;
+            }
+
             tptable.set(hash, remain_depth, r_eval, alpha_init, beta, legal_moves.size(), order_arr);
+            delete[] order_arr;
         }
     }
 }
