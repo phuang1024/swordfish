@@ -68,7 +68,8 @@ namespace Transposition {
         }
 
         /**
-         * @param move_order  Same format as TP::move_order
+         * @param move_order  Same format as TP::move_order.
+         *     If nullptr, leaves current move_order.
          */
         void set(ull hash, char depth, int eval, int alpha, int beta, int move_count, int* move_order) {
             TP* tp = get(hash);
@@ -80,13 +81,16 @@ namespace Transposition {
             tp->eval = eval;
             tp->alpha = alpha;
             tp->beta = beta;
-            if (tp->move_order == nullptr || tp->move_count != move_count) {
-                if (tp->move_order != nullptr)
-                    delete[] tp->move_order;
-                tp->move_order = new int[move_count];
-                tp->move_count = move_count;
-                for (int i = 0; i < move_count; i++)
-                    tp->move_order[i] = move_order[i];
+
+            if (move_order != nullptr) {
+                if (tp->move_order == nullptr || tp->move_count != move_count) {
+                    if (tp->move_order != nullptr)
+                        delete[] tp->move_order;
+                    tp->move_order = new int[move_count];
+                    tp->move_count = move_count;
+                    for (int i = 0; i < move_count; i++)
+                        tp->move_order[i] = move_order[i];
+                }
             }
         }
 

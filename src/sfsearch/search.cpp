@@ -47,6 +47,7 @@ static void unified_search(
     const ull hash = Transposition::hash(pos);
     TP& tp = *tptable.get(hash);
     const bool tp_good = (tp.depth != -1 && tp.hash == hash);
+    const bool tp_moveorder_good = (tp_good && tp.move_count == (int)legal_moves.size());
 
     // Set statistic variables.
     r_nodes++;
@@ -91,9 +92,7 @@ static void unified_search(
         }
 
         // Use move ordering if possible.
-        if (tp.move_order != nullptr)
-            std::cerr << tp.move_order[i] << std::endl;
-        const Move& move = (tp.move_order != nullptr) ?
+        const Move& move = (tp_moveorder_good) ?
             legal_moves[tp.move_order[i]] : legal_moves[i];
 
         // Because of NMP, a king capture may occur.
@@ -106,7 +105,7 @@ static void unified_search(
             res.data["depth"] = std::to_string(maxdepth);
             res.data["currmove"] = move.uci();
             res.data["currmovenumber"] = std::to_string(currmovenumber++);
-            std::cerr << res.uci() << std::endl;
+            std::cout << res.uci() << std::endl;
         }
 
         // Check if quiesce and capture move.
@@ -132,7 +131,7 @@ static void unified_search(
         }
 
         // Null move pruning.
-        if (remain_depth >= 4) {
+        if (remain_depth >= 2) {
             Position new_pos = pos;
             new_pos.turn = !new_pos.turn;  // Null move.
 
@@ -195,18 +194,21 @@ static void unified_search(
         write |= (remain_depth == tp.depth) && (alpha_init < tp.alpha) && (beta > tp.beta);
         if (write) {
             // Make move order array.
-            int* order_arr = new int[legal_moves.size()];
+            int* order_arr = nullptr;
             int i = 0;
-            for (auto it = move_order.rbegin(); it != move_order.rend(); it++) {
-                order_arr[i++] = it->second;
-            }
-            if (i != (int)legal_moves.size()) {
-                std::cerr << move_order.size() << ' ' << i << ' ' << legal_moves.size() << std::endl;
-                throw 1;
+
+            // Only make move order if all moves searched.
+            if (move_order.size() == legal_moves.size()) {
+                order_arr = new int[legal_moves.size()];
+                for (auto it = move_order.rbegin(); it != move_order.rend(); it++) {
+                    order_arr[i++] = it->second;
+                }
             }
 
-            tptable.set(hash, remain_depth, r_eval, alpha_init, beta, legal_moves.size(), order_arr);
-            delete[] order_arr;
+            tptable.set(hash, remain_depth, r_eval, alpha_init, beta, i, order_arr);
+
+            if (order_arr != nullptr)
+                delete[] order_arr;
         }
     }
 }
