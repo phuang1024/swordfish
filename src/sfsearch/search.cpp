@@ -29,7 +29,7 @@ static void unified_search(
         ull time_start, TPTable& tptable, Position& pos, int maxdepth, int mydepth, int movetime,
         int alpha, int beta,
         bool is_root, bool is_quiesce,
-        bool do_nmp, bool do_delta,
+        bool do_nmp, bool do_delta, bool do_lmr,
         int& r_eval, std::vector<Move>& r_pv, ull& r_nodes, int& r_maxdepth)
 {
     std::vector<Move> legal_moves;
@@ -65,7 +65,7 @@ static void unified_search(
                 time_start, tptable, pos, maxdepth, mydepth + 1, movetime,
                 alpha, beta,
                 false, true,
-                do_nmp, do_delta,
+                do_nmp, do_delta, do_lmr,
                 r_eval, r_pv, r_nodes, r_maxdepth);
         return;
     }
@@ -77,7 +77,7 @@ static void unified_search(
     bool beta_cutoff = false;
     int currmovenumber = 1;
     for (int i = 0; i < (int)legal_moves.size(); i++) {
-        if (remain_depth > 3 && maxdepth != 1 && Time::elapse(time_start) > movetime)
+        if (maxdepth != 1 && Time::elapse(time_start) > movetime)
             return;
 
         // Return TP score if current alpha-beta bounds are good enough.
@@ -141,7 +141,7 @@ static void unified_search(
                     time_start, tptable, new_pos, maxdepth-2, mydepth + 1, movetime,
                     -beta, -alpha,
                     false, is_quiesce,
-                    do_nmp, do_delta,
+                    do_nmp, do_delta, do_lmr,
                     null_eval, null_pv, r_nodes, r_maxdepth);
             null_eval = -null_eval;
 
@@ -151,17 +151,26 @@ static void unified_search(
             }
         }
 
+        // Next depth position.
+        int next_maxdepth = maxdepth;
         Position new_pos = pos;
         new_pos.push(move);
+
+        // Late move reductions.
+        if (do_lmr && remain_depth >= 2 && i > 4) {
+            int max_reduction = (double)legal_moves.size() / 10;
+            int reduction = max_reduction * (i-4) / (legal_moves.size()-4) + 1;
+            next_maxdepth -= reduction;
+        }
 
         // Get eval of new position.
         int curr_eval;
         std::vector<Move> curr_pv;
         unified_search(
-                time_start, tptable, new_pos, maxdepth, mydepth + 1, movetime,
+                time_start, tptable, new_pos, next_maxdepth, mydepth + 1, movetime,
                 -beta, -alpha,
                 false, is_quiesce,
-                do_nmp, do_delta,
+                do_nmp, do_delta, do_lmr,
                 curr_eval, curr_pv, r_nodes, r_maxdepth);
         curr_eval = -curr_eval;
 
@@ -242,7 +251,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
                     time_start, tptable, pos, depth, 0, movetime,
                     alpha, beta,
                     true, false,
-                    true, true,
+                    true, true, true,
                     curr_best_eval, curr_pv, nodes, max_search_depth);
 
             // Increase window if fail.
