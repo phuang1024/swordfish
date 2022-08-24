@@ -113,6 +113,7 @@ static void unified_search(
             continue;
 
         // Delta pruning.
+        /*
         if (is_quiesce) {
             int delta = 0;
             if (Bit::get(*relbb.tp, move.to))
@@ -150,6 +151,7 @@ static void unified_search(
                 return;
             }
         }
+        */
 
         // Next depth position.
         int next_maxdepth = maxdepth;
@@ -158,6 +160,7 @@ static void unified_search(
 
         // Late move reductions.
         if (do_lmr && remain_depth >= 2 && i > 4) {
+            // TODO no reduce important moves.
             int max_reduction = (double)legal_moves.size() / 10;
             int reduction = max_reduction * (i-4) / (legal_moves.size()-4) + 1;
             next_maxdepth -= reduction;
@@ -175,7 +178,7 @@ static void unified_search(
         curr_eval = -curr_eval;
 
         // Check alpha beta.
-        if (curr_eval >= beta) {
+        if (curr_eval >= beta && !is_root) {
             beta_cutoff = true;
             break;
         }
@@ -197,28 +200,22 @@ static void unified_search(
     r_eval = beta_cutoff ? beta : alpha;
 
     // Write to TP.
-    if (!beta_cutoff) {
-        bool write = false;
-        write |= remain_depth > tp.depth;
-        write |= (remain_depth == tp.depth) && (alpha_init < tp.alpha) && (beta > tp.beta);
-        if (write) {
-            // Make move order array.
-            int* order_arr = nullptr;
-            int i = 0;
-
-            // Only make move order if all moves searched.
-            if (move_order.size() == legal_moves.size()) {
-                order_arr = new int[legal_moves.size()];
-                for (auto it = move_order.rbegin(); it != move_order.rend(); it++) {
-                    order_arr[i++] = it->second;
-                }
+    if (remain_depth >= tp.depth) {
+        // Make move order array.
+        int* order_arr = nullptr;
+        int i = 0;
+        // Only make move order if all moves searched.
+        if (move_order.size() == legal_moves.size()) {
+            order_arr = new int[legal_moves.size()];
+            for (auto it = move_order.rbegin(); it != move_order.rend(); it++) {
+                order_arr[i++] = it->second;
             }
-
-            tptable.set(hash, remain_depth, r_eval, alpha_init, beta, i, order_arr);
-
-            if (order_arr != nullptr)
-                delete[] order_arr;
         }
+
+        tptable.set(hash, remain_depth, r_eval, alpha_init, beta, i, order_arr);
+
+        if (order_arr != nullptr)
+            delete[] order_arr;
     }
 }
 
