@@ -95,6 +95,15 @@ static void unified_search(
         const Move& move = (tp_moveorder_good) ?
             legal_moves[tp.move_order[i]] : legal_moves[i];
 
+        // If move is "important"
+        bool important = false;
+        if (Bit::get(relbb.a_pieces, move.to))   // Capture
+            important = true;
+        else if (Bit::get(pos.wp|pos.bp, move.from) && move.to / 8 == 7)   // Promotion
+            important = true;
+        else if ((pos.wk|pos.bk) & attacks)   // Check
+            important = true;
+
         // Because of NMP, a king capture may occur.
         if (Bit::get(pos.wk|pos.bk, move.to))
             continue;
@@ -113,8 +122,7 @@ static void unified_search(
             continue;
 
         // Delta pruning.
-        /*
-        if (is_quiesce) {
+        if (do_delta && !important && is_quiesce) {
             int delta = 0;
             if (Bit::get(*relbb.tp, move.to))
                 delta = 1;
@@ -132,7 +140,7 @@ static void unified_search(
         }
 
         // Null move pruning.
-        if (remain_depth >= 2) {
+        if (do_nmp && !important && remain_depth >= 4) {
             Position new_pos = pos;
             new_pos.turn = !new_pos.turn;  // Null move.
 
@@ -151,7 +159,6 @@ static void unified_search(
                 return;
             }
         }
-        */
 
         // Next depth position.
         int next_maxdepth = maxdepth;
@@ -159,9 +166,8 @@ static void unified_search(
         new_pos.push(move);
 
         // Late move reductions.
-        if (do_lmr && remain_depth >= 2 && i > 4) {
-            // TODO no reduce important moves.
-            int max_reduction = (double)legal_moves.size() / 10;
+        if (do_lmr && !important && remain_depth >= 2 && i > 4) {
+            int max_reduction = legal_moves.size() / 10;
             int reduction = max_reduction * (i-4) / (legal_moves.size()-4) + 1;
             next_maxdepth -= reduction;
         }
