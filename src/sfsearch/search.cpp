@@ -12,8 +12,8 @@ namespace Search {
 
 /**
  * Alpha beta negamax search that can act like:
- * * Root node: Sets both r_eval and r_bestmove.
- * * Normal search: Sets r_eval, ignores r_bestmove.
+ * * Root node: Sets r_eval
+ * * Normal search: Sets r_eval
  * * Quiescence search: Evaluates as soon as position is quiet.
  *
  * Some algorithms implemented using pseudocode from https://chessprogramming.org
@@ -21,14 +21,14 @@ namespace Search {
  * @param maxdepth  Max depth of normal search (quiesce if exceeds).
  * @param mydepth  Depth of this node.
  * @param r_eval  Eval of this node relative to position's turn.
- * @param r_bestmove  Best move. Only set if root search.
+ * @param r_pv  PV starting from this node.
  * @param r_maxdepth  Max depth of search.
  */
 static void unified_search(
         ull time_start, TPTable& tptable, Position& pos, int maxdepth, int mydepth, int movetime,
         int alpha, int beta,
         bool is_root, bool is_quiesce,
-        int& r_eval, Move& r_bestmove, ull& r_nodes, int& r_maxdepth)
+        int& r_eval, std::vector<Move>& r_pv, ull& r_nodes, int& r_maxdepth)
 {
     const int alpha_init = alpha;
     std::vector<Move> legal_moves;
@@ -83,11 +83,12 @@ static void unified_search(
 
     // Start quie search if remaining depth 0.
     if (!is_quiesce && remain_depth == 0) {
+        std::vector<Move> curr_pv;
         unified_search(
                 time_start, tptable, pos, maxdepth, mydepth + 1, movetime,
                 alpha, beta,
                 false, true,
-                r_eval, r_bestmove, r_nodes, r_maxdepth);
+                r_eval, curr_pv, r_nodes, r_maxdepth);
         return;
     }
 
@@ -131,28 +132,30 @@ static void unified_search(
 
         // Get eval of new position.
         int curr_eval;
+        std::vector<Move> curr_pv;
         unified_search(
                 time_start, tptable, new_pos, maxdepth, mydepth + 1, movetime,
                 -beta, -alpha,
                 false, is_quiesce,
-                curr_eval, r_bestmove, r_nodes, r_maxdepth);
+                curr_eval, curr_pv, r_nodes, r_maxdepth);
         curr_eval = -curr_eval;
 
         // Check alpha beta.
         if (curr_eval >= beta) {
             beta_cutoff = true;
+            r_pv.resize(mydepth);
             break;
         }
         if (curr_eval > alpha) {
             alpha = curr_eval;
             best_move = move;
+            r_pv.resize(0);
+            r_pv.push_back(move);
+            r_pv.insert(r_pv.end(), curr_pv.begin(), curr_pv.end());
         }
     }
 
     // Set returns.
-    if (is_root) {
-        r_bestmove = best_move;
-    }
     r_eval = beta_cutoff ? beta : alpha;
 
     // Write to TP.
@@ -181,7 +184,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
 
         // Aspiration window.
         int curr_best_eval;
-        Move curr_best_move;
+        std::vector<Move> curr_pv;
         int lower, upper;
         lower = upper = (depth == 1 ? 1e9 : 10);
 
@@ -193,7 +196,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
                     time_start, tptable, pos, depth, 0, movetime,
                     alpha, beta,
                     true, false,
-                    curr_best_eval, curr_best_move, nodes, max_search_depth);
+                    curr_best_eval, curr_pv, nodes, max_search_depth);
 
             // Increase window if fail.
             if (curr_best_eval <= alpha)
@@ -207,7 +210,7 @@ Move search(Position& pos, int maxdepth, int movetime) {
             break;
 
         best_eval = curr_best_eval;
-        best_move = curr_best_move;
+        best_move = curr_pv[0];
 
         const int elapse = Time::elapse(time_start);
         bool search_done = false;
@@ -215,7 +218,9 @@ Move search(Position& pos, int maxdepth, int movetime) {
         SearchResult res;
         res.data["depth"] = std::to_string(depth);
         res.data["seldepth"] = std::to_string(max_search_depth);
-        res.data["pv"] = best_move.uci();
+        for (const Move& move: curr_pv) {
+            res.data["pv"] += move.uci() + " ";
+        }
         res.data["nodes"] = std::to_string(nodes);
         res.data["nps"] = std::to_string(Time::nps(nodes, elapse));
         res.data["time"] = std::to_string(elapse);
