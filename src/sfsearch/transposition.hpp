@@ -12,7 +12,7 @@ namespace Transposition {
         int16_t eval, alpha, beta;
         Move best_move;
         // Search index specific to this.
-        uint16_t search_index;
+        int16_t search_index;
         // for (i: 0 to num_moves): search(moves[move_order[i]])
         uint8_t* move_order;
 
@@ -24,7 +24,7 @@ namespace Transposition {
 
         TP() {
             // This means unitialized
-            depth = -1;
+            depth = -2;
             search_index = -1;
             move_order = nullptr;
         }
@@ -36,13 +36,13 @@ namespace Transposition {
     class TPTable {
     public:
         // Which search we are currently doing e.g. 1st, 2nd, 3rd, etc.
-        uint16_t search_index;
+        int16_t search_index;
 
         ~TPTable() {
             delete[] table;
         }
 
-        TPTable(int size = 1e7 + 3) {
+        TPTable(int size = 1e8 + 7) {
             this->size = size;
             used = 0;
             table = new TP[size];
@@ -72,7 +72,7 @@ namespace Transposition {
 
         inline void set(ull hash, char depth, int eval, int alpha, int beta, Move best_move) {
             TP* tp = get(hash);
-            if (tp->depth == -1)
+            if (tp->depth == -2)
                 used++;
 
             tp->hash = hash;
@@ -81,6 +81,7 @@ namespace Transposition {
             tp->alpha = alpha;
             tp->beta = beta;
             tp->best_move = best_move;
+            tp->search_index = search_index;
         }
 
         /**

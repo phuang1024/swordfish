@@ -116,7 +116,7 @@ static void unified_search(
         if (tp_good) {
             if (!is_root && tp.depth >= remain_depth) {
                 if (tp.alpha <= alpha && tp.beta >= beta) {
-                    r_eval = std::min(tp.eval, beta);
+                    r_eval = std::min((int)tp.eval, beta);
                     return;
                 }
             }
@@ -128,10 +128,11 @@ static void unified_search(
         if (is_quiesce && !Bit::get(t_pieces, move.to))
             continue;
 
+        // New position.
         Position new_pos = pos;
         new_pos.push(move);
 
-        // Get eval of new position.
+        // Search on new pos.
         int curr_eval;
         std::vector<Move> curr_pv;
         unified_search(
@@ -160,16 +161,12 @@ static void unified_search(
     r_eval = beta_cutoff ? beta : alpha;
 
     // Write to TP.
-    bool write = false;
-    if (tptable.search_index > tp.search_index)
-        write = true;
-    else if (remain_depth > tp.depth)
-        write = true;
-    else if (remain_depth == tp.depth && r_eval > tp.eval)
-        write = true;
-
-    if (write)
+    // We can be this much shallower and write.
+    const int depth_thres = (int)tptable.search_index - (int)tp.search_index;
+    const int deeper = remain_depth + depth_thres - tp.depth;
+    if (deeper > 0 || (deeper == 0 && r_eval > tp.eval)) {
         tptable.set(hash, remain_depth, r_eval, alpha_init, beta, best_move);
+    }
 }
 
 
