@@ -26,6 +26,7 @@ int main() {
             break;
         } else if (cmd.mode == "d") {
             Ascii::print(std::cout, pos);
+            std::cout << "Hash: " << tptable.hash(pos) << std::endl;
         } else if (cmd.mode == "eval") {
             std::vector<Move> moves;
             ull attacks;

@@ -160,12 +160,14 @@ static void unified_search(
     r_eval = beta_cutoff ? beta : alpha;
 
     // Write to TP.
+    /*
     bool write = false;
     write |= remain_depth > tp.depth;
     write |= (remain_depth == tp.depth) && (alpha_init < tp.alpha) && (beta > tp.beta);
     if (write) {
+    */
         tptable.set(hash, remain_depth, r_eval, alpha_init, beta, best_move);
-    }
+    //}
 }
 
 
