@@ -6,18 +6,27 @@ namespace Transposition {
      * Transposition entry.
      */
     struct TP {
-        ull hash;
+        uint64_t hash;
         // Depth of search
-        char depth;
-        int eval, alpha, beta;
+        int8_t depth;
+        int16_t eval, alpha, beta;
         Move best_move;
         // Search index specific to this.
         uint16_t search_index;
+        // for (i: 0 to num_moves): search(moves[move_order[i]])
+        uint8_t* move_order;
+
+        ~TP() {
+            if (move_order != nullptr) {
+                delete[] move_order;
+            }
+        }
 
         TP() {
             // This means unitialized
             depth = -1;
             search_index = -1;
+            move_order = nullptr;
         }
     };
 
