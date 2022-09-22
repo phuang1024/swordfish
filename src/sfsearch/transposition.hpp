@@ -7,13 +7,17 @@ namespace Transposition {
      */
     struct TP {
         ull hash;
-        char depth;  // Depth of search.
+        // Depth of search
+        char depth;
         int eval, alpha, beta;
         Move best_move;
+        // Search index specific to this.
+        uint16_t search_index;
 
         TP() {
             // This means unitialized
             depth = -1;
+            search_index = -1;
         }
     };
 
@@ -22,6 +26,9 @@ namespace Transposition {
      */
     class TPTable {
     public:
+        // Which search we are currently doing e.g. 1st, 2nd, 3rd, etc.
+        uint16_t search_index;
+
         ~TPTable() {
             delete[] table;
         }
@@ -30,6 +37,7 @@ namespace Transposition {
             this->size = size;
             used = 0;
             table = new TP[size];
+            search_index = 0;
 
             init_hash();
         }

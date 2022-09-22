@@ -51,6 +51,8 @@ int main() {
                 const int maxdepth = cmd.args.count("depth") ? cmd.args["depth"] : 255;
                 const Move bestmove = Search::search(tptable, pos, maxdepth, movetime);
                 std::cout << "bestmove " << bestmove.uci() << std::endl;
+
+                tptable.search_index++;
             }
         }
     }
