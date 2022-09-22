@@ -9,6 +9,7 @@ set(CMAKE_CXX_FLAGS -Wall)
 add_subdirectory(sfeval)
 add_subdirectory(sfmovegen)
 add_subdirectory(sfsearch)
+add_subdirectory(sfuci)
 add_subdirectory(sfutils)
 
 configure_file(config.hpp.in config.hpp)
@@ -18,6 +19,7 @@ target_link_libraries(swordfish PUBLIC
     sfeval
     sfmovegen
     sfsearch
+    sfuci
     sfutils
 )
 target_include_directories(swordfish PUBLIC
@@ -25,5 +27,6 @@ target_include_directories(swordfish PUBLIC
     "${PROJECT_SOURCE_DIR}/sfeval"
     "${PROJECT_SOURCE_DIR}/sfmovegen"
     "${PROJECT_SOURCE_DIR}/sfsearch"
+    "${PROJECT_SOURCE_DIR}/sfuci"
     "${PROJECT_SOURCE_DIR}/sfutils"
 )

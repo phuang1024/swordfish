@@ -1,6 +1,7 @@
 #include <sstream>
 
-#include "sfsearch.hpp"
+#include "sfuci.hpp"
+#include "sfutils.hpp"
 
 
 UCICommand::UCICommand(std::istream& is) {

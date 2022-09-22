@@ -4,53 +4,8 @@
 #include <map>
 #include <string>
 
+#include "sfuci.hpp"
 #include "sfutils.hpp"
-
-
-/**
- * Map of std::string key to string value, e.g. depth="5"
- */
-class SearchResult {
-public:
-    std::map<std::string, std::string> data;
-
-    /**
-     * UCI representation of data.
-     * e.g.
-     * info depth 5 ...
-     */
-    inline std::string uci() {
-        std::string str = "info ";
-        for (const auto& [key, value]: data) {
-            if (key == "pv")   // PV must be last.
-                continue;
-            str += key;
-            str += " ";
-            str += value;
-            str += " ";
-        }
-        if (data.count("pv")) {
-            str += "pv ";
-            str += data["pv"];
-        }
-        return str;
-    }
-};
-
-
-/**
- * Has base (first word, e.g. "position"), and map of key to int value, e.g. movetime 1000.
- * Also "Position" attr, only set if it's a position command.
- * TODO maybe this should be moved to a new library
- */
-class UCICommand {
-public:
-    std::string mode;
-    std::map<std::string, int> args;
-    Position pos;
-
-    UCICommand(std::istream& is);
-};
 
 
 /**

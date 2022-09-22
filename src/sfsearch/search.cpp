@@ -1,6 +1,7 @@
 #include "sfeval.hpp"
 #include "sfmovegen.hpp"
 #include "sfsearch.hpp"
+#include "sfuci.hpp"
 #include "sfutils.hpp"
 
 using Transposition::TP;
