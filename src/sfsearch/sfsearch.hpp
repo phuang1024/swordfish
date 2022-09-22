@@ -23,7 +23,7 @@ namespace Search {
      * Minimax.
      * pv: Bestmove.
      */
-    Move search(Position& pos, int maxdepth, int movetime);
+    Move search(Transposition::TPTable& tptable, Position& pos, int maxdepth, int movetime);
 
     /**
      * Computes move time from UCI args, e.g. wtime

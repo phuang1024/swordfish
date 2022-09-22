@@ -16,6 +16,8 @@ int main() {
     Position pos;
     pos.setup_std();
 
+    Transposition::TPTable tptable;
+
     // UCI loop
     while (true) {
         UCICommand cmd(std::cin);
@@ -46,7 +48,7 @@ int main() {
             } else {
                 const int movetime = Search::get_movetime(pos, cmd.args);
                 const int maxdepth = cmd.args.count("depth") ? cmd.args["depth"] : 255;
-                const Move bestmove = Search::search(pos, maxdepth, movetime);
+                const Move bestmove = Search::search(tptable, pos, maxdepth, movetime);
                 std::cout << "bestmove " << bestmove.uci() << std::endl;
             }
         }

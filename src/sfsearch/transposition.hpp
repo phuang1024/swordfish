@@ -2,12 +2,6 @@
  * Call Transposition::init() before using.
  */
 namespace Transposition {
-    static bool inited = false;
-    static ull HASH_PIECES[12][64],
-               HASH_CASTLE[16],
-               HASH_EP[8],
-               HASH_TURN[2];
-
     /**
      * Transposition entry.
      */
@@ -26,11 +20,8 @@ namespace Transposition {
     /**
      * Transposition table.
      */
-    struct TPTable {
-        TP* table;
-        int size;
-        int used;
-
+    class TPTable {
+    public:
         ~TPTable() {
             delete[] table;
         }
@@ -39,13 +30,30 @@ namespace Transposition {
             this->size = size;
             used = 0;
             table = new TP[size];
+
+            init_hash();
         }
 
-        TP* get(ull hash) {
+        inline ull hash(const Position& pos) {
+            ull digest = 0;
+    
+            for (int sq = 0; sq < 64; sq++) {
+                const int piece = pos.piece_at(sq);
+                if (piece != EMPTY) {
+                    digest ^= HASH_PIECES[piece-1][sq];
+                }
+            }
+            digest ^= HASH_CASTLE[pos.castling];
+            digest ^= HASH_EP[pos.ep % 8];
+            digest ^= HASH_TURN[pos.turn];
+            return digest;
+        }
+
+        inline TP* get(ull hash) {
             return &table[hash % size];
         }
 
-        void set(ull hash, char depth, int eval, int alpha, int beta, Move best_move) {
+        inline void set(ull hash, char depth, int eval, int alpha, int beta, Move best_move) {
             TP* tp = get(hash);
             if (tp->depth == -1)
                 used++;
@@ -61,13 +69,20 @@ namespace Transposition {
         /**
          * UCI hashfull value.
          */
-        int get_hashfull() {
+        inline int get_hashfull() {
             return 1000ULL * used / size;
         }
-    };
 
-    inline void init() {
-        if (!inited) {
+    private:
+        TP* table;
+        int size;
+        int used;
+        ull HASH_PIECES[12][64],
+            HASH_CASTLE[16],
+            HASH_EP[8],
+            HASH_TURN[2];
+
+        void init_hash() {
             // Set hash bits.
             for (int i = 0; i < 12; i++)
                 for (int j = 0; j < 64; j++)
@@ -79,22 +94,5 @@ namespace Transposition {
             for (int i = 0; i < 2; i++)
                 HASH_TURN[i] = Random::randull();
         }
-
-        inited = true;
-    }
-
-    inline ull hash(const Position& pos) {
-        ull digest = 0;
-
-        for (int sq = 0; sq < 64; sq++) {
-            const int piece = pos.piece_at(sq);
-            if (piece != EMPTY) {
-                digest ^= HASH_PIECES[piece-1][sq];
-            }
-        }
-        digest ^= HASH_CASTLE[pos.castling];
-        digest ^= HASH_EP[pos.ep % 8];
-        digest ^= HASH_TURN[pos.turn];
-        return digest;
-    }
+    };
 }

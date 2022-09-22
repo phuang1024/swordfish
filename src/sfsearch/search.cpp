@@ -39,7 +39,7 @@ static void unified_search(
     const int remain_depth = std::max(maxdepth - mydepth, 0);
     const int static_eval = Eval::eval(pos, legal_moves.size(), attacks, kpos, mydepth)
         * (pos.turn ? 1 : -1);
-    const ull hash = Transposition::hash(pos);
+    const ull hash = tptable.hash(pos);
     TP& tp = *tptable.get(hash);
     const bool tp_good = (tp.depth != -1 && tp.hash == hash);
 
@@ -169,12 +169,9 @@ static void unified_search(
 }
 
 
-Move search(Position& pos, int maxdepth, int movetime) {
+Move search(TPTable& tptable, Position& pos, int maxdepth, int movetime) {
     const ull time_start = Time::time();
     ull nodes = 0;
-
-    Transposition::init();
-    TPTable tptable;
 
     Move best_move(0, 0);
     int best_eval = 0;
