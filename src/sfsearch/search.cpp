@@ -51,7 +51,7 @@ static void unified_search(
 
     const ull hash = tptable.hash(pos);
     TP& tp = *tptable.get(hash);
-    const bool tp_good = (tp.depth != -1 && tp.hash == hash);
+    const bool tp_good = (tp.type != TPType::NO_INFO && tp.hash == hash);
     const bool tp_moveorder_good = tp_good && tp.move_order[0] != -1;
 
     // Set statistic variables.
@@ -84,6 +84,9 @@ static void unified_search(
                     return;
                 }
                 beta = std::min(beta, tp_eval);
+            } else if (tp.type == TPType::QUIESCE && is_quiesce) {
+                r_eval = std::min(std::max(tp_eval, alpha), beta);
+                return;
             }
         }
     }
