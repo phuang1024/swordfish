@@ -1,3 +1,6 @@
+#include <cstring>
+
+
 /**
  * Call Transposition::init() before using.
  */
@@ -10,23 +13,18 @@ namespace Transposition {
         // Depth of search
         int8_t depth;
         int16_t eval, alpha, beta;
-        Move best_move;
         // Search index specific to this.
         int16_t search_index;
+        uint8_t move_count;
         // for (i: 0 to num_moves): search(moves[move_order[i]])
-        uint8_t* move_order;
-
-        ~TP() {
-            if (move_order != nullptr) {
-                delete[] move_order;
-            }
-        }
+        // At most 64 moves.
+        int8_t move_order[64];
 
         TP() {
             // This means unitialized
-            depth = -2;
+            depth = -1;
             search_index = -1;
-            move_order = nullptr;
+            move_order[0] = -1;
         }
     };
 
@@ -42,7 +40,7 @@ namespace Transposition {
             delete[] table;
         }
 
-        TPTable(int size = 1e8 + 7) {
+        TPTable(int size = 1e7 + 3) {
             this->size = size;
             used = 0;
             table = new TP[size];
@@ -70,9 +68,10 @@ namespace Transposition {
             return &table[hash % size];
         }
 
-        inline void set(ull hash, char depth, int eval, int alpha, int beta, Move best_move) {
+        inline void set(ull hash, char depth, int eval, int alpha, int beta,
+                int move_count, uint8_t* move_order) {
             TP* tp = get(hash);
-            if (tp->depth == -2)
+            if (tp->depth == -1)
                 used++;
 
             tp->hash = hash;
@@ -80,8 +79,15 @@ namespace Transposition {
             tp->eval = eval;
             tp->alpha = alpha;
             tp->beta = beta;
-            tp->best_move = best_move;
             tp->search_index = search_index;
+
+            // Set move order array
+            tp->move_count = move_count;
+            if (move_order != nullptr) {
+                memcpy(tp->move_order, move_order, move_count);
+            } else {
+                tp->move_order[0] = -1;
+            }
         }
 
         /**

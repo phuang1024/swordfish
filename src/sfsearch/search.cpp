@@ -1,3 +1,5 @@
+#include <set>
+
 #include "sfeval.hpp"
 #include "sfmovegen.hpp"
 #include "sfsearch.hpp"
@@ -31,17 +33,22 @@ static void unified_search(
         bool is_root, bool is_quiesce,
         int& r_eval, std::vector<Move>& r_pv, ull& r_nodes, int& r_maxdepth)
 {
-    const int alpha_init = alpha;
     std::vector<Move> legal_moves;
     ull attacks;
-    int kpos = Bit::first(*pos.relative_bb(pos.turn).mk);
     Movegen::get_legal_moves(pos, legal_moves, attacks);
+    // (score, legal_moves index)
+    std::multiset<std::pair<int, int>> move_order;
+
+    const int alpha_init = alpha;
+    int kpos = Bit::first(*pos.relative_bb(pos.turn).mk);
     const int remain_depth = std::max(maxdepth - mydepth, 0);
     const int static_eval = Eval::eval(pos, legal_moves.size(), attacks, kpos, mydepth)
         * (pos.turn ? 1 : -1);
+
     const ull hash = tptable.hash(pos);
     TP& tp = *tptable.get(hash);
     const bool tp_good = (tp.depth != -1 && tp.hash == hash);
+    const bool tp_moveorder_good = tp_good && tp.move_order[0] != -1;
 
     // Set statistic variables.
     r_nodes++;
@@ -54,32 +61,7 @@ static void unified_search(
     }
 
     // Transposition
-    int tp_skip_ind = -1;
     if (tp_good) {
-        // Check if beta cutoff.
-        /*
-        if (!is_root && tp.depth >= remain_depth) {
-            if (tp.eval >= beta && tp.alpha < beta) {
-                r_eval = beta;
-                return;
-            }
-        }
-        */
-
-        // Move ordering.
-        if (!tp.best_move.is_null()) {
-            // Skip matching move already in vector.
-            for (int i = 0; i < (int)legal_moves.size(); i++) {
-                if (legal_moves[i] == tp.best_move) {
-                    tp_skip_ind = i;
-                    break;
-                }
-            }
-            if (tp_skip_ind == -1)
-                throw 1;
-
-            legal_moves.push_back(tp.best_move);
-        }
     }
 
     // Start quie search if remaining depth 0.
@@ -105,11 +87,10 @@ static void unified_search(
 
     Move best_move(0, 0);
     bool beta_cutoff = false;
-    for (int i = legal_moves.size() - 1; i >= 0; i--) {
+    int last_eval = 123456789;
+    for (int i = 0; i < (int)legal_moves.size(); i++) {
         if (remain_depth > 3 && maxdepth != 1 && Time::elapse(time_start) > movetime)
             return;
-        if (i == tp_skip_ind)
-            continue;
 
         // Return TP score if current alpha-beta bounds are good enough.
         // TP alpha-beta should be outside current alpha-beta.
@@ -122,7 +103,13 @@ static void unified_search(
             }
         }
 
-        const Move& move = legal_moves[i];
+        const int move_index = tp_moveorder_good ? tp.move_order[i] : i;
+        const Move& move = legal_moves[move_index];
+
+        if (is_root) {
+            std::cout << "info depth " << remain_depth << " currmove " <<
+                move.uci() << " currmovenumber " << i+1 << std::endl;
+        }
 
         // Check if quiesce and capture move.
         if (is_quiesce && !Bit::get(t_pieces, move.to))
@@ -142,10 +129,16 @@ static void unified_search(
                 curr_eval, curr_pv, r_nodes, r_maxdepth);
         curr_eval = -curr_eval;
 
+        // Add to move ordering
+        // If not improve score, write low value instead of prev alpha.
+        int tp_score = (curr_eval != last_eval) ? curr_eval : -1e9;
+        move_order.insert(std::pair<int, int>(tp_score, move_index));
+        last_eval = curr_eval;
+
         // Check alpha beta.
         if (curr_eval >= beta) {
             beta_cutoff = true;
-            r_pv.resize(mydepth);
+            r_pv.resize(0);
             break;
         }
         if (curr_eval > alpha) {
@@ -162,10 +155,23 @@ static void unified_search(
 
     // Write to TP.
     // We can be this much shallower and write.
-    const int depth_thres = (int)tptable.search_index - (int)tp.search_index;
-    const int deeper = remain_depth + depth_thres - tp.depth;
-    if (deeper > 0 || (deeper == 0 && r_eval > tp.eval)) {
-        tptable.set(hash, remain_depth, r_eval, alpha_init, beta, best_move);
+    if (!is_quiesce) {
+        const int depth_thres = (int)tptable.search_index - (int)tp.search_index;
+        const int deeper = remain_depth + depth_thres - tp.depth;
+        if (deeper > 0) {
+            uint8_t* move_order_arr = nullptr;
+            // Check reqs to make move order
+            if (legal_moves.size() <= 64 && move_order.size() == legal_moves.size()) {
+                move_order_arr = new uint8_t[legal_moves.size()];
+                int i = 0;
+                for (auto it = move_order.rbegin(); it != move_order.rend(); it++) {
+                    move_order_arr[i] = it->second;
+                    i++;
+                }
+            }
+            tptable.set(hash, remain_depth, r_eval, alpha_init, beta,
+                    legal_moves.size(), move_order_arr);
+        }
     }
 }
 
