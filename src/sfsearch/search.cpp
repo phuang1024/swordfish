@@ -8,6 +8,7 @@
 
 using Transposition::TP;
 using Transposition::TPTable;
+using Transposition::TPType;
 
 
 namespace Search {
@@ -65,6 +66,26 @@ static void unified_search(
 
     // Transposition
     if (tp_good) {
+        if (!is_root && tp.depth >= remain_depth) {
+            // Do this so don't have to type cast in every std::min
+            const int tp_eval = tp.eval;
+            if (tp.type == TPType::EXACT) {
+                r_eval = std::min(std::max(tp_eval, alpha), beta);
+                return;
+            } else if (tp.type == TPType::FAIL_LOW) {
+                if (tp_eval <= alpha) {
+                    r_eval = alpha;
+                    return;
+                }
+                alpha = std::max(alpha, tp_eval);
+            } else if (tp.type == TPType::FAIL_HIGH) {
+                if (tp_eval >= beta) {
+                    r_eval = beta;
+                    return;
+                }
+                beta = std::min(beta, tp_eval);
+            }
+        }
     }
 
     // Start quie search if remaining depth 0.
@@ -92,17 +113,6 @@ static void unified_search(
     bool beta_cutoff = false;
     int last_eval = 123456789;
     for (int i = 0; i < (int)legal_moves.size(); i++) {
-        // Return TP score if current alpha-beta bounds are good enough.
-        // TP alpha-beta should be outside current alpha-beta.
-        if (tp_good) {
-            if (!is_root && tp.depth >= remain_depth) {
-                if (tp.alpha <= alpha && tp.beta >= beta) {
-                    r_eval = std::min((int)tp.eval, beta);
-                    return;
-                }
-            }
-        }
-
         const int move_index = tp_moveorder_good ? tp.move_order[i] : i;
         const Move& move = legal_moves[move_index];
 
@@ -155,9 +165,22 @@ static void unified_search(
 
     // Write to TP.
     // We can be this much shallower and write.
+    TPType type = TPType::EXACT;
+    if (is_quiesce) {
+        type = TPType::QUIESCE;
+    } else if (alpha <= alpha_init) {
+        type = TPType::FAIL_LOW;
+    } else if (beta_cutoff) {
+        type = TPType::FAIL_HIGH;
+    }
+
+    bool write = false;
+    write |= type > tp.type;
     const int depth_thres = (int)tptable.search_index - (int)tp.search_index;
     const int deeper = remain_depth + depth_thres - tp.depth;
-    if (deeper >= 0) {
+    write |= deeper > 0;
+
+    if (write) {
         uint8_t* move_order_arr = nullptr;
         // Check reqs to make move order
         if (legal_moves.size() <= 64 && move_order.size() == legal_moves.size()) {
@@ -168,8 +191,8 @@ static void unified_search(
                 i++;
             }
         }
-        tptable.set(hash, remain_depth, r_eval, alpha_init, beta,
-                legal_moves.size(), move_order_arr);
+
+        tptable.set(type, hash, remain_depth, r_eval, legal_moves.size(), move_order_arr);
     }
 }
 
