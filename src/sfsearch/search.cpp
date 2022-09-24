@@ -33,6 +33,9 @@ static void unified_search(
         bool is_root, bool is_quiesce,
         int& r_eval, std::vector<Move>& r_pv, ull& r_nodes, int& r_maxdepth)
 {
+    if (maxdepth != 1 && Time::elapse(time_start) > movetime)
+        return;
+
     std::vector<Move> legal_moves;
     ull attacks;
     Movegen::get_legal_moves(pos, legal_moves, attacks);
@@ -89,9 +92,6 @@ static void unified_search(
     bool beta_cutoff = false;
     int last_eval = 123456789;
     for (int i = 0; i < (int)legal_moves.size(); i++) {
-        if (remain_depth > 3 && maxdepth != 1 && Time::elapse(time_start) > movetime)
-            return;
-
         // Return TP score if current alpha-beta bounds are good enough.
         // TP alpha-beta should be outside current alpha-beta.
         if (tp_good) {
@@ -155,23 +155,21 @@ static void unified_search(
 
     // Write to TP.
     // We can be this much shallower and write.
-    if (!is_quiesce) {
-        const int depth_thres = (int)tptable.search_index - (int)tp.search_index;
-        const int deeper = remain_depth + depth_thres - tp.depth;
-        if (deeper > 0) {
-            uint8_t* move_order_arr = nullptr;
-            // Check reqs to make move order
-            if (legal_moves.size() <= 64 && move_order.size() == legal_moves.size()) {
-                move_order_arr = new uint8_t[legal_moves.size()];
-                int i = 0;
-                for (auto it = move_order.rbegin(); it != move_order.rend(); it++) {
-                    move_order_arr[i] = it->second;
-                    i++;
-                }
+    const int depth_thres = (int)tptable.search_index - (int)tp.search_index;
+    const int deeper = remain_depth + depth_thres - tp.depth;
+    if (deeper >= 0) {
+        uint8_t* move_order_arr = nullptr;
+        // Check reqs to make move order
+        if (legal_moves.size() <= 64 && move_order.size() == legal_moves.size()) {
+            move_order_arr = new uint8_t[legal_moves.size()];
+            int i = 0;
+            for (auto it = move_order.rbegin(); it != move_order.rend(); it++) {
+                move_order_arr[i] = it->second;
+                i++;
             }
-            tptable.set(hash, remain_depth, r_eval, alpha_init, beta,
-                    legal_moves.size(), move_order_arr);
         }
+        tptable.set(hash, remain_depth, r_eval, alpha_init, beta,
+                legal_moves.size(), move_order_arr);
     }
 }
 
