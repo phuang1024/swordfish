@@ -69,8 +69,8 @@ static void unified_search(
         if (!is_root && tp.depth >= remain_depth) {
             // Do this so don't have to type cast in every std::min
             const int tp_eval = tp.eval;
-            if (tp.type == TPType::EXACT) {
-                r_eval = std::min(std::max(tp_eval, alpha), beta);
+            if (tp.type == TPType::EXACT && tp_eval >= alpha && tp_eval <= beta) {
+                r_eval = tp_eval;
                 return;
             } else if (tp.type == TPType::FAIL_LOW) {
                 if (tp_eval <= alpha) {
@@ -84,10 +84,10 @@ static void unified_search(
                     return;
                 }
                 beta = std::min(beta, tp_eval);
-            } else if (tp.type == TPType::QUIESCE && is_quiesce) {
+            } /*else if (tp.type == TPType::QUIESCE && is_quiesce) {
                 r_eval = std::min(std::max(tp_eval, alpha), beta);
                 return;
-            }
+            }*/
         }
     }
 
