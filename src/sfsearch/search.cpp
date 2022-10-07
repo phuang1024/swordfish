@@ -109,8 +109,14 @@ static void unified_search(
     }
 
     // Start at static eval in case no captures for quie.
-    if (is_quiesce)
+    if (is_quiesce) {
         alpha = std::max(alpha, static_eval);
+        // Delta pruning  TODO disable in endgame
+        if (static_eval + 200 < alpha) {
+            r_eval = alpha;
+            return;
+        }
+    }
 
     Move best_move(0, 0);
     bool beta_cutoff = false;
