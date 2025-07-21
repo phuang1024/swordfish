@@ -164,22 +164,27 @@ static inline int pawn_structure(ull wp, ull bp) {
     );
 }
 
-int eval(const Position& pos, int move_count, ull attacks, int kpos, int mydepth) {
+int eval(const Position& pos) {//, int move_count, ull attacks, int kpos, int mydepth) {
+    /*
     const int eog = check_eog(pos.turn, move_count, attacks, kpos, mydepth);
     if (eog != 123456789)
         return eog;
+    */
 
     int mat_w, mat_b;
     material(pos, mat_w, mat_b);
-    int mat_total = mat_w + mat_b;
+    //int mat_total = mat_w + mat_b;
     int mat_score = 100 * (mat_w-mat_b);
+    return mat_score;
 
+    /*
     const int phase = std::min(std::max(-5*mat_total + 250, 0), 100);
     const int pm = piece_map(pos, phase);
     //const int pawns = pawn_structure(pos.wp, pos.bp);
 
     const int score = mat_score + 0.4*pm;// + pawns;
     return score;
+    */
 }
 
 

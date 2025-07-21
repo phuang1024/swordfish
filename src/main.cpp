@@ -16,7 +16,7 @@ int main() {
     Position pos;
     pos.setup_std();
 
-    Transposition::TPTable tptable;
+    //Transposition::TPTable tptable;
 
     // UCI loop
     while (true) {
@@ -26,13 +26,13 @@ int main() {
             break;
         } else if (cmd.mode == "d") {
             Ascii::print(std::cout, pos);
-            std::cout << "Hash: " << tptable.hash(pos) << std::endl;
+            //std::cout << "Hash: " << tptable.hash(pos) << std::endl;
         } else if (cmd.mode == "eval") {
             std::vector<Move> moves;
             ull attacks;
             Movegen::get_legal_moves(pos, moves, attacks);
             int kpos = Bit::first(*pos.relative_bb(pos.turn).mk);
-            const int score = Eval::eval(pos, moves.size(), attacks, kpos, 0);
+            const int score = 0;//Eval::eval(pos, moves.size(), attacks, kpos, 0);
             std::cout << score << " cp (pov current turn)" << std::endl;
         } else if (cmd.mode == "isready") {
             std::cout << "readyok" << std::endl;
@@ -47,12 +47,13 @@ int main() {
                 SearchResult res = Search::perft(pos, cmd.args["perft"]);
                 std::cout << res.uci() << std::endl;
             } else {
-                const int movetime = Search::get_movetime(pos, cmd.args);
+                //const int movetime = Search::get_movetime(pos, cmd.args);
                 const int maxdepth = cmd.args.count("depth") ? cmd.args["depth"] : 255;
-                const Move bestmove = Search::search(tptable, pos, maxdepth, movetime);
-                std::cout << "bestmove " << bestmove.uci() << std::endl;
+                //const Move bestmove = Search::search(tptable, pos, maxdepth, movetime);
+                //std::cout << "bestmove " << bestmove.uci() << std::endl;
+                Search::search(pos, maxdepth);
 
-                tptable.search_index++;
+                //tptable.search_index++;
             }
         }
     }

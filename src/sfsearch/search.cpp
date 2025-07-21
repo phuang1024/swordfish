@@ -4,244 +4,67 @@
 #include "sfuci.hpp"
 #include "sfutils.hpp"
 
-using Transposition::TP;
-using Transposition::TPTable;
+//using Transposition::TP;
+//using Transposition::TPTable;
 
 
 namespace Search {
 
 
+static int negamax_wrapper(Position& pos, int depth, int alpha, int beta);
+
+
 /**
- * Alpha beta negamax search that can act like:
- * * Root node: Sets r_eval
- * * Normal search: Sets r_eval
- * * Quiescence search: Evaluates as soon as position is quiet.
- *
- * Some algorithms implemented using pseudocode from https://chessprogramming.org
- *
- * @param maxdepth  Max depth of normal search (quiesce if exceeds).
- * @param mydepth  Depth of this node.
- * @param r_eval  Eval of this node relative to position's turn.
- * @param r_pv  PV starting from this node.
- * @param r_maxdepth  Max depth of search.
+ * depth: Remaining search depth.
  */
-static void unified_search(
-        ull time_start, TPTable& tptable, Position& pos, int maxdepth, int mydepth, int movetime,
-        int alpha, int beta,
-        bool is_root, bool is_quiesce,
-        int& r_eval, std::vector<Move>& r_pv, ull& r_nodes, int& r_maxdepth)
-{
-    const int alpha_init = alpha;
+static int negamax(Position& pos, int depth, int alpha, int beta) {
+    const int static_eval = Eval::eval(pos);// * (pos.turn ? 1 : -1);
+
+    if (depth == 0) {
+        return static_eval;
+    }
+
     std::vector<Move> legal_moves;
     ull attacks;
-    int kpos = Bit::first(*pos.relative_bb(pos.turn).mk);
     Movegen::get_legal_moves(pos, legal_moves, attacks);
-    const int remain_depth = std::max(maxdepth - mydepth, 0);
-    const int static_eval = Eval::eval(pos, legal_moves.size(), attacks, kpos, mydepth)
-        * (pos.turn ? 1 : -1);
-    const ull hash = tptable.hash(pos);
-    TP& tp = *tptable.get(hash);
-    const bool tp_good = (tp.depth != -1 && tp.hash == hash);
 
-    // Set statistic variables.
-    r_nodes++;
-    r_maxdepth = std::max(r_maxdepth, mydepth);
-
-    // End of game.
-    if (legal_moves.size() == 0) {
-        r_eval = static_eval;
-        return;
+    if (legal_moves.empty()) {
+        return static_eval;
     }
 
-    // Transposition
-    int tp_skip_ind = -1;
-    if (tp_good) {
-        // Check if beta cutoff.
-        /*
-        if (!is_root && tp.depth >= remain_depth) {
-            if (tp.eval >= beta && tp.alpha < beta) {
-                r_eval = beta;
-                return;
-            }
-        }
-        */
-
-        // Move ordering.
-        if (!tp.best_move.is_null()) {
-            // Skip matching move already in vector.
-            for (int i = 0; i < (int)legal_moves.size(); i++) {
-                if (legal_moves[i] == tp.best_move) {
-                    tp_skip_ind = i;
-                    break;
-                }
-            }
-            if (tp_skip_ind == -1)
-                throw 1;
-
-            legal_moves.push_back(tp.best_move);
-        }
-    }
-
-    // Start quie search if remaining depth 0.
-    if (!is_quiesce && remain_depth == 0) {
-        std::vector<Move> curr_pv;
-        unified_search(
-                time_start, tptable, pos, maxdepth, mydepth + 1, movetime,
-                alpha, beta,
-                false, true,
-                r_eval, curr_pv, r_nodes, r_maxdepth);
-        return;
-    }
-
-    // Only used in quiesce.
-    ull t_pieces;
-    if (is_quiesce) {
-        t_pieces = pos.relative_bb(pos.turn).t_pieces;
-    }
-
-    // Start at static eval in case no captures for quie.
-    if (is_quiesce)
-        alpha = std::max(alpha, static_eval);
-
-    Move best_move(0, 0);
-    bool beta_cutoff = false;
-    for (int i = legal_moves.size() - 1; i >= 0; i--) {
-        if (remain_depth > 3 && maxdepth != 1 && Time::elapse(time_start) > movetime)
-            return;
-        if (i == tp_skip_ind)
-            continue;
-
-        // Return TP score if current alpha-beta bounds are good enough.
-        // TP alpha-beta should be outside current alpha-beta.
-        if (tp_good) {
-            if (!is_root && tp.depth >= remain_depth) {
-                if (tp.alpha <= alpha && tp.beta >= beta) {
-                    r_eval = std::min(tp.eval, beta);
-                    return;
-                }
-            }
-        }
-
-        const Move& move = legal_moves[i];
-
-        // Check if quiesce and capture move.
-        if (is_quiesce && !Bit::get(t_pieces, move.to))
-            continue;
-
+    int best_eval = -1e9;
+    for (int i = 0; i < (int)legal_moves.size(); i++) {
         Position new_pos = pos;
-        new_pos.push(move);
+        new_pos.push(legal_moves[i]);
 
-        // Get eval of new position.
-        int curr_eval;
-        std::vector<Move> curr_pv;
-        unified_search(
-                time_start, tptable, new_pos, maxdepth, mydepth + 1, movetime,
-                -beta, -alpha,
-                false, is_quiesce,
-                curr_eval, curr_pv, r_nodes, r_maxdepth);
-        curr_eval = -curr_eval;
-
-        // Check alpha beta.
-        if (curr_eval >= beta) {
-            beta_cutoff = true;
-            r_pv.resize(mydepth);
-            break;
-        }
-        if (curr_eval > alpha) {
-            alpha = curr_eval;
-            best_move = move;
-            r_pv.resize(0);
-            r_pv.push_back(move);
-            r_pv.insert(r_pv.end(), curr_pv.begin(), curr_pv.end());
+        int score = -negamax_wrapper(new_pos, depth - 1, 0, 0);
+        if (score > best_eval) {
+            best_eval = score;
         }
     }
 
-    // Set returns.
-    r_eval = beta_cutoff ? beta : alpha;
-
-    // Write to TP.
-    bool write = false;
-    if (tptable.search_index > tp.search_index)
-        write = true;
-    else if (remain_depth > tp.depth)
-        write = true;
-    else if (remain_depth == tp.depth && r_eval > tp.eval)
-        write = true;
-
-    if (write)
-        tptable.set(hash, remain_depth, r_eval, alpha_init, beta, best_move);
+    return best_eval;
 }
 
 
-Move search(TPTable& tptable, Position& pos, int maxdepth, int movetime) {
-    const ull time_start = Time::time();
-    ull nodes = 0;
+/**
+ * Wrapper for debugging purposes.
+ */
+static int negamax_wrapper(Position& pos, int depth, int alpha, int beta) {
+    std::cout << "ENTER" << std::endl;
+    std::cout << pos.get_fen() << std::endl;
+    std::cout << Eval::eval(pos) << std::endl;
+    int ret = negamax(pos, depth, alpha, beta);
+    std::cout << "EXIT" << std::endl;
+    return ret;
+}
 
-    Move best_move(0, 0);
-    int best_eval = 0;
 
-    // Iterative deepening.
-    for (int depth = 1; depth <= maxdepth; depth++) {
-        int max_search_depth = 0;
-
-        // Aspiration window.
-        int curr_best_eval;
-        std::vector<Move> curr_pv;
-        int lower, upper;
-        lower = upper = (depth == 1 ? 1e9 : 10);
-
-        while (true) {
-            //const int alpha = best_eval - lower, beta = best_eval + upper;
-            //TODO currently window disabled: we can only write to TP if search doesnt fail.
-            int alpha = -1e9, beta = 1e9;
-            unified_search(
-                    time_start, tptable, pos, depth, 0, movetime,
-                    alpha, beta,
-                    true, false,
-                    curr_best_eval, curr_pv, nodes, max_search_depth);
-
-            // Increase window if fail.
-            if (curr_best_eval <= alpha)
-                lower *= 2;
-            else if (curr_best_eval >= beta)
-                upper *= 2;
-            else
-                break;
-        }
-        if (depth > 1 && Time::elapse(time_start) > movetime)
-            break;
-
-        best_eval = curr_best_eval;
-        best_move = curr_pv[0];
-
-        const int elapse = Time::elapse(time_start);
-        bool search_done = false;
-
-        SearchResult res;
-        res.data["depth"] = std::to_string(depth);
-        res.data["seldepth"] = std::to_string(max_search_depth);
-        for (const Move& move: curr_pv) {
-            res.data["pv"] += move.uci() + " ";
-        }
-        res.data["nodes"] = std::to_string(nodes);
-        res.data["nps"] = std::to_string(Time::nps(nodes, elapse));
-        res.data["time"] = std::to_string(elapse);
-        res.data["hashfull"] = std::to_string(tptable.get_hashfull());
-        if (abs(best_eval) > 1e5) {
-            int mate_in = (Eval::MATE_SCORE - abs(best_eval) + 1) / 2;
-            res.data["score mate"] = std::to_string(mate_in * (best_eval > 0 ? 1 : -1));
-            if (movetime < 1e9 && mate_in <= depth)
-                search_done = true;
-        } else {
-            res.data["score cp"] = std::to_string(best_eval);
-        }
-        std::cout << res.uci() << std::endl;
-
-        if (search_done)
-            break;
-    }
-
-    return best_move;
+/**
+ * Search main entry point.
+ */
+void search(Position& pos, int maxdepth) {
+    negamax(pos, maxdepth, -1e9, 1e9);
 }
 
 

@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-#include "transposition.hpp"
+//#include "transposition.hpp"
 
 #include "sfuci.hpp"
 #include "sfutils.hpp"
@@ -23,7 +23,8 @@ namespace Search {
      * Minimax.
      * pv: Bestmove.
      */
-    Move search(Transposition::TPTable& tptable, Position& pos, int maxdepth, int movetime);
+    //Move search(Transposition::TPTable& tptable, Position& pos, int maxdepth, int movetime);
+    void search(Position& pos, int maxdepth);
 
     /**
      * Computes move time from UCI args, e.g. wtime

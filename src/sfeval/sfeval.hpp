@@ -7,5 +7,5 @@ namespace Eval {
     /**
      * Evaluation in centipawns from current turn's pov.
      */
-    int eval(const Position& pos, int move_count, ull attacks, int kpos, int mydepth);
+    int eval(const Position& pos);//, int move_count, ull attacks, int kpos, int mydepth);
 }
